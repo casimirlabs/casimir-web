@@ -21,7 +21,7 @@ import useFormat from "@/composables/services/format"
 import useUser from "@/composables/services/user"
 import useWallets from "@/composables/services/wallets"
 import useWalletConnectV2 from "@/composables/services/walletConnectV2"
-import { CryptoAddress, LoginCredentials, ProviderString } from "@casimir/types"
+import { Account, CryptoAddress, LoginCredentials, ProviderString } from "@casimir/types"
 
 const { login, loginWithSecondaryAddress } = useAuth()
 const { openConnectWalletModal, toggleConnectWalletModal } = useConnectWalletModal()

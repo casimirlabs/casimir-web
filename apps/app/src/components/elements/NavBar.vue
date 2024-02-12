@@ -21,7 +21,7 @@ import {
     useStorage
 } from "@vueuse/core"
 import { 
-    ref
+    ref, computed
 } from "vue"
 import useNavMenu from "@/composables/state/navMenu"
 import { 
@@ -93,6 +93,15 @@ function copyTextToClipboard(text) {
             }, 1000)
         })
 }
+
+
+const userSecondaryAccounts = computed(() =>{
+    let secondaryAccounts = []
+    user?.value?.accounts?.map((item) => {
+        if (item.address != user?.value?.address) secondaryAccounts.push(item)
+    })
+    return secondaryAccounts
+})
 </script>
 
 <template>
@@ -289,7 +298,7 @@ function copyTextToClipboard(text) {
                       Secondary Wallet(s)
                     </caption>
                     <button
-                      v-for="(account, index) in user.accounts"
+                      v-for="(account, index) in userSecondaryAccounts"
                       :key="index"
                       class="w-full mt-[8px] rounded-[3px] flex items-center
                       justify-between px-[8px] py-[6px] hover:bg-gray_4 dark:hover:bg-gray_5"
@@ -310,27 +319,29 @@ function copyTextToClipboard(text) {
                           {{ convertString(account.address) }}
                         </div>
                       </div>
-
                       <div 
-                        v-if="showCopyForSecondary && index === ''"
+                        v-if="showCopyForSecondary == index"
                       >
-                        <Square2StackIcon
-                          class="w-[18px] h-[18px] text-gray_3"
-                        />
-                      </div>
+                        <div 
+                          v-if="copySuccessful == ''"
+                        >
+                          <Square2StackIcon
+                            class="w-[18px] h-[18px] text-gray_3"
+                          />
+                        </div>
+                        <div
+                          v-else-if="copySuccessful == 'copied'"
+                          class="flex items-center text-[10px] text-green font-[600]"
+                        >
+                          Copied
+                        </div>
 
-                      <div
-                        v-else-if="showCopyForSecondary && index === 'copied'"
-                        class="flex items-center text-[10px] text-green font-[600]"
-                      >
-                        Copied
-                      </div>
-
-                      <div
-                        v-else-if="showCopyForSecondary && index === 'failed'"
-                        class="flex items-center text-[10px] text-red"
-                      >
-                        Failed
+                        <div
+                          v-else-if="copySuccessful == 'failed'"
+                          class="flex items-center text-[10px] text-red"
+                        >
+                          Failed
+                        </div>
                       </div>
                     </button>
                   </div>
