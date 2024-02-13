@@ -1,4 +1,4 @@
-import { readonly, ref, watch } from "vue"
+import { readonly, ref, watch, onMounted } from "vue"
 import { Account, ProviderString, UserWithAccountsAndOperators } from "@casimir/types"
 import useEnvironment from "@/composables/services/environment"
 import { ethers } from "ethers"
@@ -20,11 +20,9 @@ export default function useUser() {
     async function initializeUserComposable() {
         if (userComposableInitialized.value) return
         userComposableInitialized.value = true
-        watch(user, async () => {
-            await setUserAccountBalances()
-        })
     }
-
+    
+    
     function getPathIndex(provider: ProviderString, address: string) {
         const { accounts } = user.value as UserWithAccountsAndOperators
         const target = accounts.find((account: Account) => account.walletProvider === provider && account.address === address)
@@ -72,6 +70,14 @@ export default function useUser() {
             )
         }
     }
+
+    onMounted(async () => {
+        if (userComposableInitialized.value) return
+        userComposableInitialized.value = true
+        watch(user, async () => {
+            await setUserAccountBalances()
+        })
+    })
 
     function setUser(newUserValue: UserWithAccountsAndOperators | undefined) {
         user.value = newUserValue
