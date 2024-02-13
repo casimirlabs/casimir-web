@@ -28,44 +28,45 @@ export default function useUser() {
     }
 
     async function removeAccount(account: Account,) {
+        const { id: accountId } = account
         const userId = user?.value?.id
         const options = {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ 
-                id: userId,
-                address: account.address,
-                currency: account.currency,
-                ownerAddress: user?.value?.address,
-                walletProvider: account.walletProvider 
-            }),
+            body: JSON.stringify({ accountId, userId }),
         }
         const result = await fetch(`${usersUrl}/user/remove-account`,options)
-        console.log("result :>> ", result)
-        if (result) {
-            // addToast(
-            //     {
-            //         id: `remove_sub_account_${account.}`,
-            //         type: "info",
-            //         iconUrl: "/goerli.svg",
-            //         title: "Your are on Goerli Testnet",
-            //         subtitle: "Estimated time to mainnet is 12 days",
-            //         timed: true,
-            //         loading: false
-            //     }
-            // )
+        const { data: updatedUser, error } = await result.json()
+        
+        // TODO: @DemogorGod - Feel free to update toasts
+        if (!error) {
+            setUser(updatedUser)
+            addToast(
+                {
+                    id: `remove_sub_account_${accountId}`,
+                    type: "info",
+                    iconUrl: "/goerli.svg",
+                    title: "Successfully removed account",
+                    subtitle: "These are exciting times!",
+                    timed: true,
+                    loading: false
+                }
+            )
+        } else {
+            addToast(
+                {
+                    id: `remove_sub_account_${accountId}`,
+                    type: "error",
+                    iconUrl: "/goerli.svg",
+                    title: "Error removing account",
+                    subtitle: "Please try again",
+                    timed: true,
+                    loading: false
+                }
+            )
         }
-        // if (!result.error) {
-        //     setSelectedAddress(result.data.address)
-        //     result.data.accounts.forEach((account: Account) => {
-        //         if (account.address === selectedAddress.value) {
-        //             setSelectedProvider(account.walletProvider as ProviderString)
-        //             setSelectedCurrency(account.currency as Currency)
-        //         }
-        //     })
-        // }
     }
 
     function setUser(newUserValue: UserWithAccountsAndOperators | undefined) {

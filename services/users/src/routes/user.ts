@@ -44,8 +44,8 @@ router.post("/add-sub-account", verifySession(), async (req: SessionRequest, res
         const { account, id } = req.body
         const { ownerAddress } = account
         const userId = id.toString()
-        const userSessionId = req.session?.getUserId()
-        const validatedUserId = validateUserId(userSessionId, userId)
+        const userIdOnSession = req.session?.getUserId()
+        const validatedUserId = validateUserId(userIdOnSession, userId)
         if (!validatedUserId) {
             res.setHeader("Content-Type", "application/json")
             res.status(200)
@@ -162,43 +162,22 @@ router.get("/check-secondary-address/:address", async (req: express.Request, res
 
 router.post("/remove-account", verifySession(), async (req: SessionRequest, res: express.Response) => {
     try {
-        console.log("REMOVING ACCOUNT!")
-        const { address, currency, id, ownerAddress, walletProvider } = req.body
-        const userId = id.toString()
-        const userSessionId = req.session?.getUserId()
-        const validatedAddress = validateUserId(userSessionId, userId)
-        if (!validatedAddress) {    
-            res.setHeader("Content-Type", "application/json")
-            res.status(200)
-            res.json({
-                message: "Address does not match session",
-                error: true,
-                data: null
-            })
-            return
-        }
-        const accountRemoved = await removeAccount({ address, currency, ownerAddress, walletProvider })
-        const user = await getUserByAddress(ownerAddress)
-        
-        if (accountRemoved) {
-            res.setHeader("Content-Type", "application/json")
-            res.status(200)
-            res.json({
-                message: "Account removed",
-                error: false,
-                data: user
-            })
-        } else {
-            res.setHeader("Content-Type", "application/json")
-            res.status(200)
-            res.json({
-                message: "Account not found",
-                error: true,
-                data: user
-            })
-        }
+        const { accountId, userId } = req.body
+        const userIdOnSession = req.session?.getUserId()
+        const validatedAddress = validateUserId(userIdOnSession, userId)
+        if (!validatedAddress) throw new Error("Address does not match session")
+
+        await removeAccount(accountId, userId)
+        const user = await getUserById(userId)
+
+        res.setHeader("Content-Type", "application/json")
+        res.status(200)
+        res.json({
+            message: "Account removed",
+            error: false,
+            data: user
+        })
     } catch (err) {
-        console.log("err :>> ", err)
         res.status(500)
         res.json({
             message: "Error adding account",
@@ -260,8 +239,8 @@ function maskAddress(address: string) {
     return address.slice(0, 6) + "..." + address.slice(-4)
 }
 
-function validateUserId(userSessionId:string | undefined, userId:string) {
-    return userSessionId === userId
+function validateUserId(userIdOnSession:string | undefined, userId:string) {
+    return userIdOnSession == userId
 }
 
 export default router

@@ -1,6 +1,6 @@
 import { Postgres } from "./postgres"
 import { camelCase } from "@casimir/format"
-import { Account, OperatorAddedSuccess, RemoveAccountOptions, User, UserAddedSuccess, UserWithAccountsAndOperators } from "@casimir/types"
+import { Account, OperatorAddedSuccess, User, UserAddedSuccess, UserWithAccountsAndOperators } from "@casimir/types"
 import useEthers from "./ethers"
 
 const { generateNonce } = useEthers()
@@ -269,25 +269,40 @@ export default function useDB() {
         }
     }
     
-    // TODO: Does this also delete any operator associated with the address associated with this account?
+    // TODO: Delete any operator associated with the address associated with this account?
     /**
      * Remove an account.
-     * @param address - The account's address (pk)
-     * @param ownerAddress - The account's owner address
-     * @param walletProvider - The account's wallet provider
-     * @param currency - The account's currency
-     * @returns The removed account if found, otherwise undefined
+     * @param accountId - The account's id
+     * @param userId - The user's id
+     * @returns A promise that resolves when the account is removed
      */
-    async function removeAccount({ address, currency, ownerAddress, walletProvider } : RemoveAccountOptions) {
-        const text = "DELETE FROM accounts WHERE address = $1 AND owner_address = $2 AND wallet_provider = $3 AND currency = $4 RETURNING *;"
-        const params = [address,
-            ownerAddress,
-            walletProvider,
-            currency]
-        const rows = await postgres.query(text, params)
-        return rows[0] as Account
+    async function removeAccount(accountId: number, userId: number) {
+        try {
+            await postgres.query("BEGIN")
+    
+            const deleteUserAccountLink = "DELETE FROM user_accounts WHERE account_id = $1 AND user_id = $2;"
+            const params = [accountId, userId]
+            const userAccountResult = await postgres.query(deleteUserAccountLink, params)
+    
+            if (userAccountResult) {
+                const deleteAccount = "DELETE FROM accounts WHERE id = $1;"
+                const accountParams = [accountId]
+                const accountResult = await postgres.query(deleteAccount, accountParams)
+    
+                await postgres.query("COMMIT")
+                return accountResult
+            } else {
+                await postgres.query("ROLLBACK")
+                console.log("No link found in user_accounts for the given accountId and userId.")
+                return null
+            }
+        } catch (err) {
+            await postgres.query("ROLLBACK")
+            console.log("Error in removeAccount:", err)
+            throw new Error("There was an error removing the account from the database")
+        }
     }
-
+    
     /**
      * Update user's address based on userId.
      * @param userId - The user's id
@@ -391,9 +406,6 @@ export default function useDB() {
       
         return convertedObj
     }
-      
-      
-      
 
     return { 
         addAccount,
