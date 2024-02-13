@@ -89,23 +89,40 @@ const clearErrorMessage = () => {
     }, 3500)
 }
 
+const checkBalance = () => {
+    const index = user?.value?.accounts?.findIndex(item => {item == stakingWalletAddress.value})
+    const accountBalance = user?.value?.accounts[index].balance
+    if (index > -1) {
+        if (accountBalance <= formatedAmountToStake.value) {
+            return true
+        }
+    }
+    return false
+}
+
 const handleStakingAction = () => {
-    handleStake()
     if (!stakingWalletAddress.value || !formatedAmountToStake.value) {
         errorMessage.value = "Please fill out all of the inputs before staking"
         showErrorBorder.value = true
         clearErrorMessage()
+
+        if (checkBalance()) {
+            errorMessage.value = "Insufficient Funds"
+            showErrorBorder.value = true
+            clearErrorMessage()
+            return
+        }
+
         return
     } 
-    // else if() {
-    // TODO: check balance of the the amount selected with the wallet selected
-    // return
-    // }
+  
     if (!acceptTerms.value) {
         errorMessage.value = "Please accept the terms and conditions before staking"
         clearErrorMessage()
         return
     }
+  
+    handleStake()
 
     setAmountToStake(null)
     selectWallet(null)
@@ -144,8 +161,10 @@ const handleStakingAction = () => {
             v-if="stakingWalletAddress"
             class="tooltip_container"
           >
-            {{ convertString(stakingWalletAddress) }} 
-            ({{ formatEthersCasimir(formatDecimalString(user?.accounts[user?.accounts.findIndex(item => item.address == stakingWalletAddress)].balance)) }}) ETH
+            <small class="dark:text-white">
+              {{ convertString(stakingWalletAddress) }} 
+              ({{ formatEthersCasimir(formatDecimalString(user?.accounts[user?.accounts.findIndex(item => item.address == stakingWalletAddress)].balance)) }}) ETH
+            </small>
             <div class="tooltip whitespace-nowrap">
               <small>{{ user?.accounts[user?.accounts.findIndex(item => item.address == stakingWalletAddress)].balance }}</small>
             </div>

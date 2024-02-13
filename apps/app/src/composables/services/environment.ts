@@ -8,10 +8,10 @@ const domain = window.location.host
 
 /* Ethereum environment */
 const ethereumUrl = import.meta.env.PUBLIC_ETHEREUM_RPC_URL || "http://127.0.0.1:8545"
-// const ethereumWsUrl = import.meta.env.PUBLIC_ETHEREUM_WS_URL
+const ethereumWsUrl = import.meta.env.PUBLIC_ETHEREUM_WS_URL
 const provider = new ethers.providers.JsonRpcProvider(ethereumUrl)
 const batchProvider: ethers.providers.JsonRpcBatchProvider = new ethers.providers.JsonRpcBatchProvider(ethereumUrl)
-// const wsProvider: ethers.providers.WebSocketProvider | null = ethereumWsUrl !== "undefined" ? new ethers.providers.WebSocketProvider(ethereumWsUrl) : null
+const wsProvider: ethers.providers.WebSocketProvider | null = ethereumWsUrl !== "undefined" ? new ethers.providers.WebSocketProvider(ethereumWsUrl) : null
 
 /* Casimir environment */
 // const docsUrl = import.meta.env.PUBLIC_DOCS_URL || "https://docs.dev.casimir.co"
@@ -22,8 +22,8 @@ const walletConnectProjectId = import.meta.env.PUBLIC_WALLET_CONNECT_PROJECT_ID
 const requiredNetwork: "1" | "5" = origin.includes("localhost") ? "5" : origin.includes("app.dev") ? "5" : "1"
 
 /* Addresses */
-// const factoryAddress = import.meta.env.PUBLIC_FACTORY_ADDRESS
-// const factory = new ethers.Contract(factoryAddress, ICasimirFactoryAbi, provider) as CasimirFactory
+const factoryAddress = import.meta.env.PUBLIC_FACTORY_ADDRESS
+const factory = new ethers.Contract(factoryAddress, ICasimirFactoryAbi, provider) as CasimirFactory
 // const ssvNetworkAddress = import.meta.env.PUBLIC_SSV_NETWORK_ADDRESS
 // const ssvViewsAddress = import.meta.env.PUBLIC_SSV_VIEWS_ADDRESS
 
@@ -31,8 +31,8 @@ const requiredNetwork: "1" | "5" = origin.includes("localhost") ? "5" : origin.i
 // const cryptoCompareApiKey = import.meta.env.PUBLIC_CRYPTO_COMPARE_API_KEY || ""
 
 /* Emulators */
-// const ledgerType = import.meta.env.PUBLIC_SPECULOS_URL ? "speculos" : "usb"
-// const speculosUrl = import.meta.env.PUBLIC_SPECULOS_URL ? "http://localhost:5001" : ""
+const ledgerType = import.meta.env.PUBLIC_SPECULOS_URL ? "speculos" : "usb"
+const speculosUrl = import.meta.env.PUBLIC_SPECULOS_URL ? "http://localhost:5001" : ""
 
 export default function useEnvironment() {
 
@@ -41,17 +41,17 @@ export default function useEnvironment() {
         domain,
         // cryptoCompareApiKey,
         ethereumUrl,
-        // factory,
+        factory,
         provider,
         // origin,
-        // ledgerType,
+        ledgerType,
         requiredNetwork,
-        // speculosUrl,
+        speculosUrl,
         // ssvNetworkAddress,
         // ssvViewsAddress,
         // docsUrl,
         usersUrl,
         walletConnectProjectId,
-        // wsProvider,
+        wsProvider,
     }
 }

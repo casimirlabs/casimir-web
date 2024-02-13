@@ -6,7 +6,7 @@ import useToasts from "@/composables/state/toasts"
 import useFormat from "@/composables/services/format"
 
 
-const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
+const { convertString } = useFormat()
 
 const {
     addToast
@@ -42,7 +42,6 @@ export default function useUser() {
         const result = await fetch(`${usersUrl}/user/remove-account`,options)
         const { data: updatedUser, error } = await result.json()
         
-        // TODO: @DemogorGod - Feel free to update toasts
         if (!error) {
             setUser(updatedUser)
             addToast(
