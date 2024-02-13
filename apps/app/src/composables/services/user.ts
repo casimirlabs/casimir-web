@@ -3,6 +3,10 @@ import { Account, ProviderString, UserWithAccountsAndOperators } from "@casimir/
 import useEnvironment from "@/composables/services/environment"
 import { ethers } from "ethers"
 import useToasts from "@/composables/state/toasts"
+import useFormat from "@/composables/services/format"
+
+
+const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
 
 const {
     addToast
@@ -46,10 +50,10 @@ export default function useUser() {
             addToast(
                 {
                     id: `remove_sub_account_${accountId}`,
-                    type: "info",
-                    iconUrl: "/goerli.svg",
+                    type: "success",
+                    iconUrl: "",
                     title: "Successfully removed account",
-                    subtitle: "These are exciting times!",
+                    subtitle: `${convertString(account.address)} was removed`,
                     timed: true,
                     loading: false
                 }
@@ -58,10 +62,10 @@ export default function useUser() {
             addToast(
                 {
                     id: `remove_sub_account_${accountId}`,
-                    type: "error",
-                    iconUrl: "/goerli.svg",
-                    title: "Error removing account",
-                    subtitle: "Please try again",
+                    type: "failed",
+                    iconUrl: "",
+                    title: "Something went wrong...",
+                    subtitle: "Please try again later",
                     timed: true,
                     loading: false
                 }
