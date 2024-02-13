@@ -169,8 +169,6 @@ export default function useStakingState() {
             return confirmation
         } catch (err: any) {
             console.error(`Error in deposit function: ${JSON.stringify(err)}`)
-            // Add error to local storage
-            localStorage.setItem("stakeWithdrawError", err)
             if (err.message.includes("denied by the user")) {
                 toastContent ={
                     id: toastContent.id,
