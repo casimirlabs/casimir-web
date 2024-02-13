@@ -52,7 +52,7 @@ export default function useUser() {
                     id: `remove_sub_account_${accountId}`,
                     type: "success",
                     iconUrl: "",
-                    title: "Successfully removed account",
+                    title: "Successfully Removed Account",
                     subtitle: `${convertString(account.address)} was removed`,
                     timed: true,
                     loading: false
@@ -64,7 +64,7 @@ export default function useUser() {
                     id: `remove_sub_account_${accountId}`,
                     type: "failed",
                     iconUrl: "",
-                    title: "Something went wrong...",
+                    title: "Something Went Wrong...",
                     subtitle: "Please try again later",
                     timed: true,
                     loading: false
