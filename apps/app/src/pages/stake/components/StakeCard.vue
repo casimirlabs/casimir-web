@@ -90,7 +90,7 @@ const clearErrorMessage = () => {
 }
 
 const checkBalance = () => {
-    const index = user?.value?.accounts?.findIndex(item => {item == stakingWalletAddress.value})
+    const index = user?.value?.accounts?.findIndex(item => item == stakingWalletAddress.value)
     const accountBalance = user?.value?.accounts[index].balance
     if (index > -1) {
         if (accountBalance <= formatedAmountToStake.value) {
@@ -100,7 +100,7 @@ const checkBalance = () => {
     return false
 }
 
-const handleStakingAction = () => {
+const handleStakingAction = async() => {
     if (!stakingWalletAddress.value || !formatedAmountToStake.value) {
         errorMessage.value = "Please fill out all of the inputs before staking"
         showErrorBorder.value = true
@@ -122,7 +122,7 @@ const handleStakingAction = () => {
         return
     }
   
-    handleStake()
+    await handleStake()
 
     setAmountToStake(null)
     selectWallet(null)

@@ -1,12 +1,28 @@
 <script setup>
+import { watch } from "vue"
 import NavBar from "@/components/elements/NavBar.vue"
 import Toasts from "@/components/elements/Toasts.vue"
 import ConnectWalletModal from "@/components/elements/ConnectWalletModal.vue"
 import useConnectWalletModal from "@/composables/state/connectWalletModal"
 import useAuth from "@/composables/services/auth"
+import useContracts from "@/composables/services/contracts"
+import useUser from "@/composables/services/user"
 import Loading from "@/components/elements/Loading.vue"
+
 const { loadingSession } = useAuth()
+const { initializeContractsComposable } = useContracts()
+const { user } = useUser()
 const { openConnectWalletModal } = useConnectWalletModal()
+
+watch(user, async (newUser, oldUser) => {
+    // On Sign in
+    if (newUser && !oldUser) {
+        await initializeContractsComposable()
+    } else if (newUser && oldUser) {
+    // On page refresh when signed in
+        await initializeContractsComposable()
+    }
+})
 
 </script>
 

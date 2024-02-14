@@ -1,4 +1,4 @@
-import { computed, onMounted, onUnmounted, readonly, ref, watch } from "vue"
+import { onMounted, onUnmounted, readonly, ref, watch } from "vue"
 import { useStorage } from "@vueuse/core"
 import { CasimirManager } from "@casimir/ethereum/build/@types"
 import { ProviderString, StakeDetails } from "@casimir/types"
@@ -21,8 +21,8 @@ const {
     updateToast,
     removeToast
 } = useToasts()
-const { user } = useUser()
-const { detectActiveNetwork } = useWallets()
+const { user, getPathIndex } = useUser()
+const { detectActiveNetwork, detectActiveWalletAddress, switchEthersNetwork } = useWallets()
 const { getWalletConnectSignerV2 } = useWalletConnectV2()
 
 let baseManager: CasimirManager
@@ -32,12 +32,16 @@ const initializeComposable = ref(false)
 const stakingWalletAddress = ref(null as null | string)
 const stakingAmount = ref(null as null | number)
 const eigenLayerSelection = ref(false as boolean)
-const selectedWalletProvider = computed(() => {
-    const index = user?.value?.accounts?.findIndex(item => {item.address == stakingWalletAddress.value}) as number
+const userStakeDetails = ref<Array<StakeDetails>>([])
+
+const selectedWalletProvider = ref("" as ProviderString)
+
+watch(stakingWalletAddress, () =>{
+    const index = user?.value?.accounts?.findIndex(item => item.address == stakingWalletAddress.value) as number
     if (index > -1) {
-        return user?.value?.accounts[index].walletProvider
+        selectedWalletProvider.value = user?.value?.accounts[index].walletProvider as ProviderString
     } else {
-        return null
+        selectedWalletProvider.value = "" as ProviderString
     }
 })
 
@@ -73,27 +77,27 @@ export default function useStakingState() {
         eigenLayerSelection.value = false
     })
 
-    const selectWallet = (address: string) => {
+    function selectWallet(address: string) {
         stakingWalletAddress.value = address
     }
 
-    const setAmountToStake = (amount: number) => {
+    function setAmountToStake(amount: number) {
         stakingAmount.value = amount
     }
 
-    const toggleEigenlayerSelection = () => {
+    function toggleEigenlayerSelection() {
         eigenLayerSelection.value = !eigenLayerSelection.value
     }
 
-    const toggleTerms = () => {
+    function toggleTerms() {
         acceptTerms.value = !acceptTerms.value
     }
 
-    const setWithdrawAmount = (amount: number) => {
+    function setWithdrawAmount(amount: number) {
         withdrawAmount.value = amount
     }
 
-    const getRandomToastId = (length: number) => {
+    function getRandomToastId(length: number) {
         const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
         let result = ""
         for (let i = 0; i < length; i++) {
@@ -113,15 +117,13 @@ export default function useStakingState() {
             loading: true
         }
         addToast(toastContent)
-
+        
         try {
-            // TODO: @ccali11 Make sure we're getting the right network here.
             const activeNetwork = await detectActiveNetwork(walletProvider)
-            console.log("activeNetwork :>> ", activeNetwork)
-            // if (activeNetwork !== 5) {
-            //     await switchEthersNetwork(walletProvider, "0x5")
-            //     return window.location.reload()
-            // }
+            if (activeNetwork !== 5) {
+                await switchEthersNetwork(walletProvider, "0x5")
+                return window.location.reload()
+            }
 
             let signer
             if (browserProvidersList.includes(walletProvider)) {
@@ -135,6 +137,7 @@ export default function useStakingState() {
             } else {
                 throw new Error(`Invalid wallet provider: ${walletProvider}`)
             }
+
             const manager = type === "default" ? baseManager : eigenManager
             const managerSigner = (manager as CasimirManager).connect(signer as ethers.Signer)
             const fees = await getDepositFees()
@@ -152,7 +155,7 @@ export default function useStakingState() {
             updateToast(toastContent)
             const result = await managerSigner.depositStake({ value, type: 2 })
             const confirmation = await result.wait(1)
-            if (confirmation) console.log("toast!")
+            if (!confirmation) throw new Error("Confirmation failed")
             toastContent ={
                 id: toastContent.id,
                 type: "success",
@@ -165,7 +168,7 @@ export default function useStakingState() {
             updateToast(toastContent)
             setTimeout(() => {
                 removeToast(toastContent.id)
-            }, 3000)
+            }, 4000)
             return confirmation
         } catch (err: any) {
             console.error(`Error in deposit function: ${JSON.stringify(err)}`)
@@ -204,32 +207,38 @@ export default function useStakingState() {
         }
     }
 
-    // TODO: hande stake and withdraw functions
     async function handleStake() {
-        await deposit({
-            amount: stakingAmount?.value?.toString() as string,
-            walletProvider: selectedWalletProvider.value as ProviderString,
-            type: eigenLayerSelection.value? "eigen" : "default",
-            pathIndex: undefined
-        })
+        let pathIndex = 0
 
-        // if (browserProvidersList.includes(selectedWalletAddress.value as string)) {
-        //     const activeAddress = await detectActiveWalletAddress(selectedStakingProvider.value)
-        //     if (activeAddress !== selectedWalletAddress.value) {
-        //         formattedAmountToStakeOrWithdraw.value = 0
-        //         stakeButtonText.value = "Stake"
-        //         return alert(`The account you selected is not the same as the one that is active in your ${selectedStakingProvider.value} wallet. Please open your ${selectedStakingProvider.value} browser extension select the account you want to use to stake.`)
-        //     }
-        // } else {
-        //     pathIndex = getPathIndex(selectedStakingProvider.value, selectedWalletAddress.value as string)
-        // }
-        // const depositPayload = {
-        //     amount: formattedAmountToStakeOrWithdraw.value.toString(),
-        //     walletProvider: selectedStakingProvider.value,
-        //     type: stakeType.value,
-        //     pathIndex: pathIndex !== undefined ? pathIndex : undefined
-        // }
-        // const result = await deposit(depositPayload)
+        if (browserProvidersList.includes(selectedWalletProvider.value as ProviderString)) {
+            const activeAddress = await detectActiveWalletAddress(selectedWalletProvider.value as ProviderString)
+            if (activeAddress !== stakingWalletAddress.value) {
+                stakingAmount.value = 0
+                const toastContent = {
+                    id: getRandomToastId(16),
+                    type: "failed",
+                    iconUrl: "",
+                    title: "Can Not Stake",
+                    subtitle: "The wallet you are trying to stake to is not your active wallet.",
+                    timed: true,
+                    loading: false
+                }
+                addToast(toastContent)
+                setTimeout(() => {
+                    removeToast(toastContent.id)
+                }, 3000)
+            }
+        } else {
+            pathIndex = getPathIndex(selectedWalletProvider.value as ProviderString, stakingWalletAddress.value as string)
+        }
+        
+        const depositPayload = {
+            amount: stakingAmount.value?.toString() as string,
+            walletProvider: selectedWalletProvider.value as ProviderString,
+            type: eigenLayerSelection.value ? "eigen" : "default" as "eigen" | "default",
+            pathIndex
+        }
+        await deposit(depositPayload)
     }
 
     async function handleWithdraw() {
@@ -296,12 +305,16 @@ export default function useStakingState() {
         const addresses = user.value?.accounts.map((account) => account.address) as Array<string>
 
         async function getUserStakeAndWithdrawable(manager: CasimirManager, address: string) {
-            const userStake = await (manager as CasimirManager).getUserStake(address)
-            const userStakeNumber = parseFloat(ethers.utils.formatEther(userStake))
-            const availableToWithdraw = await (manager as CasimirManager).getWithdrawableBalance()
-            const availableToWithdrawNumber = parseFloat(ethers.utils.formatEther(availableToWithdraw))
-    
-            return { userStakeNumber, availableToWithdrawNumber }
+            try {
+                const userStake = await (manager as CasimirManager).getUserStake(address)
+                const userStakeNumber = parseFloat(ethers.utils.formatEther(userStake))
+                const availableToWithdraw = await (manager as CasimirManager).getWithdrawableBalance()
+                const availableToWithdrawNumber = parseFloat(ethers.utils.formatEther(availableToWithdraw))
+        
+                return { userStakeNumber, availableToWithdrawNumber }
+            } catch (err: any) {
+                return { userStakeNumber: 0, availableToWithdrawNumber: 0 }
+            }
         }
     
         const promises = addresses.map(async (address) => {

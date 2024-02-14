@@ -22,11 +22,10 @@ export default function useUser() {
         userComposableInitialized.value = true
     }
     
-    
-    function getPathIndex(provider: ProviderString, address: string) {
+    function getPathIndex(provider: ProviderString, address: string) : number {
         const { accounts } = user.value as UserWithAccountsAndOperators
         const target = accounts.find((account: Account) => account.walletProvider === provider && account.address === address)
-        return target?.pathIndex
+        return target?.pathIndex || 0
     }
 
     async function removeAccount(account: Account,) {

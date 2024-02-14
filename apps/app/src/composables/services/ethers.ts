@@ -17,7 +17,7 @@ const { installedWallets } = useWallets()
 
 export default function useEthers() {
   
-    const browserProvidersList = [
+    const browserProvidersList: Array<ProviderString> = [
         "BraveWallet",
         "CoinbaseWallet",
         "MetaMask",
