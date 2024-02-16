@@ -28,7 +28,7 @@ const factory = new ethers.Contract(factoryAddress, ICasimirFactoryAbi, provider
 // const ssvViewsAddress = import.meta.env.PUBLIC_SSV_VIEWS_ADDRESS
 
 /* API Keys */
-// const cryptoCompareApiKey = import.meta.env.PUBLIC_CRYPTO_COMPARE_API_KEY || ""
+const cryptoCompareApiKey = import.meta.env.PUBLIC_CRYPTO_COMPARE_API_KEY || ""
 
 /* Emulators */
 const ledgerType = import.meta.env.PUBLIC_SPECULOS_URL ? "speculos" : "usb"
@@ -39,7 +39,7 @@ export default function useEnvironment() {
     return {
         batchProvider,
         domain,
-        // cryptoCompareApiKey,
+        cryptoCompareApiKey,
         ethereumUrl,
         factory,
         provider,

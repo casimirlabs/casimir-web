@@ -22,7 +22,8 @@ import useStakingState from "@/composables/state/staking"
 
 const {
     setWithdrawAmount,
-    handleWithdraw
+    handleWithdraw,
+    userStakeDetails
 } = useStakingState()
 
 
@@ -30,12 +31,17 @@ const { user } = useUser()
 const { convertString } = useFormat()
 const columns = [
     { title: "Address", show: ref(true), value: "address" }, 
-    { title: "Amount", show: ref(true), value: "amount" }, 
+    { title: "Total Staked", show: ref(true), value: "amount" }, 
     { title: "Rewards", show: ref(true), value: "rewards" }, 
-    { title: "EigenLayer", show: ref(true), value: "eigenlayer" }, 
-    { title: "Timestamp", show: ref(true), value: "timestamp" }, 
-    { title: "Age", show: ref(false), value: "age" }, 
-    { title: "Status", show: ref(true), value: "status" }, 
+    { title: "EigenLayer", show: ref(true), value: "eigen" }, 
+    { title: "Available to Withdraw", show: ref(true), value: "available_to_withdraw" }, 
+    { title: "Withdraws Initiated", show: ref(true), value: "withdrawal_initiated" }, 
+    { title: "Withdraws Requested", show: ref(true), value: "withdrawal_requested" }, 
+    { title: "Withdraws Fulfilled", show: ref(true), value: "withdrawal_fulfilled" }, 
+    // Removed for now
+    // { title: "Timestamp", show: ref(true), value: "timestamp" }, 
+    // { title: "Age", show: ref(false), value: "age" }, 
+    // { title: "Status", show: ref(true), value: "status" }, 
 ]
 
 const tableHeaders = ref(columns)
@@ -78,72 +84,12 @@ const  openOpenActiveStakeOptions = () => {
     openActiveStakeOptions.value = true
 }
 
-const activeStakingItems = ref([])
-// TODO: get active stake here and add them
-
-function generateRandomStakingItems(count) {
-
-    const generateRandomNumber = (min, max) => {
-        return Math.floor(Math.random() * (max - min + 1)) + min
-    }
-
-    const generateRandomBoolean = () => {
-        return Math.random() < 0.5
-    }
-
-    const generateRandomTimestamp = () => {
-        const now = Date.now()
-        const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000)
-        return new Date(generateRandomNumber(thirtyDaysAgo, now)).toISOString()
-    }
-
-    const generateRandomStatus = () => {
-        const statuses = ["active", "inactive", "pending"]
-        return statuses[Math.floor(Math.random() * statuses.length)]
-    }
-
-    const calculateAge = (timestamp) => {
-        const now = Date.now()
-        const timestampDate = new Date(timestamp)
-        const difference = now - timestampDate.getTime()
-      
-        const seconds = Math.floor(difference / 1000)
-        const minutes = Math.floor(seconds / 60)
-        const hours = Math.floor(minutes / 60)
-        const days = Math.floor(hours / 24)
-      
-        if (days > 0) {
-            return `${days} days ago`
-        } else if (hours > 0) {
-            return `${hours} hours ago`
-        } else if (minutes > 0) {
-            return `${minutes} minutes ago`
-        } else {
-            return `${seconds} seconds ago`
-        }
-    }
-
-    for (let i = 0; i < count; i++) {
-        const timestamp = generateRandomTimestamp()
-        activeStakingItems.value.push({
-            address: "0x3bb9954a6ccc41b7179faf0cf5da4a3a6977a850",
-            amount: generateRandomNumber(1, 100),
-            rewards: generateRandomNumber(0, 10),
-            eigenlayer: generateRandomBoolean(),
-            timestamp: timestamp,
-            age: calculateAge(timestamp),
-            status: generateRandomStatus()
-        })
-    }
-}
-
-generateRandomStakingItems(30)
 
 
 const currentPage = ref(1)
 const itemsPerPage = ref(9)
 const pagesAvailable = computed(() => {
-    return Math.ceil(activeStakingItems.value.length / itemsPerPage.value)
+    return Math.ceil(userStakeDetails.value.length / itemsPerPage.value)
 })
 
 const goToStartPage = () => {
@@ -266,7 +212,7 @@ const findSwitchHeaderValue = (switchItem) => {
           </thead>
           <tbody class="w-full">
             <tr
-              v-for="stake in activeStakingItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)"
+              v-for="stake in userStakeDetails.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)"
               :key="stake"
               class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
               @click="openOpenActiveStakeOptions(), selectedStake = stake"
