@@ -27,12 +27,19 @@ const { getWalletConnectSignerV2 } = useWalletConnectV2()
 
 let baseManager: CasimirManager
 let eigenManager: CasimirManager
+const stakingToastId = ref(null as null | string)
+const withdrawToastId = ref(null as null | string)
 
 const initializeComposable = ref(false)
 const stakingWalletAddress = ref(null as null | string)
 const stakingAmount = ref(null as null | number)
 const eigenLayerSelection = ref(false as boolean)
 const userStakeDetails = ref<Array<StakeDetails>>([])
+const depositFees = ref(null as null | number)
+
+
+// TODO: update any to the contract type
+const userActiceContracts = ref<any[] | undefined>(undefined)
 
 const selectedWalletProvider = ref("" as ProviderString)
 
@@ -55,6 +62,7 @@ export default function useStakingState() {
             baseManager = getBaseManager()
             eigenManager = getEigenManager()
             await getUserStakeDetails()
+            await getDepositFees()
         }
     })
       
@@ -68,6 +76,7 @@ export default function useStakingState() {
             baseManager = getBaseManager()
             eigenManager = getEigenManager()
             await getUserStakeDetails()
+            await getDepositFees()
         }
     })
     
@@ -105,10 +114,10 @@ export default function useStakingState() {
         }
         return result
     }
-
+    
     async function deposit({ amount, walletProvider, type, pathIndex }: { amount: string, walletProvider: ProviderString, type: "default" | "eigen", pathIndex: number | undefined}) {
         let toastContent = {
-            id: getRandomToastId(16),
+            id: stakingToastId.value as string,
             type: "loading",
             iconUrl: "",
             title: "Submitting Stake",
@@ -117,7 +126,7 @@ export default function useStakingState() {
             loading: true
         }
         addToast(toastContent)
-        
+
         try {
             const activeNetwork = await detectActiveNetwork(walletProvider)
             if (activeNetwork !== 5) {
@@ -209,13 +218,13 @@ export default function useStakingState() {
 
     async function handleStake() {
         let pathIndex = 0
-
+        stakingToastId.value = getRandomToastId(16)
         if (browserProvidersList.includes(selectedWalletProvider.value as ProviderString)) {
             const activeAddress = await detectActiveWalletAddress(selectedWalletProvider.value as ProviderString)
             if (activeAddress !== stakingWalletAddress.value) {
                 stakingAmount.value = 0
                 const toastContent = {
-                    id: getRandomToastId(16),
+                    id: stakingToastId.value,
                     type: "failed",
                     iconUrl: "",
                     title: "Can Not Stake",
@@ -241,50 +250,29 @@ export default function useStakingState() {
         await deposit(depositPayload)
     }
 
-    async function handleWithdraw() {
-        let toastContent ={
-            id: getRandomToastId(16),
+    async function handleWithdraw(stakeInfo : any) {
+        const { address, amount } = stakeInfo
+        
+        withdrawToastId.value = getRandomToastId(16)
+        const toastContent ={
+            id: withdrawToastId.value as string,
             type: "loading",
             iconUrl: "",
-            title: "Withdrawing Stake",
-            subtitle: "Processing stake withdraw request",
+            title: "Confirming Withdraw",
+            subtitle: "Confirming stake withdraw from pool",
             timed: false,
             loading: true
         }
-        addToast(toastContent)
+        updateToast(toastContent)
 
-        setTimeout(() => {
-            toastContent ={
-                id: toastContent.id,
-                type: "loading",
-                iconUrl: "",
-                title: "Confirming Withdraw",
-                subtitle: "Confirming stake withdraw from pool",
-                timed: false,
-                loading: true
-            }
-            updateToast(toastContent)
-
-            setTimeout(() => {
-                toastContent ={
-                    id: toastContent.id,
-                    type: "success",
-                    iconUrl: "",
-                    title: "Stake Withdraw Complete",
-                    subtitle: "Stake withdraw is finalized and  no errors",
-                    timed: false,
-                    loading: false
-                }
-                updateToast(toastContent)
-                setTimeout(() => {
-                    removeToast(toastContent.id)
-                }, 3000)
-            }, 3000)
-        }, 3000)
-
-        // Add toast accordingly
-        // handle withdraw here
-        // submit withdraw
+        console.log("withdrawAmount.value :>> ", withdrawAmount.value)
+        const withdrawPayload = {
+            amount: withdrawAmount.value?.toString() as string,
+            address: stakeInfo.address as string,
+            walletProvider: selectedWalletProvider.value as ProviderString,
+            type: eigenLayerSelection.value ? "eigen" : "default" as "eigen" | "default"
+        }
+        await withdraw(withdrawPayload)
     }
 
     async function getDepositFees(): Promise<number> {
@@ -293,6 +281,7 @@ export default function useStakingState() {
             // const fees = await (manager as CasimirManager).FEE_PERCENT()
             const fees = 5
             const feesRounded = Math.round(fees * 100) / 100
+            depositFees.value = feesRounded
             return feesRounded
         } catch (err: any) {
             console.error(`There was an error in getDepositFees function: ${JSON.stringify(err)}`)
@@ -344,6 +333,73 @@ export default function useStakingState() {
     
         await Promise.all(promises)
         userStakeDetails.value = result
+        console.log("userStakeDetails.value :>> ", userStakeDetails.value)
+    }
+
+    async function withdraw({ amount, walletProvider, type }: { amount: string, walletProvider: ProviderString, type: "default" | "eigen" }) {
+        try {
+            const activeNetwork = await detectActiveNetwork(walletProvider)
+            if (activeNetwork !== 5) {
+                await switchEthersNetwork(walletProvider, "0x5")
+                return window.location.reload()
+            }
+
+            if (browserProvidersList.includes(selectedWalletProvider.value as ProviderString)) {
+                const activeAddress = await detectActiveWalletAddress(selectedWalletProvider.value as ProviderString)
+                if (activeAddress !== stakingWalletAddress.value) {
+                    stakingAmount.value = 0
+                    const toastContent = {
+                        id: withdrawToastId.value as string,
+                        type: "failed",
+                        iconUrl: "",
+                        title: "Cannot Withdraw",
+                        subtitle: "The wallet you are trying to withdraw to is not your active wallet.",
+                        timed: true,
+                        loading: false
+                    }
+                    addToast(toastContent)
+                    setTimeout(() => {
+                        removeToast(toastContent.id)
+                    }, 3000)
+                }
+            }
+            // TODO: Handle other wallet providers selected address
+    
+            let signer
+            if (browserProvidersList.includes(walletProvider)) {
+                signer = getEthersBrowserSigner(walletProvider)
+            } else if (walletProvider === "WalletConnect") {
+                await getWalletConnectSignerV2()
+            } else if (walletProvider === "Ledger") {
+                getEthersLedgerSigner()
+            } else if (walletProvider === "Trezor") {
+                getEthersTrezorSigner()
+            } else {
+                throw new Error(`Invalid wallet provider: ${walletProvider}`)
+            }
+            const manager = type === "default" ? baseManager : eigenManager
+            const managerSigner = (manager as CasimirManager).connect(signer as ethers.Signer)
+            const value = ethers.utils.parseEther(amount)
+            const result = await managerSigner.requestWithdrawal(value)
+            const confirmation = await result.wait(1)
+            return confirmation
+        } catch (err: any) {
+            console.error(`There was an error in withdraw function: ${JSON.stringify(err)}`)
+            const toastContent = {
+                id: withdrawToastId.value as string,
+                type: "failed",
+                iconUrl: "",
+                title: "Something Went Wrong",
+                subtitle: "Please try again later",
+                timed: true,
+                loading: false
+            }
+            addToast(toastContent)
+            setTimeout(() => {
+                removeToast(toastContent.id)
+            }, 3000)
+            return false
+        }
     }
 
     return {
@@ -352,6 +408,7 @@ export default function useStakingState() {
         eigenLayerSelection: readonly(eigenLayerSelection),
         acceptTerms: readonly(acceptTerms),
         withdrawAmount: readonly(withdrawAmount),
+        depositFees: readonly(depositFees),
         selectWallet,
         setAmountToStake,
         toggleEigenlayerSelection,

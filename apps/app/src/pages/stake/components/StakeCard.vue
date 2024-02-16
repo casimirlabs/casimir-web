@@ -32,7 +32,8 @@ const {
     setAmountToStake,
     acceptTerms,
     toggleTerms,
-    handleStake
+    handleStake,
+    depositFees
 } = useStakingState()
 
 const openSelectWalletinput = ref(false)
@@ -317,8 +318,7 @@ const handleStakingAction = async() => {
 
     <div class="flex items-center justify-between w-full">
       <small class="font-[500]">Fees</small>
-      <!-- TODO: Add fees here -->
-      <small class="font-[500]">{{ 0.00 }}%</small>
+      <small class="font-[500]">{{ depositFees? depositFees : '- -' }}%</small>
     </div>
 
     <div

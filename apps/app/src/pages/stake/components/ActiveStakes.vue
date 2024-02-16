@@ -207,6 +207,7 @@ const clearErrorMessage = () => {
 
 const errorMessage = ref(null)
 const handleWithdrawAction = () => {
+
     // TODO: check if the amount selected is above the amout user is able to withdraw 
     // if(){
     //     errorMessage.value= "Insufficient funds"
@@ -214,7 +215,7 @@ const handleWithdrawAction = () => {
     //     return
     // }
 
-    handleWithdraw()
+    handleWithdraw(selectedStake.value)
     closeOpenActiveStakeOptions()
 
 }
