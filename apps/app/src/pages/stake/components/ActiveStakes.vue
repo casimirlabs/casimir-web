@@ -28,7 +28,7 @@ const {
 
 
 const { user } = useUser()
-const { convertString } = useFormat()
+const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
 const columns = [
     { title: "Address", show: ref(true), value: "address" }, 
     { title: "Total Staked", show: ref(true), value: "amountStaked" }, 
@@ -155,11 +155,11 @@ const errorMessage = ref(null)
 const handleWithdrawAction = () => {
 
     // TODO: check if the amount selected is above the amout user is able to withdraw 
-    // if(){
-    //     errorMessage.value= "Insufficient funds"
-    //     clearErrorMessage()
-    //     return
-    // }
+    if (formatedAmountToWithdraw.value >  selectedStake.value.availableToWithdraw) {
+        errorMessage.value= "Insufficient withdrawl amount"
+        clearErrorMessage()
+        return
+    }
 
     handleWithdraw(selectedStake.value)
     closeOpenActiveStakeOptions()
@@ -210,187 +210,157 @@ const findSwitchHeaderValue = (switchItem) => {
               </th>
             </tr>
           </thead>
-          <div v-if="userStakeDetails && userStakeDetails.length > 0">
-            <tbody
-              v-if="userStakeDetails.length > itemsPerPage"
-              class="w-full"
-            >
-              <tr
-                v-for="stake in userStakeDetails.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)"
+          <tbody
+            v-if="userStakeDetails.length > itemsPerPage"
+            class="w-full"
+          >
+            <tr
+              v-for="stake in userStakeDetails.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)"
                 
-                :key="stake"
-                class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
-                @click="openOpenActiveStakeOptions(), selectedStake = stake"
-              >
-                <td
-                  v-for="(item, index) in tableHeaders"
-                  v-show="item.show"
-                  :key="index"
-                  class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
-                >
-                  <div
-                    v-if="item.value === 'address'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <div
-                      v-if="!getWalletProviderByAddress(stake[item.value])"
-                      class="placeholder_avatar"
-                    />
-                    <div 
-                      v-else
-                      class="w-[20px] h-[20px]"
-                    >
-                      <img
-                        :src="getWalletProviderByAddress(stake[item.value])"
-                        alt=""
-                        class="w-[20px] h-[20px]"
-                      >
-                    </div>
-                    <small>
-                      {{ convertString(stake[item.value]) }}
-                    </small>
-                  </div>
-  
-                  <div
-                    v-if="item.value === 'amount'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>
-                      {{ stake[item.value] }} ETH
-                    </small>
-                  </div>
-  
-                  <div
-                    v-if="item.value === 'rewards'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>
-                      {{ stake[item.value] }} ETH
-                    </small>
-                  </div>
-  
-                  <div
-                    v-if="item.value === 'eigenlayer'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>
-                      {{ stake[item.value]? 'Enabled' : 'Disabled' }}
-                    </small>
-                  </div>
-  
-                  <div
-                    v-if="item.value === 'timestamp'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>{{ formatTimestamp(stake[item.value]) }}</small>
-                  </div>
-  
-  
-                  <div
-                    v-if="item.value === 'age'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>{{ stake[item.value] }}</small>
-                  </div>
-                  <div
-                    v-if="item.value === 'status'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>{{ stake[item.value] }}</small>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-            <tbody
-              v-else
-              class="w-full"
+              :key="stake"
+              class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
+              @click="openOpenActiveStakeOptions(), selectedStake = stake"
             >
-              <tr
-                v-for="stake in userStakeDetails"
-                :key="stake"
-                class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
-                @click="openOpenActiveStakeOptions(), selectedStake = stake"
+              <td
+                v-for="(item, index) in tableHeaders"
+                v-show="item.show"
+                :key="index"
+                class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
               >
-                <td
-                  v-for="(item, index) in tableHeaders"
-                  v-show="item.show"
-                  :key="index"
-                  class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
+                <div
+                  v-if="item.value === 'address'"
+                  class="px-[8px] flex items-center gap-[12px]"
                 >
                   <div
-                    v-if="item.value === 'address'"
-                    class="px-[8px] flex items-center gap-[12px]"
+                    v-if="!getWalletProviderByAddress(stake[item.value])"
+                    class="placeholder_avatar"
+                  />
+                  <div 
+                    v-else
+                    class="w-[20px] h-[20px]"
                   >
-                    <div
-                      v-if="!getWalletProviderByAddress(stake[item.value])"
-                      class="placeholder_avatar"
-                    />
-                    <div 
-                      v-else
+                    <img
+                      :src="getWalletProviderByAddress(stake[item.value])"
+                      alt=""
                       class="w-[20px] h-[20px]"
                     >
-                      <img
-                        :src="getWalletProviderByAddress(stake[item.value])"
-                        alt=""
-                        class="w-[20px] h-[20px]"
-                      >
+                  </div>
+                  <small>
+                    {{ convertString(stake[item.value] ) }}
+                  </small>
+                </div>
+  
+                <div
+                  v-if="
+                    item.value === 'amountStaked' ||
+                      item.value === 'rewards' ||
+                      item.value === 'availableToWithdraw' ||
+                      item.value === 'WithdrawalInitiated' ||
+                      item.value === 'WithdrawalRequested' ||
+                      item.value === 'WithdrawalFulfilled' 
+                  "
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <div class="tooltip_container_left">
+                    <small>
+                      {{ 
+                        formatEthersCasimir(formatDecimalString(stake[item.value]))
+                      }} ETH
+                    </small>
+                    <div class="tooltip_left whitespace-nowrap">
+                      {{ 
+                        stake[item.value]
+                      }}
                     </div>
+                  </div>
+                </div>
+  
+                <div
+                  v-if="item.value === 'operatorType'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <small>
+                    {{ stake[item.value] == "Default"? 'Disabled' : 'Enabled' }}
+                  </small>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tbody
+            v-else
+            class="w-full"
+          >
+            <tr
+              v-for="stake in userStakeDetails"
+              :key="stake"
+              class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
+              @click="openOpenActiveStakeOptions(), selectedStake = stake"
+            >
+              <td
+                v-for="(item, index) in tableHeaders"
+                v-show="item.show"
+                :key="index"
+                class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
+              >
+                <div
+                  v-if="item.value === 'address'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <div
+                    v-if="!getWalletProviderByAddress(stake[item.value])"
+                    class="placeholder_avatar"
+                  />
+                  <div 
+                    v-else
+                    class="w-[20px] h-[20px]"
+                  >
+                    <img
+                      :src="getWalletProviderByAddress(stake[item.value])"
+                      alt=""
+                      class="w-[20px] h-[20px]"
+                    >
+                  </div>
+                  <small>
+                    {{ convertString(stake[item.value] ) }}
+                  </small>
+                </div>
+  
+                <div
+                  v-if="
+                    item.value === 'amountStaked' ||
+                      item.value === 'rewards' ||
+                      item.value === 'availableToWithdraw' ||
+                      item.value === 'WithdrawalInitiated' ||
+                      item.value === 'WithdrawalRequested' ||
+                      item.value === 'WithdrawalFulfilled' 
+                  "
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <div class="tooltip_container_left">
                     <small>
-                      {{ convertString(stake[item.value]) }}
+                      {{ 
+                        formatEthersCasimir(formatDecimalString(stake[item.value]))
+                      }} ETH
                     </small>
+                    <div class="tooltip_left whitespace-nowrap">
+                      {{ 
+                        stake[item.value]
+                      }}
+                    </div>
                   </div>
+                </div>
   
-                  <div
-                    v-if="item.value === 'amount'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>
-                      {{ stake[item.value] }} ETH
-                    </small>
-                  </div>
-  
-                  <div
-                    v-if="item.value === 'rewards'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>
-                      {{ stake[item.value] }} ETH
-                    </small>
-                  </div>
-  
-                  <div
-                    v-if="item.value === 'eigenlayer'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>
-                      {{ stake[item.value]? 'Enabled' : 'Disabled' }}
-                    </small>
-                  </div>
-  
-                  <div
-                    v-if="item.value === 'timestamp'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>{{ formatTimestamp(stake[item.value]) }}</small>
-                  </div>
-  
-  
-                  <div
-                    v-if="item.value === 'age'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>{{ stake[item.value] }}</small>
-                  </div>
-                  <div
-                    v-if="item.value === 'status'"
-                    class="px-[8px] flex items-center gap-[12px]"
-                  >
-                    <small>{{ stake[item.value] }}</small>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </div>
+                <div
+                  v-if="item.value === 'operatorType'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <small>
+                    {{ stake[item.value] == "Default"? 'Disabled' : 'Enabled' }}
+                  </small>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -559,53 +529,84 @@ const findSwitchHeaderValue = (switchItem) => {
                   <h1 class="card_title">
                     Inspect Stake
                   </h1>
-                  <!-- TODO: check if there is a id for stakes -->
-                  <p class="card_subtitle">
-                    ID: askjdjfa;lksdjfas
+                  <p class="card_subtitle whitespace-nowrap truncate">
+                    Address: {{ selectedStake.address }}
                   </p>
                 </div>
                 <div class="flex flex-col items-start gap-[12px] py-[24px]">
                   <div class="flex w-full items-center justify-between">
-                    <small class="font-[300]">Status</small>
-                    <small>
-                      {{ selectedStake.status.toUpperCase() }}
-                    </small>
-                  </div>
-                  <div class="flex w-full items-center justify-between">
-                    <small class="font-[300]">Amount</small>
-                    <small>
-                      {{ selectedStake.amount }} ETH
-                    </small>
+                    <small class="font-[300]">Total Staked</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class="max-w-[90px] truncate text-right">
+                        {{ selectedStake.amountStaked }} 
+                      </small>
+                      <small>ETH</small>
+                    </div>
                   </div>
                   <div class="flex w-full items-center justify-between">
                     <small class="font-[300]">Rewards</small>
-                    <small>
-                      {{ selectedStake.rewards }} ETH
-                    </small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class="max-w-[90px] truncate text-right">
+                        {{ selectedStake.rewards }} 
+                      </small>
+                      <small>ETH</small>
+                    </div>
                   </div>
                   <div class="flex w-full items-center justify-between">
-                    <small class="font-[300]">EigenLayer</small>
-                    <small>
-                      {{ selectedStake.eigenlayer? 'ENABLED' : 'DISABLED' }}
-                    </small>
+                    <small class="font-[300]">Available to Withdraw</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class="max-w-[90px] truncate text-right">
+                        {{ selectedStake.availableToWithdraw }} 
+                      </small>
+                      <small>ETH</small>
+                    </div>
+                  </div>
+                  <div class="py-[12px] w-full text-left border-b border-b-lightBorder dark:border-b-darkBorder">
+                    <caption class="font-[500] whitespace-nowrap">
+                      Withdrawls Info
+                    </caption>
                   </div>
                   <div class="flex w-full items-center justify-between">
-                    <small class="font-[300]">Timestamp</small>
-                    <small>
-                      {{ formatTimestamp(selectedStake.timestamp) }}
-                    </small>
+                    <small class="font-[300] whitespace-nowrap">Initiated Amount</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class="max-w-[90px] truncate text-right">
+                        {{ selectedStake.WithdrawalInitiated }} 
+                      </small>
+                      <small>ETH</small>
+                    </div>
                   </div>
                   <div class="flex w-full items-center justify-between">
-                    <small class="font-[300]">Age</small>
-                    <small>
-                      {{ selectedStake.age }}
-                    </small>
+                    <small class="font-[300] whitespace-nowrap">Requested Amount</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class="max-w-[90px] truncate text-right">
+                        {{ selectedStake.WithdrawalRequested }} 
+                      </small>
+                      <small>ETH</small>
+                    </div>
+                  </div>
+                  <div class="flex w-full items-center justify-between">
+                    <small class="font-[300] whitespace-nowrap">Fulfilled Amount</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class="max-w-[90px] truncate text-right">
+                        {{ selectedStake.WithdrawalFulfilled }} 
+                      </small>
+                      <small>ETH</small>
+                    </div>
                   </div>
                 </div>
 
                 <div class="pt-[12px] border-t border-t-lightBorder dark:border-t-darkBorder">
                   <div class="w-full text-left">
-                    <label for="amount_selector"><caption class="font-[500]">Amount</caption></label>
+                    <div class="flex items-center justify-between">
+                      <label for="amount_selector"><caption class="font-[500]">Amount</caption></label>
+                      <caption
+                        class="text-red font-[300] whitespace-nowrap" 
+                        :class="errorMessage? 'opacity-100' : 'opacity-0'"
+                        style="transition: all 0.6s ease-in;"
+                      >
+                        {{ errorMessage }}
+                      </caption>
+                    </div>
                     <div
                       ref="amount_selector"
                       class="input_container input_container_border"
@@ -636,15 +637,6 @@ const findSwitchHeaderValue = (switchItem) => {
                       Withdraw
                     </small>
                   </button>
-                </div>
-                <div class="w-full h-[20px] ">
-                  <caption
-                    class="text-red font-[500]" 
-                    :class="errorMessage? 'opacity-100' : 'opacity-0'"
-                    style="transition: all 0.6s ease-in;"
-                  >
-                    {{ errorMessage }}
-                  </caption>
                 </div>
               </DialogPanel>
             </TransitionChild>
