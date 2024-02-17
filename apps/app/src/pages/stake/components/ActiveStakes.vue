@@ -31,13 +31,13 @@ const { user } = useUser()
 const { convertString } = useFormat()
 const columns = [
     { title: "Address", show: ref(true), value: "address" }, 
-    { title: "Total Staked", show: ref(true), value: "amount" }, 
+    { title: "Total Staked", show: ref(true), value: "amountStaked" }, 
     { title: "Rewards", show: ref(true), value: "rewards" }, 
-    { title: "EigenLayer", show: ref(true), value: "eigen" }, 
-    { title: "Available to Withdraw", show: ref(true), value: "available_to_withdraw" }, 
-    { title: "Withdraws Initiated", show: ref(true), value: "withdrawal_initiated" }, 
-    { title: "Withdraws Requested", show: ref(true), value: "withdrawal_requested" }, 
-    { title: "Withdraws Fulfilled", show: ref(true), value: "withdrawal_fulfilled" }, 
+    { title: "EigenLayer", show: ref(true), value: "operatorType" }, 
+    { title: "Available to Withdraw", show: ref(true), value: "availableToWithdraw" }, 
+    { title: "Withdraws Initiated", show: ref(true), value: "WithdrawalInitiated" }, 
+    { title: "Withdraws Requested", show: ref(true), value: "WithdrawalRequested" }, 
+    { title: "Withdraws Fulfilled", show: ref(true), value: "WithdrawalFulfilled" }, 
     // Removed for now
     // { title: "Timestamp", show: ref(true), value: "timestamp" }, 
     // { title: "Age", show: ref(false), value: "age" }, 
@@ -89,7 +89,7 @@ const  openOpenActiveStakeOptions = () => {
 const currentPage = ref(1)
 const itemsPerPage = ref(9)
 const pagesAvailable = computed(() => {
-    return Math.ceil(userStakeDetails.value.length / itemsPerPage.value)
+    return Math.ceil(userStakeDetails?.value?.length / itemsPerPage.value)
 })
 
 const goToStartPage = () => {
@@ -210,95 +210,187 @@ const findSwitchHeaderValue = (switchItem) => {
               </th>
             </tr>
           </thead>
-          <tbody class="w-full">
-            <tr
-              v-for="stake in userStakeDetails.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)"
-              :key="stake"
-              class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
-              @click="openOpenActiveStakeOptions(), selectedStake = stake"
+          <div v-if="userStakeDetails && userStakeDetails.length > 0">
+            <tbody
+              v-if="userStakeDetails.length > itemsPerPage"
+              class="w-full"
             >
-              <td
-                v-for="(item, index) in tableHeaders"
-                v-show="item.show"
-                :key="index"
-                class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
+              <tr
+                v-for="stake in userStakeDetails.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)"
+                
+                :key="stake"
+                class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
+                @click="openOpenActiveStakeOptions(), selectedStake = stake"
               >
-                <div
-                  v-if="item.value === 'address'"
-                  class="px-[8px] flex items-center gap-[12px]"
+                <td
+                  v-for="(item, index) in tableHeaders"
+                  v-show="item.show"
+                  :key="index"
+                  class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
                 >
                   <div
-                    v-if="!getWalletProviderByAddress(stake[item.value])"
-                    class="placeholder_avatar"
-                  />
-                  <div 
-                    v-else
-                    class="w-[20px] h-[20px]"
+                    v-if="item.value === 'address'"
+                    class="px-[8px] flex items-center gap-[12px]"
                   >
-                    <img
-                      :src="getWalletProviderByAddress(stake[item.value])"
-                      alt=""
+                    <div
+                      v-if="!getWalletProviderByAddress(stake[item.value])"
+                      class="placeholder_avatar"
+                    />
+                    <div 
+                      v-else
                       class="w-[20px] h-[20px]"
                     >
+                      <img
+                        :src="getWalletProviderByAddress(stake[item.value])"
+                        alt=""
+                        class="w-[20px] h-[20px]"
+                      >
+                    </div>
+                    <small>
+                      {{ convertString(stake[item.value]) }}
+                    </small>
                   </div>
-                  <small>
-                    {{ convertString(stake[item.value]) }}
-                  </small>
-                </div>
-
-                <div
-                  v-if="item.value === 'amount'"
-                  class="px-[8px] flex items-center gap-[12px]"
+  
+                  <div
+                    v-if="item.value === 'amount'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>
+                      {{ stake[item.value] }} ETH
+                    </small>
+                  </div>
+  
+                  <div
+                    v-if="item.value === 'rewards'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>
+                      {{ stake[item.value] }} ETH
+                    </small>
+                  </div>
+  
+                  <div
+                    v-if="item.value === 'eigenlayer'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>
+                      {{ stake[item.value]? 'Enabled' : 'Disabled' }}
+                    </small>
+                  </div>
+  
+                  <div
+                    v-if="item.value === 'timestamp'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>{{ formatTimestamp(stake[item.value]) }}</small>
+                  </div>
+  
+  
+                  <div
+                    v-if="item.value === 'age'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>{{ stake[item.value] }}</small>
+                  </div>
+                  <div
+                    v-if="item.value === 'status'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>{{ stake[item.value] }}</small>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tbody
+              v-else
+              class="w-full"
+            >
+              <tr
+                v-for="stake in userStakeDetails"
+                :key="stake"
+                class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
+                @click="openOpenActiveStakeOptions(), selectedStake = stake"
+              >
+                <td
+                  v-for="(item, index) in tableHeaders"
+                  v-show="item.show"
+                  :key="index"
+                  class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
                 >
-                  <small>
-                    {{ stake[item.value] }} ETH
-                  </small>
-                </div>
-
-                <div
-                  v-if="item.value === 'rewards'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>
-                    {{ stake[item.value] }} ETH
-                  </small>
-                </div>
-
-                <div
-                  v-if="item.value === 'eigenlayer'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>
-                    {{ stake[item.value]? 'Enabled' : 'Disabled' }}
-                  </small>
-                </div>
-
-                <div
-                  v-if="item.value === 'timestamp'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>{{ formatTimestamp(stake[item.value]) }}</small>
-                </div>
-
-
-                <div
-                  v-if="item.value === 'age'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>{{ stake[item.value] }}</small>
-                </div>
-
-
-                <!-- TODO: adjust status ui based on possible status options -->
-                <div
-                  v-if="item.value === 'status'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>{{ stake[item.value] }}</small>
-                </div>
-              </td>
-            </tr>
-          </tbody>
+                  <div
+                    v-if="item.value === 'address'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <div
+                      v-if="!getWalletProviderByAddress(stake[item.value])"
+                      class="placeholder_avatar"
+                    />
+                    <div 
+                      v-else
+                      class="w-[20px] h-[20px]"
+                    >
+                      <img
+                        :src="getWalletProviderByAddress(stake[item.value])"
+                        alt=""
+                        class="w-[20px] h-[20px]"
+                      >
+                    </div>
+                    <small>
+                      {{ convertString(stake[item.value]) }}
+                    </small>
+                  </div>
+  
+                  <div
+                    v-if="item.value === 'amount'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>
+                      {{ stake[item.value] }} ETH
+                    </small>
+                  </div>
+  
+                  <div
+                    v-if="item.value === 'rewards'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>
+                      {{ stake[item.value] }} ETH
+                    </small>
+                  </div>
+  
+                  <div
+                    v-if="item.value === 'eigenlayer'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>
+                      {{ stake[item.value]? 'Enabled' : 'Disabled' }}
+                    </small>
+                  </div>
+  
+                  <div
+                    v-if="item.value === 'timestamp'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>{{ formatTimestamp(stake[item.value]) }}</small>
+                  </div>
+  
+  
+                  <div
+                    v-if="item.value === 'age'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>{{ stake[item.value] }}</small>
+                  </div>
+                  <div
+                    v-if="item.value === 'status'"
+                    class="px-[8px] flex items-center gap-[12px]"
+                  >
+                    <small>{{ stake[item.value] }}</small>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </div>
         </table>
       </div>
     </div>

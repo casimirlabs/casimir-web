@@ -4,7 +4,7 @@ export interface StakeDetails {
     amountStaked: number
     availableToWithdraw: number
     rewards?: number
-    initiatedWithdrawals?: number
-    requestedWithdrawals?: number
-    fulfilledWithdrawals?: number
+    WithdrawalInitiated?: number
+    WithdrawalRequested?: number
+    WithdrawalFulfilled?: number
 }

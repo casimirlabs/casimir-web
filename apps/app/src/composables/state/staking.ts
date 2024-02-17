@@ -1,13 +1,11 @@
 import { onMounted, onUnmounted, readonly, ref, watch } from "vue"
-import { get, useStorage } from "@vueuse/core"
+import { useStorage } from "@vueuse/core"
 import { CasimirManager } from "@casimir/ethereum/build/@types"
-import { Account, BreakdownAmount, ContractEventsByAddress, ProviderString, StakeDetails, UserWithAccountsAndOperators } from "@casimir/types"
+import { ContractEventsByAddress, ProviderString, StakeDetails, UserContractEvents } from "@casimir/types"
 import { ethers } from "ethers"
 import useContracts from "@/composables/services/contracts"
 import useEthers from "@/composables/services/ethers"
-import useFormat from "@/composables/services/format"
 import useLedger from "@/composables/services/ledger"
-import usePrice from "@/composables/services/price"
 import useToasts from "@/composables/state/toasts"
 import useTrezor from "@/composables/services/trezor"
 import useUser from "@/composables/services/user"
@@ -16,15 +14,9 @@ import useWalletConnectV2 from "@/composables/services/walletConnectV2"
 
 const { getBaseManager, getEigenManager, contractsAreInitialized } = useContracts()
 const { browserProvidersList, getEthersBrowserSigner } = useEthers()
-const { formatEthersCasimir } = useFormat()
 const { getEthersLedgerSigner } = useLedger()
-const { getCurrentPrice } = usePrice()
 const { getEthersTrezorSigner } = useTrezor()
-const {
-    addToast,
-    updateToast,
-    removeToast
-} = useToasts()
+const { addToast, updateToast, removeToast } = useToasts()
 const { user, getPathIndex } = useUser()
 const { detectActiveNetwork, detectActiveWalletAddress, switchEthersNetwork } = useWallets()
 const { getWalletConnectSignerV2 } = useWalletConnectV2()
@@ -61,14 +53,13 @@ export default function useStakingState() {
         if (contractsAreInitialized.value) {
             baseManager = getBaseManager()
             eigenManager = getEigenManager()
-            await getUserStakeDetails()
             await getDepositFees()
-            await getStakingContractRewards()
         }
     })
       
     onMounted(async () => {
         if (!initializeComposable.value) {
+            initializeComposable.value = true
             stakingWalletAddress.value = null
             stakingAmount.value = null
             eigenLayerSelection.value = false
@@ -290,7 +281,6 @@ export default function useStakingState() {
         }
     }
 
-    // TODO: Combine this with getStakingContractDetails
     async function getUserStakeDetails() {
         const result: Array<StakeDetails> = []
         const addresses = user.value?.accounts.map((account) => account.address) as Array<string>
@@ -298,6 +288,7 @@ export default function useStakingState() {
         async function getUserStakeAndWithdrawable(manager: CasimirManager, address: string) {
             try {
                 const userStake = await (manager as CasimirManager).getUserStake(address)
+                console.log("userStake :>> ", userStake)
                 const userStakeNumber = parseFloat(ethers.utils.formatEther(userStake))
                 const availableToWithdraw = await (manager as CasimirManager).getWithdrawableBalance()
                 const availableToWithdrawNumber = parseFloat(ethers.utils.formatEther(availableToWithdraw))
@@ -315,11 +306,20 @@ export default function useStakingState() {
             ])
     
             if (baseManagerData.userStakeNumber > 0) {
+                const amountStaked = baseManagerData.userStakeNumber
+                const availableToWithdraw = baseManagerData.availableToWithdrawNumber
+                const userEventTotals = await getContractEventsTotalsByAddress(address, baseManager)
+                const { WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = userEventTotals
+                const rewards = await calculateRewards(amountStaked, userEventTotals)
                 result.push({
                     operatorType: "Default",
                     address,
-                    amountStaked: baseManagerData.userStakeNumber,
-                    availableToWithdraw: baseManagerData.availableToWithdrawNumber,
+                    amountStaked,
+                    availableToWithdraw,
+                    rewards,
+                    WithdrawalInitiated,
+                    WithdrawalRequested, 
+                    WithdrawalFulfilled 
                 })
             }
     
@@ -382,60 +382,13 @@ export default function useStakingState() {
         }
     }
 
-
-    async function getStakingContractDetails() : Promise<BreakdownAmount> {
+    async function calculateRewards(currentStaked: number, userEventTotals: ContractEventsByAddress) : Promise<number> {
         try {
-            /* Get User's Current Stake */
-            const addresses = (user.value as UserWithAccountsAndOperators).accounts.map((account: Account) => account.address) as string[]
-            const currentUserStakePromises = [] as Array<Promise<ethers.BigNumber>>
-            addresses.forEach(address => currentUserStakePromises.push((baseManager as CasimirManager).getUserStake(address)))
-            addresses.forEach(address => currentUserStakePromises.push((eigenManager as CasimirManager).getUserStake(address)))
-            const settledCurrentUserStakePromises = await Promise.allSettled(currentUserStakePromises) as Array<PromiseFulfilledResult<ethers.BigNumber>>
-            const currentUserStake = settledCurrentUserStakePromises.filter(result => result.status === "fulfilled").map(result => result.value)
-            const currentUserStakeSum = currentUserStake.reduce((acc, curr) => acc.add(curr), ethers.BigNumber.from(0))
-            const currentUserStakeETH = parseFloat(ethers.utils.formatEther(currentUserStakeSum))
-
-            /* Get User's All Time Deposits and Withdrawals */
-            const userEventTotalsPromises = [] as Array<Promise<ContractEventsByAddress>>
-            addresses.forEach(address => {userEventTotalsPromises.push(getContractEventsTotalsByAddress(address, baseManager))})
-            addresses.forEach(address => {userEventTotalsPromises.push(getContractEventsTotalsByAddress(address, eigenManager))})
-            
-            const userEventTotals = await Promise.all(userEventTotalsPromises) as Array<ContractEventsByAddress>
-            const userEventTotalsSum = userEventTotals.reduce((acc, curr) => {
-                const { StakeDeposited, WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = curr
-                return {
-                    StakeDeposited: acc.StakeDeposited + (StakeDeposited || 0),
-                    WithdrawalInitiated: acc.WithdrawalInitiated + (WithdrawalInitiated || 0),
-                    WithdrawalRequested: acc.WithdrawalRequested + (WithdrawalRequested || 0),
-                    WithdrawalFulfilled: acc.WithdrawalFulfilled + (WithdrawalFulfilled || 0)
-                }
-            }, { 
-                StakeDeposited: 0, 
-                WithdrawalInitiated: 0, 
-                WithdrawalRequested: 0, 
-                WithdrawalFulfilled: 0 
-            } as { StakeDeposited: number; WithdrawalInitiated: number, WithdrawalRequested: number, WithdrawalFulfilled: number })
-              
-              
-            const stakedDepositedETH = userEventTotalsSum.StakeDeposited
-            const withdrawalInitiatedETH = userEventTotalsSum.WithdrawalInitiated
-            const withdrawalRequestedETH = userEventTotalsSum.WithdrawalRequested
-            const withdrawalFulfilledETH = userEventTotalsSum.WithdrawalFulfilled
-            
-
-            /* Get User's All Time Rewards */
-            const currentUserStakeMinusEvents = 
-                currentUserStakeETH - stakedDepositedETH + ((withdrawalInitiatedETH) + (withdrawalRequestedETH) + (withdrawalFulfilledETH))
-            return {
-                eth: `${formatEthersCasimir(currentUserStakeMinusEvents)} ETH`,
-                usd: `$${formatEthersCasimir(currentUserStakeMinusEvents * (await getCurrentPrice({ coin: "ETH", currency: "USD" })))}`
-            }
+            const { StakeDeposited, StakeRebalanced, WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = userEventTotals as UserContractEvents
+            return currentStaked - StakeDeposited + ((WithdrawalInitiated) + (WithdrawalRequested) + (WithdrawalFulfilled))
         } catch (err) {
-            console.error(`There was an error in getStakingContractRewards: ${err}`)
-            return {
-                eth: "0 ETH",
-                usd: "$ 0.00"
-            }
+            console.error(`There was an error in calculateRewards: ${err}`)
+            return 0
         }
     }
 
@@ -512,6 +465,7 @@ export default function useStakingState() {
         acceptTerms: readonly(acceptTerms),
         withdrawAmount: readonly(withdrawAmount),
         depositFees: readonly(depositFees),
+        userStakeDetails: readonly(userStakeDetails),
         selectWallet,
         setAmountToStake,
         toggleEigenlayerSelection,
