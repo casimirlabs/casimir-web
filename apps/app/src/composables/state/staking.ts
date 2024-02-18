@@ -288,7 +288,6 @@ export default function useStakingState() {
         async function getUserStakeAndWithdrawable(manager: CasimirManager, address: string) {
             try {
                 const userStake = await (manager as CasimirManager).getUserStake(address)
-                console.log("userStake :>> ", userStake)
                 const userStakeNumber = parseFloat(ethers.utils.formatEther(userStake))
                 const availableToWithdraw = await (manager as CasimirManager).getWithdrawableBalance()
                 const availableToWithdrawNumber = parseFloat(ethers.utils.formatEther(availableToWithdraw))
@@ -335,7 +334,6 @@ export default function useStakingState() {
     
         await Promise.all(promises)
         userStakeDetails.value = result
-        console.log("userStakeDetails.value :>> ", userStakeDetails.value)
     }
 
     async function getContractEventsTotalsByAddress(address: string, manager: CasimirManager) : Promise<ContractEventsByAddress> {

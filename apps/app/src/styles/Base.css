@@ -116,3 +116,16 @@
       z-index: 5;
       transform: translateY(-50%);
   }
+
+  .circle_with_slash_contianer{
+    @apply w-[140%] h-[140%] rounded-[999px] border 
+    dark:border-white
+    border-gray_3 
+    flex items-center justify-center;
+    transform: translateX(-15%) translateY(-15%);
+  }
+
+  .circle_with_slash{
+    @apply w-full h-[2px] bg-gray_3 dark:bg-white;
+    transform: rotate(-45deg);
+  }

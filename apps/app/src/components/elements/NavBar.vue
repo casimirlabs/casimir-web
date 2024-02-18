@@ -1,18 +1,12 @@
 <script setup>
 import { 
-    ArrowTopRightOnSquareIcon,
     SunIcon,
     MoonIcon,
-    Bars3Icon,
-    InformationCircleIcon, 
-    XMarkIcon,
-    ChartBarSquareIcon,
-    Cog8ToothIcon,
-    MagnifyingGlassCircleIcon,
     PlusCircleIcon,
     ArrowRightOnRectangleIcon,
-    Square3Stack3DIcon,
     Square2StackIcon,
+    UserIcon,
+    ArrowLongUpIcon
 } from "@heroicons/vue/24/outline"
 import router from "@/composables/services/router"
 import { 
@@ -21,7 +15,7 @@ import {
     useStorage
 } from "@vueuse/core"
 import { 
-    ref, computed
+    ref, computed, watch
 } from "vue"
 import useNavMenu from "@/composables/state/navMenu"
 import { 
@@ -34,6 +28,12 @@ import useConnectWalletModal from "@/composables/state/connectWalletModal"
 import useAuth from "@/composables/services/auth"
 import useUser from "@/composables/services/user"
 import useFormat from "@/composables/services/format"
+import useOperatorStatus from "@/composables/state/operatorStatus"
+
+const {
+    showUserIsAnOperator,
+    toggleUserOperator
+} = useOperatorStatus()
 
 const { convertString } = useFormat()
 
@@ -102,6 +102,17 @@ const userSecondaryAccounts = computed(() =>{
     })
     return secondaryAccounts
 })
+
+const showOperatorTooltip = ref(false)
+
+watch(showUserIsAnOperator, (newValue, oldValue) =>{
+    if (oldValue == undefined) {
+        showOperatorTooltip.value = true
+        setTimeout(() => {
+            showOperatorTooltip.value = false
+        }, 3000)
+    }
+})
 </script>
 
 <template>
@@ -140,6 +151,42 @@ const userSecondaryAccounts = computed(() =>{
       </div>
 
       <div class="flex items-center justify-end gap-[24px] w-full">
+        <button
+          v-if="showUserIsAnOperator != undefined"
+          class="relative"
+          @click="toggleUserOperator(showUserIsAnOperator == true || showUserIsAnOperator == 'true'? false : true)"
+        >
+          <UserIcon 
+            class="w-[14px] h-[14px]"
+            :class="showUserIsAnOperator == true || showUserIsAnOperator == 'true'? 'text-green' : 'text-gray_3 dark:text-white'"
+          />
+          <div
+            v-show="showUserIsAnOperator == 'false' || showUserIsAnOperator == false"
+            class="absolute top-0 left-0 w-full h-full"
+          >
+            <div class="circle_with_slash_contianer">
+              <div class="circle_with_slash" />
+            </div>
+          </div>
+
+          <div
+            class="tooltip_container"
+            :style="showOperatorTooltip? 'opacity: 1; visibility: visible;' :'opacity: 0; visibility: hidden;'"
+            style="transition: all 0.3s ease-in ;"
+          >
+            <div
+              class="tooltip w-[180px]" 
+              style="opacity: 1; visibility: visible; top: 165%; transform: translateY(+20%) translateX(-5%);"
+            >
+              <div class="flex items-center gap-[12px] text-left">
+                <ArrowLongUpIcon class="w-[36px] h-[36px]" />
+                <span>
+                  You can toggle operator mode here
+                </span>
+              </div>
+            </div>
+          </div>
+        </button>
         <button @click="toggleDark()">
           <SunIcon
             v-if="isDark"

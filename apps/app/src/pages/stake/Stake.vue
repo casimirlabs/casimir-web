@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue"
+import { ref, watch, onMounted } from "vue"
 import ConnectWallet from "./components/ConnectedWallets.vue"
 import StakeCard from "./components/StakeCard.vue"
 import ActiveStakes from "./components/ActiveStakes.vue"
@@ -12,11 +12,16 @@ import {
 import { 
     InformationCircleIcon,
 } from "@heroicons/vue/24/outline"
-
 import TermsOfService from "@/components/elements/TermsOfService.vue"
+import useOperatorStatus from "@/composables/state/operatorStatus"
+import OperatorPrompt from "./components/OperatorPrompt.vue"
+import OperatorView from "./components/OperatorView.vue"
 
 const openTermsAndConditions = ref(false)
 
+const {
+    showUserIsAnOperator
+} = useOperatorStatus()
 
 const closeTermsAndCondiditons = () => {
     openTermsAndConditions.value = false
@@ -24,10 +29,64 @@ const closeTermsAndCondiditons = () => {
 const  openTermsAndCondiditons = () => {
     openTermsAndConditions.value = true
 }
+
+const showOperatorView = ref(false)
+
+onMounted(() => {
+    if (showUserIsAnOperator.value == "true" || showUserIsAnOperator.value == true) {
+        showOperatorView.value = true
+    } else if (showUserIsAnOperator.value == "false" || showUserIsAnOperator.value == false) {
+        showOperatorView.value = false
+    }
+})
+watch(showUserIsAnOperator, () => {
+    if (showUserIsAnOperator.value == "true" || showUserIsAnOperator.value == true) {
+        showOperatorView.value = true
+    } else if (showUserIsAnOperator.value == "false" || showUserIsAnOperator.value == false) {
+        showOperatorView.value = false
+    }
+})
 </script>
 
 <template>
   <div>
+    <div
+      class="w-full overflow-hidden "
+      :class="showUserIsAnOperator == undefined? 'h-[100px] pb-[24px]' : 'h-[0px] pb-[0px]' "
+      style="transition: all 0.5s ease-in;"
+    >
+      <transition
+        name="slide-up"
+      >
+        <div
+          v-if="showUserIsAnOperator == undefined"
+          class="h-full w-full"
+        >
+          <OperatorPrompt />
+        </div>
+      </transition>
+    </div>
+
+
+    <div
+      class="w-full overflow-hidden"
+      :style="showOperatorView === true? 
+        'height: 540px; padding-bottom: 24px;' :
+        'height: 0px; padding-bottom: 0px;'"
+      style="transition: all 0.5s ease-in;"
+    >
+      <transition
+        name="slide-down"
+      >
+        <div
+          v-if="showOperatorView === true"
+          class="h-full w-full"
+        >
+          <OperatorView />
+        </div>
+      </transition>
+    </div>
+
     <div class="flex items-start gap-[24px] h-[510px] 900s:flex-wrap-reverse 900s:h-[1044px]">
       <div class="w-9/12 h-full 900s:w-full 900s:h-[510px]">
         <ConnectWallet />
@@ -51,7 +110,6 @@ const  openTermsAndCondiditons = () => {
         </caption>
       </button>
     </div>
-
 
     <!-- Active Stake Options -->
     <TransitionRoot
@@ -114,4 +172,20 @@ const  openTermsAndCondiditons = () => {
 </template>
 
 <style>
+.slide-up-enter-active {
+  transition: transform 4.3s, opacity 0.3s;
+}
+.slide-up-enter {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+
+.slide-down-enter-active {
+  transition: transform 4.3s, opacity 0.3s;
+}
+.slide-down-enter {
+  transform: translateY(100%);
+  opacity: 0;
+}
 </style>

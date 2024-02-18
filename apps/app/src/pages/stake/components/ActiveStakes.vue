@@ -35,8 +35,8 @@ const columns = [
     { title: "Rewards", show: ref(true), value: "rewards" }, 
     { title: "EigenLayer", show: ref(true), value: "operatorType" }, 
     { title: "Available to Withdraw", show: ref(true), value: "availableToWithdraw" }, 
-    { title: "Withdraws Initiated", show: ref(true), value: "WithdrawalInitiated" }, 
-    { title: "Withdraws Requested", show: ref(true), value: "WithdrawalRequested" }, 
+    { title: "Withdraws Initiated", show: ref(false), value: "WithdrawalInitiated" }, 
+    { title: "Withdraws Requested", show: ref(false), value: "WithdrawalRequested" }, 
     { title: "Withdraws Fulfilled", show: ref(true), value: "WithdrawalFulfilled" }, 
     // Removed for now
     // { title: "Timestamp", show: ref(true), value: "timestamp" }, 
@@ -46,9 +46,7 @@ const columns = [
 
 const tableHeaders = ref(columns)
 
-
-useStorage("chosenActiveHeaders", tableHeaders.value)
-const showArrowsIndex = ref(-1)
+useStorage("chosenActiveStakeTableHeaders", tableHeaders.value)
 
 const toggleColumnShowItem = (item) =>{
     const index = columns.findIndex((col) => col === item)
@@ -117,10 +115,6 @@ const getWalletProviderByAddress = (address) => {
     return false
 }
 
-const formatTimestamp = (timestamp) =>{
-    const date = new Date(timestamp)
-    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
-}
 const formatedAmountToWithdraw = ref(null)
 const selectedStake = ref(null)
 
@@ -458,8 +452,6 @@ const findSwitchHeaderValue = (switchItem) => {
                     v-for="(item, index) in columns"
                     :key="index"
                     class="w-full flex items-center justify-between mt-[10px] text-[14px] font-[500] tracking-[0.15px] text-[#71717a]"
-                    @mouseenter="showArrowsIndex = index"
-                    @mouseleave="showArrowsIndex = -1"
                   >
                     {{ item.title }}
                     <div class="flex items-center gap-[12px] text-[12px]">
