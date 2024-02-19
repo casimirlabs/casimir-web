@@ -7,7 +7,7 @@ import {
     ChevronRightIcon,
     ChevronDoubleRightIcon
 } from "@heroicons/vue/24/outline"
-import { ref, computed } from "vue"
+import { ref, computed, onMounted } from "vue"
 import {
     TransitionRoot,
     TransitionChild,
@@ -35,9 +35,9 @@ const columns = [
     { title: "Rewards", show: ref(true), value: "rewards" }, 
     { title: "EigenLayer", show: ref(true), value: "operatorType" }, 
     { title: "Available to Withdraw", show: ref(true), value: "availableToWithdraw" }, 
-    { title: "Withdraws Initiated", show: ref(false), value: "WithdrawalInitiated" }, 
-    { title: "Withdraws Requested", show: ref(false), value: "WithdrawalRequested" }, 
-    { title: "Withdraws Fulfilled", show: ref(true), value: "WithdrawalFulfilled" }, 
+    { title: "Withdrawals Initiated", show: ref(true), value: "WithdrawalInitiated" }, 
+    { title: "Withdrawals Requested", show: ref(true), value: "WithdrawalRequested" }, 
+    { title: "Withdrawals Fulfilled", show: ref(true), value: "WithdrawalFulfilled" }, 
     // Removed for now
     // { title: "Timestamp", show: ref(true), value: "timestamp" }, 
     // { title: "Age", show: ref(false), value: "age" }, 
@@ -45,18 +45,20 @@ const columns = [
 ]
 
 const tableHeaders = ref(columns)
-
 useStorage("chosenActiveStakeTableHeaders", tableHeaders.value)
+
 
 const toggleColumnShowItem = (item) =>{
     const index = columns.findIndex((col) => col === item)
+
     if (index > -1) {
         columns[index].show = ref(!item.show.value)
-    }
-
+        tableHeaders.value = columns
+    } else return
+    
     tableHeaders.value = columns.map((col) => ({
         title: col.title,
-        show: col.show.value,
+        show: ref(col.show.value),
         value: col.value
     }))  
 }
@@ -145,12 +147,19 @@ const clearErrorMessage = () => {
     }, 3500)
 }
 
+
+const filteredStakeDetail = computed(() => {
+    if (userStakeDetails.value?.length > itemsPerPage.value) {
+        return userStakeDetails.value?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
+    } else {
+        return userStakeDetails.value
+    }
+})
+
 const errorMessage = ref(null)
 const handleWithdrawAction = () => {
-
-    // TODO: check if the amount selected is above the amout user is able to withdraw 
     if (formatedAmountToWithdraw.value >  selectedStake.value.availableToWithdraw) {
-        errorMessage.value= "Insufficient withdrawl amount"
+        errorMessage.value= "Insufficient withdrawal amount"
         clearErrorMessage()
         return
     }
@@ -205,87 +214,11 @@ const findSwitchHeaderValue = (switchItem) => {
             </tr>
           </thead>
           <tbody
-            v-if="userStakeDetails.length > itemsPerPage"
             class="w-full"
           >
             <tr
-              v-for="stake in userStakeDetails.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)"
+              v-for="stake in filteredStakeDetail"
                 
-              :key="stake"
-              class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
-              @click="openOpenActiveStakeOptions(), selectedStake = stake"
-            >
-              <td
-                v-for="(item, index) in tableHeaders"
-                v-show="item.show"
-                :key="index"
-                class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
-              >
-                <div
-                  v-if="item.value === 'address'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <div
-                    v-if="!getWalletProviderByAddress(stake[item.value])"
-                    class="placeholder_avatar"
-                  />
-                  <div 
-                    v-else
-                    class="w-[20px] h-[20px]"
-                  >
-                    <img
-                      :src="getWalletProviderByAddress(stake[item.value])"
-                      alt=""
-                      class="w-[20px] h-[20px]"
-                    >
-                  </div>
-                  <small>
-                    {{ convertString(stake[item.value] ) }}
-                  </small>
-                </div>
-  
-                <div
-                  v-if="
-                    item.value === 'amountStaked' ||
-                      item.value === 'rewards' ||
-                      item.value === 'availableToWithdraw' ||
-                      item.value === 'WithdrawalInitiated' ||
-                      item.value === 'WithdrawalRequested' ||
-                      item.value === 'WithdrawalFulfilled' 
-                  "
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <div class="tooltip_container_left">
-                    <small>
-                      {{ 
-                        formatEthersCasimir(formatDecimalString(stake[item.value]))
-                      }} ETH
-                    </small>
-                    <div class="tooltip_left whitespace-nowrap">
-                      {{ 
-                        stake[item.value]
-                      }}
-                    </div>
-                  </div>
-                </div>
-  
-                <div
-                  v-if="item.value === 'operatorType'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>
-                    {{ stake[item.value] == "default"? 'Disabled' : 'Enabled' }}
-                  </small>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-          <tbody
-            v-else
-            class="w-full"
-          >
-            <tr
-              v-for="stake in userStakeDetails"
               :key="stake"
               class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
               @click="openOpenActiveStakeOptions(), selectedStake = stake"
