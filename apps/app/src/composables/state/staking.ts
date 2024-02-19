@@ -1,7 +1,7 @@
 import { onMounted, onUnmounted, readonly, ref, watch } from "vue"
 import { useStorage } from "@vueuse/core"
 import { CasimirManager } from "@casimir/ethereum/build/@types"
-import { ContractEventsByAddress, ProviderString, StakeDetails, UserContractEvents } from "@casimir/types"
+import {  ContractEventsByAddress, ProviderString, StakeDetails, UserContractEvents } from "@casimir/types"
 import { ethers } from "ethers"
 import useContracts from "@/composables/services/contracts"
 import useEthers from "@/composables/services/ethers"
@@ -32,6 +32,7 @@ const stakingAmount = ref(null as null | number)
 const eigenLayerSelection = ref(false as boolean)
 const userStakeDetails = ref<Array<StakeDetails>>([])
 const depositFees = ref(null as null | number)
+const listeningForContractEvents = ref(false)
 
 const selectedWalletProvider = ref("" as ProviderString)
 
@@ -48,12 +49,53 @@ const withdrawAmount = ref(null as null | number)
 const acceptTerms = ref(false)
   
 export default function useStakingState() {
+    function listenForStakeWithdrawEvents() {
+        if (!initializeComposable.value) return
+        listeningForContractEvents.value = true
+        try {
+            (baseManager as CasimirManager).on("StakeDeposited", stakeDepositedListener);
+            (baseManager as CasimirManager).on("WithdrawalInitiated", withdrawalInitiatedListener);
+            (eigenManager as CasimirManager).on("StakeDeposited", stakeDepositedListener);
+            (eigenManager as CasimirManager).on("WithdrawalInitiated", withdrawalInitiatedListener)
+        } catch (err) {
+            console.log(`There was an error in listenForStakeWithdrawEvents: ${err}`)
+        }
+    }
+
+    function listenForRebalancedEvents() {
+        if (!initializeComposable.value) return
+        try {
+            (baseManager as CasimirManager).on("StakeRebalanced", stakeRebalancedListener)
+            // (eigenManager as CasimirManager).on("StakeRebalanced", stakeRebalancedListener)
+        } catch (err) {
+            console.log(`There was an error in listenForRebalancedEvents: ${err}`)
+        }
+    }
+
+    function stopListeningForContractEvents() {
+        console.log("stopListeningForContractEvents")
+        listeningForContractEvents.value = false
+        if (!initializeComposable.value) return
+        (baseManager as CasimirManager).removeListener("StakeDeposited", stakeDepositedListener);
+        (baseManager as CasimirManager).removeListener("StakeRebalanced", stakeRebalancedListener);
+        (baseManager as CasimirManager).removeListener("WithdrawalInitiated", withdrawalInitiatedListener);
+        (eigenManager as CasimirManager).removeListener("StakeDeposited", stakeDepositedListener);
+        (eigenManager as CasimirManager).removeListener("StakeRebalanced", stakeRebalancedListener);
+        (eigenManager as CasimirManager).removeListener("WithdrawalInitiated", withdrawalInitiatedListener)
+    }
+
+    const stakeDepositedListener = async () => await getUserStakeDetails()
+    const stakeRebalancedListener = async () => await getUserStakeDetails()
+    const withdrawalInitiatedListener = async () => await getUserStakeDetails()
 
     watch(contractsAreInitialized, async () => {
         if (contractsAreInitialized.value) {
             baseManager = getBaseManager()
             eigenManager = getEigenManager()
             await getDepositFees()
+            stopListeningForContractEvents()
+            listenForStakeWithdrawEvents()
+            listenForRebalancedEvents()
         }
     })
       
@@ -69,6 +111,9 @@ export default function useStakingState() {
             eigenManager = getEigenManager()
             await getUserStakeDetails()
             await getDepositFees()
+            stopListeningForContractEvents()
+            listenForStakeWithdrawEvents()
+            listenForRebalancedEvents()
         }
     })
     
@@ -76,6 +121,8 @@ export default function useStakingState() {
         stakingWalletAddress.value = null
         stakingAmount.value = null
         eigenLayerSelection.value = false
+        stopListeningForContractEvents()
+        initializeComposable.value = false
     })
 
     function selectWallet(address: string) {

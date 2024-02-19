@@ -21,7 +21,7 @@ watch(user, async (newUser, oldUser) => {
     if (newUser && !oldUser) {
         await initializeContractsComposable()
     } else if (newUser && oldUser) {
-    // On page refresh when signed in
+        // On page refresh when signed in
         await initializeContractsComposable()
     }
 })
