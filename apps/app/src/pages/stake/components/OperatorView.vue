@@ -152,7 +152,12 @@ const filteredActiveNodes = computed(() => {
                 :key="tableIndex"
                 class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
               >
-                {{ index }}
+                <div 
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  {{ index }}
+                  <!-- {{ node[item.value] }} -->
+                </div>
                 <!-- TODO: style table items according to how the payload looks like -->
               </td>
             </tr>
