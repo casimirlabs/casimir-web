@@ -182,7 +182,6 @@ export default function useWalletConnectV2() {
     }
 
     function _resetApp() {
-        console.log("resetting app")
         pairings.value = []
         session.value = undefined
         accounts.value = []
