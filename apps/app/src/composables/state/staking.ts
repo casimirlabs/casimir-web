@@ -73,7 +73,6 @@ export default function useStakingState() {
     }
 
     function stopListeningForContractEvents() {
-        console.log("stopListeningForContractEvents")
         listeningForContractEvents.value = false
         if (!initializeComposable.value) return
         (baseManager as CasimirManager).removeListener("StakeDeposited", stakeDepositedListener);

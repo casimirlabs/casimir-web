@@ -24,8 +24,8 @@ const requiredNetwork: "1" | "5" = origin.includes("localhost") ? "5" : origin.i
 /* Addresses */
 const factoryAddress = import.meta.env.PUBLIC_FACTORY_ADDRESS
 const factory = new ethers.Contract(factoryAddress, ICasimirFactoryAbi, provider) as CasimirFactory
-// const ssvNetworkAddress = import.meta.env.PUBLIC_SSV_NETWORK_ADDRESS
-// const ssvViewsAddress = import.meta.env.PUBLIC_SSV_VIEWS_ADDRESS
+const ssvNetworkAddress = import.meta.env.PUBLIC_SSV_NETWORK_ADDRESS
+const ssvViewsAddress = import.meta.env.PUBLIC_SSV_VIEWS_ADDRESS
 
 /* API Keys */
 const cryptoCompareApiKey = import.meta.env.PUBLIC_CRYPTO_COMPARE_API_KEY || ""
@@ -47,8 +47,8 @@ export default function useEnvironment() {
         ledgerType,
         requiredNetwork,
         speculosUrl,
-        // ssvNetworkAddress,
-        // ssvViewsAddress,
+        ssvNetworkAddress,
+        ssvViewsAddress,
         // docsUrl,
         usersUrl,
         walletConnectProjectId,

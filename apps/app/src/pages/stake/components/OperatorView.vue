@@ -8,17 +8,14 @@ import {
     ChevronRightIcon,
     ChevronDoubleRightIcon
 } from "@heroicons/vue/24/outline"
-import {
-    TransitionRoot,
-    TransitionChild,
-    Dialog,
-    DialogPanel,
-    Switch
-} from "@headlessui/vue"
+import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
 import { useStorage } from "@vueuse/core"
+import RegisterNode from "./RegisterNode.vue"
+import useOperators from "@/composables/services/operator.ts"
 
+const { registeredBaseOperators } = useOperators()
 
-const registerNodeModal = ref(false)
+const registerNodeModal = ref(true)
 
 const closeRegisterNodeModal = () => {
     registerNodeModal.value = false
@@ -47,25 +44,25 @@ const columns = [
 const tableHeaders = ref(columns)
 useStorage("chosenActiveNodesTableHeaders", tableHeaders.value)
 
-const toggleColumnShowItem = (item) =>{
-    const index = columns.findIndex((col) => col === item)
-    if (index > -1) {
-        columns[index].show = ref(!item.show.value)
-    }
+// const toggleColumnShowItem = (item) =>{
+//     const index = columns.findIndex((col) => col === item)
+//     if (index > -1) {
+//         columns[index].show = ref(!item.show.value)
+//     }
 
-    tableHeaders.value = columns.map((col) => ({
-        title: col.title,
-        show: col.show.value,
-        value: col.value
-    }))  
-}
+//     tableHeaders.value = columns.map((col) => ({
+//         title: col.title,
+//         show: col.show.value,
+//         value: col.value
+//     }))  
+// }
 
-const activeNodes = ref(new Array(30))
+// const activeNodes = ref(new Array(30))
 
 const currentPage = ref(1)
 const itemsPerPage = ref(9)
 const pagesAvailable = computed(() => {
-    return Math.ceil(activeNodes?.value?.length / itemsPerPage.value)
+    return Math.ceil(registeredBaseOperators?.value?.length / itemsPerPage.value)
 })
 
 const goToStartPage = () => {
@@ -87,10 +84,10 @@ const goToLastPage = () => {
 
 
 const filteredActiveNodes = computed(() => {
-    if (activeNodes.value.length >= itemsPerPage.value) {
-        return activeNodes.value.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
+    if (registeredBaseOperators.value.length >= itemsPerPage.value) {
+        return registeredBaseOperators.value.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
     } else {
-        return activeNodes.value
+        return registeredBaseOperators.value
     }
 })
 </script>
@@ -244,10 +241,7 @@ const filteredActiveNodes = computed(() => {
               <DialogPanel
                 class="card w-full max-w-[360px] p-[24px]"
               >
-                <div>
-                  Register Node
-                  <!-- TODO: add form for registering a node here -->
-                </div>
+                <RegisterNode />
               </DialogPanel>
             </TransitionChild>
           </div>
