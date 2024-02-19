@@ -274,7 +274,7 @@ const findSwitchHeaderValue = (switchItem) => {
                   class="px-[8px] flex items-center gap-[12px]"
                 >
                   <small>
-                    {{ stake[item.value] == "Default"? 'Disabled' : 'Enabled' }}
+                    {{ stake[item.value] == "default"? 'Disabled' : 'Enabled' }}
                   </small>
                 </div>
               </td>
@@ -349,7 +349,7 @@ const findSwitchHeaderValue = (switchItem) => {
                   class="px-[8px] flex items-center gap-[12px]"
                 >
                   <small>
-                    {{ stake[item.value] == "Default"? 'Disabled' : 'Enabled' }}
+                    {{ stake[item.value] == "default"? 'Disabled' : 'Enabled' }}
                   </small>
                 </div>
               </td>

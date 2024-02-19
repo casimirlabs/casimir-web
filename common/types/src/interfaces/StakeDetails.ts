@@ -1,5 +1,5 @@
 export interface StakeDetails {
-    operatorType: "Default" | "Eigen"
+    operatorType: "default" | "eigen"
     address: string
     amountStaked: number
     availableToWithdraw: number

@@ -149,7 +149,7 @@ export default function useStakingState() {
                 type: "loading",
                 iconUrl: "",
                 title: "Waiting on Confirmation",
-                subtitle: "Waiting for user to confirm stake action",
+                subtitle: "Waiting stake confirmation action",
                 timed: false,
                 loading: true
             }
@@ -243,7 +243,8 @@ export default function useStakingState() {
     }
 
     async function handleWithdraw(stakeInfo : any) {
-        const { address, amount } = stakeInfo
+        const { address, operatorType: type } = stakeInfo
+        const walletProvider = user.value?.accounts.find(account => account.address === address)?.walletProvider as ProviderString
         
         withdrawToastId.value = getRandomToastId(16)
         const toastContent ={
@@ -255,14 +256,13 @@ export default function useStakingState() {
             timed: false,
             loading: true
         }
-        updateToast(toastContent)
+        addToast(toastContent)
 
-        console.log("withdrawAmount.value :>> ", withdrawAmount.value)
         const withdrawPayload = {
             amount: withdrawAmount.value?.toString() as string,
-            address: stakeInfo.address as string,
-            walletProvider: selectedWalletProvider.value as ProviderString,
-            type: eigenLayerSelection.value ? "eigen" : "default" as "eigen" | "default"
+            address,
+            walletProvider,
+            type
         }
         await withdraw(withdrawPayload)
     }
@@ -311,7 +311,7 @@ export default function useStakingState() {
                 const { WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = userEventTotals
                 const rewards = await calculateRewards(amountStaked, userEventTotals)
                 result.push({
-                    operatorType: "Default",
+                    operatorType: "default",
                     address,
                     amountStaked,
                     availableToWithdraw,
@@ -324,7 +324,7 @@ export default function useStakingState() {
     
             // if (eigenManagerData.userStakeNumber > 0) {
             //     result.push({
-            //         operatorType: "Eigen",
+            //         operatorType: "eigen",
             //         address,
             //         amountStaked: eigenManagerData.userStakeNumber,
             //         availableToWithdraw: eigenManagerData.availableToWithdrawNumber,
@@ -390,33 +390,29 @@ export default function useStakingState() {
         }
     }
 
-    async function withdraw({ amount, walletProvider, type }: { amount: string, walletProvider: ProviderString, type: "default" | "eigen" }) {
+    async function withdraw({ address, amount, walletProvider, type }: { address: string, amount: string, walletProvider: ProviderString, type: "default" | "eigen" }) {
         try {
+            let toastContent ={
+                id: withdrawToastId.value as string,
+                type: "loading",
+                iconUrl: "",
+                title: "Submitting Withdraw",
+                subtitle: "Submitting stake withdraw from pool",
+                timed: false,
+                loading: true
+            }
+            updateToast(toastContent)
             const activeNetwork = await detectActiveNetwork(walletProvider)
             if (activeNetwork !== 5) {
                 await switchEthersNetwork(walletProvider, "0x5")
                 return window.location.reload()
             }
-
-            if (browserProvidersList.includes(selectedWalletProvider.value as ProviderString)) {
-                const activeAddress = await detectActiveWalletAddress(selectedWalletProvider.value as ProviderString)
-                if (activeAddress !== stakingWalletAddress.value) {
-                    stakingAmount.value = 0
-                    const toastContent = {
-                        id: withdrawToastId.value as string,
-                        type: "failed",
-                        iconUrl: "",
-                        title: "Cannot Withdraw",
-                        subtitle: "The wallet you are trying to withdraw to is not your active wallet.",
-                        timed: true,
-                        loading: false
-                    }
-                    addToast(toastContent)
-                    setTimeout(() => {
-                        removeToast(toastContent.id)
-                    }, 3000)
-                }
+            
+            if (browserProvidersList.includes(walletProvider)) {
+                const activeAddress = await detectActiveWalletAddress(walletProvider)
+                if (activeAddress !== address) throw new Error("Active wallet address does not match selected address.")
             }
+            
             // TODO: Handle other wallet providers selected address
     
             let signer
@@ -433,26 +429,59 @@ export default function useStakingState() {
             }
             const manager = type === "default" ? baseManager : eigenManager
             const managerSigner = (manager as CasimirManager).connect(signer as ethers.Signer)
-            const value = ethers.utils.parseEther(amount)
+            const value = ethers.utils.parseEther(amount.toString())
             const result = await managerSigner.requestWithdrawal(value)
             const confirmation = await result.wait(1)
-            return confirmation
-        } catch (err: any) {
-            console.error(`There was an error in withdraw function: ${JSON.stringify(err)}`)
-            const toastContent = {
+
+
+            toastContent ={
                 id: withdrawToastId.value as string,
-                type: "failed",
+                type: "success",
                 iconUrl: "",
-                title: "Something Went Wrong",
-                subtitle: "Please try again later",
+                title: "Withdraw Submitted",
+                subtitle: "Withdraw submitted, check on status later",
                 timed: true,
                 loading: false
             }
-            addToast(toastContent)
+            updateToast(toastContent)
+
             setTimeout(() => {
                 removeToast(toastContent.id)
             }, 3000)
-            return false
+            return confirmation
+        } catch (err: any) {
+            if (err.message == "Active wallet address does not match selected address.") {
+                stakingAmount.value = 0
+                const toastContent = {
+                    id: withdrawToastId.value as string,
+                    type: "failed",
+                    iconUrl: "",
+                    title: "Cannot Withdraw",
+                    subtitle: "The wallet you are trying to withdraw to is not your active wallet.",
+                    timed: true,
+                    loading: false
+                }
+                addToast(toastContent)
+                setTimeout(() => {
+                    removeToast(toastContent.id)
+                }, 3000)
+            } else {
+                console.error(`There was an error in withdraw function: ${JSON.stringify(err)}`)
+                const toastContent = {
+                    id: withdrawToastId.value as string,
+                    type: "failed",
+                    iconUrl: "",
+                    title: "Something Went Wrong",
+                    subtitle: "Please try again later",
+                    timed: true,
+                    loading: false
+                }
+                addToast(toastContent)
+                setTimeout(() => {
+                    removeToast(toastContent.id)
+                }, 3000)
+                return false
+            }
         }
     }
 
