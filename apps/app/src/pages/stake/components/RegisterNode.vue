@@ -292,7 +292,7 @@ const handleSubmit = () => {
           type="text"
           placeholder="Type DKG URL"
           class="flex items-center text-[14.22px] justify-between gap-[8px] w-full h-full outline-none bg-transparent"
-          :class="selectedOperatorID ? 'text-black' : 'text-grey_4'"
+          :class="selectedOperatorID ? 'text-black dark:text-white' : 'text-grey_3 dark:text-white'"
         >
         <button
           class="input_selector_button"
