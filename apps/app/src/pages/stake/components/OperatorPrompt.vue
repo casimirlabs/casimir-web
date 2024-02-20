@@ -1,5 +1,8 @@
 <script setup>
 import useOperatorStatus from "@/composables/state/operatorStatus"
+import { 
+    InformationCircleIcon
+} from "@heroicons/vue/24/outline"
 
 const {
     toggleUserOperator
@@ -16,6 +19,14 @@ const {
       >
         Yes
       </button>
+
+      <div class="mb-[3px] tooltip_container">
+        <InformationCircleIcon class="w-[20px] h-[20px]" />
+        <div class="tooltip w-[200px]">
+          Operators are individuals with SSV nodes that validate blocks. 
+        </div>
+      </div>
+      
       <button
         class="secondary_btn"
         @click="toggleUserOperator(false)"

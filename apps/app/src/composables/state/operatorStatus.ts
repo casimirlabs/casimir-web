@@ -11,6 +11,8 @@ const showUserIsAnOperator = useStorage(
     userIsAnOperator
 )
 
+const registerOperatorModalIsOpen = ref(false)
+
 const initializeComposable = ref(false)
   
 export default function useOperatorStatus() {
@@ -30,6 +32,7 @@ export default function useOperatorStatus() {
 
     return {
         showUserIsAnOperator: readonly(showUserIsAnOperator),
+        registerOperatorModalIsOpen,
         toggleUserOperator
     }
 }

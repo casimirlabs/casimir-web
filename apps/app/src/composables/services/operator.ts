@@ -47,8 +47,7 @@ const registeredEigenOperators = ref<Operator[]>([])
 
 const initializeComposable = ref(false)
 
-export default function useOperators() {
-
+export default function useOperator() {
     async function addOperator({ address, nodeUrl }: { address: string, nodeUrl: string }) {
         try {
             const requestOptions = {
@@ -193,7 +192,6 @@ export default function useOperators() {
         }
     }
 
-    // TODO: Move this to operators.ts to combine with AddOperator method
     async function registerOperatorWithCasimir({ walletProvider, address, operatorId, collateral, nodeUrl }: RegisterOperatorWithCasimirParams) {
         const activeNetwork = await detectActiveNetwork(walletProvider)
         if (activeNetwork !== 5) {
@@ -214,9 +212,10 @@ export default function useOperators() {
             } else {
                 throw new Error(`Invalid wallet provider: ${walletProvider}`)
             }
+            const value = ethers.utils.parseEther(collateral)
             const result = await (baseRegistry as CasimirRegistry)
                 .connect(signer as ethers.Signer)
-                .registerOperator(operatorId, { from: address, value: ethers.utils.parseEther(collateral) })
+                .registerOperator(operatorId, { from: address, value })
             // TODO: @shanejearley - How many confirmations do we want to wait?
             await result?.wait(1)
             await addOperator({ address, nodeUrl })

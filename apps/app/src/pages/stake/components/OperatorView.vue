@@ -12,16 +12,17 @@ import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessu
 import { useStorage } from "@vueuse/core"
 import RegisterNode from "./RegisterNode.vue"
 import useOperators from "@/composables/services/operator.ts"
+import useOperatorStatus from "@/composables/state/operatorStatus.ts"
 
+
+const { registerOperatorModalIsOpen } = useOperatorStatus()
 const { registeredBaseOperators } = useOperators()
 
-const registerNodeModal = ref(true)
-
 const closeRegisterNodeModal = () => {
-    registerNodeModal.value = false
+    registerOperatorModalIsOpen.value = false
 }
 const  openRegisterNodeModal = () => {
-    registerNodeModal.value = true
+    registerOperatorModalIsOpen.value = true
 }
 
 const nodeOptions = ref(false)
@@ -102,7 +103,7 @@ const filteredActiveNodes = computed(() => {
         <div class="mb-[3px] tooltip_container">
           <InformationCircleIcon class="w-[20px] h-[20px]" />
           <div class="tooltip w-[200px]">
-            View your current active nodes. Click node for node setting options.
+            View your current active SSV nodes on Casimir. Click node for node setting options.
           </div>
         </div>
       </div>
@@ -152,8 +153,8 @@ const filteredActiveNodes = computed(() => {
                 <div 
                   class="px-[8px] flex items-center gap-[12px]"
                 >
-                  {{ index }}
-                  <!-- {{ node[item.value] }} -->
+                  <!-- {{ index }} -->
+                  {{ node[item.value] }}
                 </div>
                 <!-- TODO: style table items according to how the payload looks like -->
               </td>
@@ -205,7 +206,7 @@ const filteredActiveNodes = computed(() => {
     <!-- Register Node -->
     <TransitionRoot
       appear
-      :show="registerNodeModal"
+      :show="registerOperatorModalIsOpen"
       as="template"
     >
       <Dialog
