@@ -13,10 +13,11 @@ import { useStorage } from "@vueuse/core"
 import RegisterNode from "./RegisterNode.vue"
 import useOperators from "@/composables/services/operator.ts"
 import useOperatorStatus from "@/composables/state/operatorStatus.ts"
-
+import useFormat from "@/composables/services/format"
+import Loading from "@/components/elements/Loading.vue"
 
 const { registerOperatorModalIsOpen } = useOperatorStatus()
-const { registeredBaseOperators } = useOperators()
+const { registeredBaseOperators, loadingRegisteredOperators } = useOperators()
 
 const closeRegisterNodeModal = () => {
     registerOperatorModalIsOpen.value = false
@@ -24,6 +25,8 @@ const closeRegisterNodeModal = () => {
 const  openRegisterNodeModal = () => {
     registerOperatorModalIsOpen.value = true
 }
+
+const { convertString } = useFormat()
 
 const nodeOptions = ref(false)
 const selectedNode = ref(null)
@@ -36,29 +39,13 @@ const  openNodeOptions = () => {
 
 const columns = [
     { title: "ID", show: ref(true), value: "id" }, 
-    { title: "Address", show: ref(true), value: "address" }, 
+    { title: "Address", show: ref(true), value: "ownerAddress" }, 
     { title: "Collateral", show: ref(true), value: "collateral" }, 
     { title: "Active Validators", show: ref(true), value: "poolCount" }, 
-    { title: "Available to Withdraw", show: ref(true), value: "availableToWithdraw" }, 
-    { title: "Node URL", show: ref(true), value: "nodeURL" }, 
+    { title: "Node URL", show: ref(true), value: "url" }, 
 ]
 const tableHeaders = ref(columns)
 useStorage("chosenActiveNodesTableHeaders", tableHeaders.value)
-
-// const toggleColumnShowItem = (item) =>{
-//     const index = columns.findIndex((col) => col === item)
-//     if (index > -1) {
-//         columns[index].show = ref(!item.show.value)
-//     }
-
-//     tableHeaders.value = columns.map((col) => ({
-//         title: col.title,
-//         show: col.show.value,
-//         value: col.value
-//     }))  
-// }
-
-// const activeNodes = ref(new Array(30))
 
 const currentPage = ref(1)
 const itemsPerPage = ref(9)
@@ -94,7 +81,7 @@ const filteredActiveNodes = computed(() => {
 </script>
 
 <template>
-  <div class="w-full h-full card shadow p-[24px] flex flex-col items-start justify-between gap-[24px]">
+  <div class="w-full h-full card shadow p-[24px] flex flex-col items-start justify-between gap-[24px] relative">
     <div class="w-full flex items-center justify-between">
       <div class="flex items-center gap-[8px]">
         <h1 class="card_title">
@@ -135,6 +122,7 @@ const filteredActiveNodes = computed(() => {
             </tr>
           </thead>
           <tbody
+            v-if="!loadingRegisteredOperators"
             class="w-full"
           >
             <tr
@@ -151,16 +139,52 @@ const filteredActiveNodes = computed(() => {
                 class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
               >
                 <div 
+                  v-if="item.value === 'ownerAddress'"
                   class="px-[8px] flex items-center gap-[12px]"
                 >
-                  <!-- {{ index }} -->
+                  {{ convertString(node[item.value] ) }}
+                </div>
+
+                <div 
+                  v-else-if="item.value === 'collateral'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  {{ node[item.value] }} ETH
+                </div>
+
+                <div 
+                  v-else-if="item.value === 'poolCount'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  {{ node[item.value] }} Validators
+                </div>
+
+
+                <div 
+                  v-else-if="item.value === 'url'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  {{ node[item.value]? node[item.value] : 'Not Available' }}
+                </div>
+                <div
+                  v-else 
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
                   {{ node[item.value] }}
                 </div>
-                <!-- TODO: style table items according to how the payload looks like -->
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <div
+      v-if="loadingRegisteredOperators"
+      class="w-full h-full absolute top-0 left-0 opacity-45 flex items-center justify-center"
+    >
+      <div class="w-[100px] h-[100px]">
+        <Loading :show-text="false" />
       </div>
     </div>
 

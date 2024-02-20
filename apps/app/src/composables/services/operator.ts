@@ -11,6 +11,7 @@ import useUser from "@/composables/services/user"
 import useWallets from "@/composables/services/wallets"
 import useWalletConnectV2 from "@/composables/services/walletConnectV2"
 import { CasimirManager, CasimirRegistry, CasimirViews } from "@casimir/ethereum/build/@types"
+import useToasts from "@/composables/state/toasts"
 
 let baseManager: CasimirManager
 let baseRegistry: CasimirRegistry
@@ -29,6 +30,7 @@ const {
     getEigenRegistry,
     getEigenViews
 } = useContracts()
+const { addToast, updateToast, removeToast } = useToasts()
 const { ethereumUrl, ssvNetworkAddress, ssvViewsAddress, usersUrl, batchProvider, provider, wsProvider } = useEnvironment()
 const { browserProvidersList, getEthersBrowserSigner } = useEthers()
 const { getEthersLedgerSigner } = useLedger()
@@ -44,6 +46,8 @@ const nonregisteredBaseOperators = ref<Operator[]>([])
 const nonregisteredEigenOperators = ref<Operator[]>([])
 const registeredBaseOperators = ref<Operator[]>([])
 const registeredEigenOperators = ref<Operator[]>([])
+
+const addNodeToastID = ref(null as null | string)
 
 const initializeComposable = ref(false)
 
@@ -66,6 +70,7 @@ export default function useOperator() {
     }
 
     async function getUserOperators(): Promise<void> {
+        loadingRegisteredOperators.value = true
         const userAddresses = user.value?.accounts.map((account: Account) => account.address) as string[]
 
         const availableProvider = wsProvider || batchProvider || provider 
@@ -89,6 +94,8 @@ export default function useOperator() {
             const idRegistered = registeredBaseOperators.value.find((registeredOperator: any) => registeredOperator.id === operator.id)
             return !idRegistered
         }) as Array<Operator>
+
+        loadingRegisteredOperators.value = false
         // nonregisteredEigenOperators.value = ssvOperators.filter((operator: any) => {
         //     const idRegistered = registeredEigenOperators.value.find((registeredOperator: any) => registeredOperator.id === operator.id)
         //     return !idRegistered
@@ -180,6 +187,15 @@ export default function useOperator() {
         }
     })
 
+    function getRandomToastId(length: number) {
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        let result = ""
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length))
+        }
+        return result
+    }
+
     function listenForContractEvents() {
         try {
             (baseRegistry as CasimirRegistry).on("OperatorRegistered", () => getUserOperators())
@@ -193,6 +209,17 @@ export default function useOperator() {
     }
 
     async function registerOperatorWithCasimir({ walletProvider, address, operatorId, collateral, nodeUrl }: RegisterOperatorWithCasimirParams) {
+        addNodeToastID.value = getRandomToastId(18)
+        let toastContent = {
+            id: addNodeToastID.value as string,
+            type: "loading",
+            iconUrl: "",
+            title: "Registering Node",
+            subtitle: "Submitting operator request to register node with SSV",
+            timed: false,
+            loading: true
+        }
+        addToast(toastContent)
         const activeNetwork = await detectActiveNetwork(walletProvider)
         if (activeNetwork !== 5) {
             await switchEthersNetwork(walletProvider, "0x5")
@@ -220,10 +247,37 @@ export default function useOperator() {
             await result?.wait(1)
             await addOperator({ address, nodeUrl })
             loadingRegisteredOperators.value = false
+            toastContent ={
+                id: toastContent.id,
+                type: "success",
+                iconUrl: "",
+                title: "Submission Successful",
+                subtitle: "Node registration is complete",
+                timed: true,
+                loading: false
+            }
+            updateToast(toastContent)
+            setTimeout(() => {
+                removeToast(toastContent.id)
+            }, 4000)
         } catch (err) {
             loadingRegisteredOperatorsError.value = true
             console.error(`There was an error in registerOperatorWithCasimir function: ${JSON.stringify(err)}`)
             loadingRegisteredOperators.value = false
+
+            toastContent ={
+                id: toastContent.id,
+                type: "failed",
+                iconUrl: "",
+                title: "Submission Failed",
+                subtitle: "Something went wrong, please try again later",
+                timed: true,
+                loading: false
+            }
+            updateToast(toastContent)
+            setTimeout(() => {
+                removeToast(toastContent.id)
+            }, 4000)
         }
     }
 
@@ -232,6 +286,7 @@ export default function useOperator() {
         nonregisteredEigenOperators: readonly(nonregisteredEigenOperators),
         registeredBaseOperators: readonly(registeredBaseOperators),
         registeredEigenOperators: readonly(registeredEigenOperators),
-        registerOperatorWithCasimir
+        loadingRegisteredOperators: readonly(loadingRegisteredOperators),
+        registerOperatorWithCasimir,
     }
 }
