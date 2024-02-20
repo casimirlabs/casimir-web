@@ -52,6 +52,17 @@ const addNodeToastID = ref(null as null | string)
 const initializeComposable = ref(false)
 
 export default function useOperator() {
+
+
+    watch(user, () =>{
+        if (!user.value) {
+            nonregisteredBaseOperators.value = []
+            nonregisteredEigenOperators.value = []
+            registeredBaseOperators.value = []
+            registeredEigenOperators.value = []
+        }
+    })
+
     async function addOperator({ address, nodeUrl }: { address: string, nodeUrl: string }) {
         try {
             const requestOptions = {
@@ -259,6 +270,7 @@ export default function useOperator() {
             updateToast(toastContent)
             setTimeout(() => {
                 removeToast(toastContent.id)
+                addNodeToastID.value = null
             }, 4000)
         } catch (err) {
             loadingRegisteredOperatorsError.value = true

@@ -52,7 +52,7 @@ watch(showUserIsAnOperator, () => {
   <div>
     <div
       class="w-full overflow-hidden "
-      :class="showUserIsAnOperator == undefined? 'h-[100px] pb-[24px]' : 'h-[0px] pb-[0px]' "
+      :class="showUserIsAnOperator == undefined? 'h-[120px] pb-[24px]' : 'h-[0px] pb-[0px]' "
       style="transition: all 0.5s ease-in;"
     >
       <transition

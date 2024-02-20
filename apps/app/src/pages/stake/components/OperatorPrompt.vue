@@ -11,7 +11,18 @@ const {
 
 <template>
   <div class="card w-full h-full shadow flex flex-col items-center justify-center gap-[12px]">
-    <small class="font-[500]">Are you an operator?</small>
+    <div class="flex items-center w-full justify-center gap-[12px]">
+      <small class="font-[500]">Are you an operator?</small>
+
+      <div class="tooltip_container flex items-center">
+        <InformationCircleIcon class="w-[20px] h-[20px]" />
+        <div class="tooltip w-[200px]">
+          Operators are individuals with SSV nodes that validate blocks
+        </div>
+      </div>
+    </div>
+
+
     <div class="flex items-center gap-[12px]">
       <button
         class="primary_btn"
@@ -19,13 +30,6 @@ const {
       >
         Yes
       </button>
-
-      <div class="mb-[3px] tooltip_container">
-        <InformationCircleIcon class="w-[20px] h-[20px]" />
-        <div class="tooltip w-[200px]">
-          Operators are individuals with SSV nodes that validate blocks. 
-        </div>
-      </div>
       
       <button
         class="secondary_btn"

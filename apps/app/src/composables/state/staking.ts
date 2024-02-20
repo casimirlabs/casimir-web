@@ -49,6 +49,13 @@ const withdrawAmount = ref(null as null | number)
 const acceptTerms = ref(false)
   
 export default function useStakingState() {
+
+    watch(user, () =>{
+        if (!user.value) {
+            userStakeDetails.value = []
+        }
+    })
+
     function listenForStakeWithdrawEvents() {
         if (!initializeComposable.value) return
         listeningForContractEvents.value = true
@@ -262,7 +269,7 @@ export default function useStakingState() {
             if (activeAddress !== stakingWalletAddress.value) {
                 stakingAmount.value = 0
                 const toastContent = {
-                    id: stakingToastId.value,
+                    id: stakingToastId.value as string,
                     type: "failed",
                     iconUrl: "",
                     title: "Can Not Stake",
@@ -273,6 +280,7 @@ export default function useStakingState() {
                 addToast(toastContent)
                 setTimeout(() => {
                     removeToast(toastContent.id)
+                    stakingToastId.value = null
                 }, 3000)
             }
         } else {
@@ -493,6 +501,7 @@ export default function useStakingState() {
 
             setTimeout(() => {
                 removeToast(toastContent.id)
+                stakingToastId.value = null
             }, 3000)
             return confirmation
         } catch (err: any) {
@@ -510,6 +519,7 @@ export default function useStakingState() {
                 addToast(toastContent)
                 setTimeout(() => {
                     removeToast(toastContent.id)
+                    stakingToastId.value = null
                 }, 3000)
             } else {
                 console.error(`There was an error in withdraw function: ${JSON.stringify(err)}`)
@@ -525,6 +535,7 @@ export default function useStakingState() {
                 addToast(toastContent)
                 setTimeout(() => {
                     removeToast(toastContent.id)
+                    stakingToastId.value = null
                 }, 3000)
                 return false
             }
