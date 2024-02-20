@@ -48,11 +48,19 @@ export default function useEthers() {
             const { ethereum } = window
             const isInstalled = installedWallets.value.includes(providerString)
             if (providerString === "CoinbaseWallet") {
-                if (!isInstalled) return window.open("https://www.coinbase.com/wallet/downloads", "_blank")
+                if (!isInstalled) {
+                    window.open("https://www.coinbase.com/wallet/downloads", "_blank")
+                    window.location.reload()
+                    return
+                }
                 if (!ethereum.providerMap && isInstalled) return alert("TrustWallet or another wallet may be interfering with CoinbaseWallet. Please disable other wallets and try again.")
                 if (ethereum?.providerMap) return ethereum.providerMap.get(providerString)
             } else if (providerString === "MetaMask") {
-                if (!isInstalled) return window.open("https://metamask.io/download.html", "_blank")
+                if (!isInstalled) {
+                    window.open("https://metamask.io/download.html", "_blank")
+                    window.location.reload()
+                    return
+                }
                 if (ethereum.providerMap && ethereum.providerMap.get("MetaMask")) {
                     return ethereum?.providerMap?.get(providerString) || undefined
                 } else if (ethereum.isMetaMask) {
@@ -61,6 +69,7 @@ export default function useEthers() {
             } else if (providerString === "BraveWallet") {
                 return getBraveWallet()
             } else if (providerString === "TrustWallet") {
+                console.log("got hereee")
                 return getTrustWallet()
             } else if (providerString === "OkxWallet") {
                 return getOkxWallet()
@@ -164,7 +173,7 @@ function getTrustWallet() {
         for (const provider of providers) {
             if (provider.isTrustWallet) return provider
         }
-    } else {
-        window.open("https://trustwallet.com/download", "_blank")
     }
+    window.open("https://trustwallet.com/download", "_blank")
+    return window.location.reload()
 }
