@@ -264,7 +264,7 @@ const filteredActiveNodes = computed(() => {
               leave-to="opacity-0 scale-95"
             >
               <DialogPanel
-                class="card w-full max-w-[360px] p-[24px]"
+                class="card shadow w-full max-w-[360px] p-[24px]"
               >
                 <RegisterNode />
               </DialogPanel>
@@ -311,11 +311,62 @@ const filteredActiveNodes = computed(() => {
               leave-to="opacity-0 scale-95"
             >
               <DialogPanel
-                class="card w-full max-w-[360px] p-[24px]"
+                class="card shadow w-full max-w-[360px] p-[24px]"
               >
-                <div>
-                  Node options
-                  <!-- TODO: add node info and buttons for deactivations and withdraws -->
+                <div class="flex flex-col justify-start gap-[12px]">
+                  <div class="text-left pb-[24px] border-b border-b-lightBorder dark:border-b-darkBorder">
+                    <h1 class="card_title">
+                      Inspect Node
+                    </h1>
+                    <p class="card_subtitle">
+                      Note: Withdraw Collateral and Node Deactivation coming soon! Thank you!
+                    </p>
+                  </div>
+                  <div class="flex w-full items-center justify-between">
+                    <small class="font-[300] whitespace-nowrap">Node ID</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class=" text-right">
+                        {{ selectedNode.id }}
+                      </small>
+                    </div>
+                  </div>
+
+                  <div class="flex w-full items-center justify-between">
+                    <small class="font-[300] whitespace-nowrap">Owner Address</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class=" text-right">
+                        {{ convertString(selectedNode.ownerAddress) }}
+                      </small>
+                    </div>
+                  </div>
+
+                  <div class="flex w-full items-center justify-between">
+                    <small class="font-[300] whitespace-nowrap">Collateral</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class=" text-right">
+                        {{ selectedNode.collateral }}
+                      </small>
+                      <small>ETH</small>
+                    </div>
+                  </div>
+
+                  <div class="flex w-full items-center justify-between">
+                    <small class="font-[300] whitespace-nowrap">Validators</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class=" text-right">
+                        {{ selectedNode.poolCount }}
+                      </small>
+                    </div>
+                  </div>
+
+                  <div class="flex w-full items-center justify-between">
+                    <small class="font-[300] whitespace-nowrap">Node URL</small>
+                    <div class="flex items-center gap-[6px]">
+                      <small class="text-right">
+                        {{ selectedNode.url }}
+                      </small>
+                    </div>
+                  </div>
                 </div>
               </DialogPanel>
             </TransitionChild>
