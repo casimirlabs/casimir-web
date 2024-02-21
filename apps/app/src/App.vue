@@ -1,44 +1,65 @@
-<script setup lang="ts">
-import HelloWorld from "./components/HelloWorld.vue"
+<script setup>
+import { onMounted, onUnmounted, watch } from "vue"
+import NavBar from "@/components/elements/NavBar.vue"
+import Toasts from "@/components/elements/Toasts.vue"
+import ConnectWalletModal from "@/components/elements/ConnectWalletModal.vue"
+import useConnectWalletModal from "@/composables/state/connectWalletModal"
+import useAuth from "@/composables/services/auth"
+import useContracts from "@/composables/services/contracts"
+import useUser from "@/composables/services/user"
+import useWalletConnectV2 from "@/composables/services/walletConnectV2"
+import Loading from "@/components/elements/Loading.vue"
+
+const { loadingSession } = useAuth()
+const { initializeContractsComposable } = useContracts()
+const { user } = useUser()
+const { initializeWalletConnect, uninitializeWalletConnect } = useWalletConnectV2()
+const { openConnectWalletModal } = useConnectWalletModal()
+
+watch(user, async (newUser, oldUser) => {
+    // On Sign in
+    if (newUser && !oldUser) {
+        await initializeContractsComposable()
+    } else if (newUser && oldUser) {
+        // On page refresh when signed in
+        await initializeContractsComposable()
+    }
+})
+
+onMounted(async () => {
+    await initializeWalletConnect()
+})
+
+onUnmounted(() => {
+    uninitializeWalletConnect()
+})
+
 </script>
 
 <template>
-  <div>
-    <a
-      href="https://vitejs.dev"
-      target="_blank"
+  <div class="app_container">
+    <NavBar class="z-[999]" />
+    <div
+      v-if="!loadingSession"
+      class="app_container_inner z-[888]"
     >
-      <img
-        src="/vite.svg"
-        class="logo"
-        alt="Vite logo"
-      >
-    </a>
-    <a
-      href="https://vuejs.org/"
-      target="_blank"
+      <div>
+        <router-view />
+      </div>
+      <Toasts />
+    </div>
+
+
+    <div
+      v-else
+      class="overflow-hidden opacity-50"
+      style="height: calc(100vh - 300px);"
     >
-      <img
-        src="./assets/vue.svg"
-        class="logo vue"
-        alt="Vue logo"
-      >
-    </a>
+      <Loading :show-text="false" />
+    </div>
+
+    <ConnectWalletModal v-show="openConnectWalletModal" />
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<style scoped></style>

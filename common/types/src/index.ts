@@ -40,6 +40,7 @@ import { User } from "./interfaces/User"
 import { UserAddedSuccess } from "./interfaces/UserAddedSuccess"
 import { UserAnalyticsData } from "./interfaces/UserAnalyticsData"
 import { UserAuthState } from "./interfaces/UserAuthState"
+import { UserContractEvents } from "./interfaces/UserContractEvents"
 import { UserWithAccountsAndOperators } from "./interfaces/UserWithAccountsAndOperators"
 import { Validator } from "./interfaces/Validator"
 
@@ -85,6 +86,7 @@ export type {
     UserAddedSuccess,
     UserAnalyticsData,
     UserAuthState,
+    UserContractEvents,
     UserWithAccountsAndOperators,
     Validator
 }

@@ -36,12 +36,11 @@ const { login, loginWithSecondaryAddress } = useAuth()
 const { requiredNetwork } = useEnvironment()
 const { browserProvidersList, getEthersAddressesWithBalances } = useEthers()
 const { convertString, formatEthersCasimir, trimAndLowercaseAddress } = useFormat()
-const { getEthersLedgerAddresses } = useLedger()
+// const { getEthersLedgerAddresses } = useLedger()
 const { getEthersTrezorAddresses } = useTrezor()
 const { user } = useUser()
 const { detectActiveNetwork, switchEthersNetwork } = useWallets()
-const { connectWalletConnect, walletConnectSelectedAccount } = useWalletConnect()
-// const { installedWallets, detectInstalledWalletProviders } = useWallets()
+const { connectWalletConnectV2 } = useWalletConnect()
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
@@ -168,7 +167,7 @@ async function selectProvider(provider: ProviderString): Promise<void> {
         } else if (browserProvidersList.includes(provider)) {
             walletProviderAddresses.value = await getEthersAddressesWithBalances(provider) as CryptoAddress[]
         } else if (provider === "Ledger") {
-            walletProviderAddresses.value = await getEthersLedgerAddresses() as CryptoAddress[]
+            // walletProviderAddresses.value = await getEthersLedgerAddresses() as CryptoAddress[]
         } else if (provider === "Trezor") {
             walletProviderAddresses.value = await getEthersTrezorAddresses() as CryptoAddress[]
         } else {
