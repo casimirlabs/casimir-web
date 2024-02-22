@@ -1,6 +1,5 @@
 import * as cdk from "aws-cdk-lib"
 import { Config } from "./providers/config"
-import { AnalyticsStack } from "./providers/analytics"
 import { BlogStack } from "./providers/blog"
 import { DocsStack } from "./providers/docs"
 import { DnsStack } from "./providers/dns"
@@ -18,7 +17,6 @@ const { hostedZone, certificate } = new DnsStack(app, config.getFullStackName("d
 const { vpc } = new NetworkStack(app, config.getFullStackName("network"), { env })
 
 if (stage !== "prod") {
-    new AnalyticsStack(app, config.getFullStackName("analytics"), { env })
     new BlogStack(app, config.getFullStackName("blog"), { env, certificate, hostedZone, vpc })
     new DocsStack(app, config.getFullStackName("docs"), { env, certificate, hostedZone })
     new LandingStack(app, config.getFullStackName("landing"), { env, certificate, hostedZone })
