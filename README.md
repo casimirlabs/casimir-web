@@ -17,7 +17,6 @@
     - [Environment Variables](#environment-variables)
   - [Apps](#apps)
     - [@casimir/app](#casimirapp)
-    - [@casimir/www](#casimirwww)
   - [Contracts](#contracts)
     - [@casimir/ethereum](#casimirethereum)
   - [Common](#common)
@@ -146,17 +145,6 @@ Run the main web app with an integrated development environment, including local
 
 See the [@casimir/app README.md](apps/app/README.md) for detailed documentation.
 
-#### @casimir/www
-
-Run the landing page app:
-
-  ```zsh
-  # From the root directory
-  npm run dev:www
-  ```
-
-See the [@casimir/www README.md](apps/www/README.md) for detailed documentation.
-
 ### Contracts
 
 The contracts packages provide the smart contracts for the project.
@@ -219,7 +207,6 @@ Code is organized into work directories (apps, common, contracts, infrastructure
 ├── apps/ (frontend apps)
 |   |── app/ (main web app)
 |   |–– docs/ (project documentation app)
-|   └── www/ (landing page app)
 ├── common/ (shared code)
 |   ├── data/ (data schemas and operational workflows)
 |   └── helpers/ (general utilities)
@@ -234,11 +221,10 @@ Code is organized into work directories (apps, common, contracts, infrastructure
 |   ├── migrations/ (database migration scripts)
 |   └── root/ (root install and dev scripts)
 ├── services/ (backend services)
-|   ├── blog/ (blog service)
 |   ├── functions/ (chainlink functions)
 |   ├── nodes/ (node configurations)
 |   ├── oracle/ (oracle service)
-|   ├── redirect/ (blog redirect service)
+|   ├── redirect/ (docs redirect service)
 |   └── users/ (users service)
 └── package.json (project-wide npm dependencies and scripts)
 ```

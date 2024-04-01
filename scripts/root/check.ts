@@ -35,16 +35,6 @@ void async function () {
         }
 
         try {
-            const go = await run("go version") as string
-            if (!go.includes("1.20")) {
-                throw new Error("🚩 Incompatible go version")
-            }
-        } catch (error) {
-            console.error(error.message)
-            throw new Error("🚩 Please install go v1.20.x (see https://github.com/consensusnetworks/casimir#prerequisites #3)")
-        }
-
-        try {
             const node = await run("node --version") as string
             const nodeLts = await run("source ~/.nvm/nvm.sh && nvm ls-remote --lts | grep 'Latest LTS' | tail -n 1 | awk '{print $2}'") as string
             if (!nodeLts.trim().includes(node.trim())) {

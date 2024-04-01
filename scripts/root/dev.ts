@@ -8,7 +8,7 @@ import { run, runSync } from "@casimir/shell"
  * You can override the following configuration environment variables:
  * - PROJECT: casimir
  * - STAGE: local | dev | sandbox | prod
- * - APP: app | www
+ * - APP: app | docs
  * - NETWORK: mainnet | testnet
  * - FORK: mainnet | testnet
  * - USE_SECRETS: true | false
@@ -24,15 +24,6 @@ import { run, runSync } from "@casimir/shell"
  */
 async function root() {
     const apps = {
-        www: {
-            contracts: false,
-            port: 3002,
-            services: {
-                blog: {
-                    port: 4001,
-                }
-            }
-        },
         app: {
             contracts: true,
             port: 3001,
@@ -54,12 +45,10 @@ async function root() {
         await loadCredentials()
         process.env.BIP39_SEED = process.env.BIP39_SEED || await getSecret("consensus-networks-bip39-seed") || ""
         process.env.CRYPTO_COMPARE_API_KEY = process.env.CRYPTO_COMPARE_API_KEY || await getSecret("casimir-crypto-compare-api-key") || ""
-        process.env.HACKMD_TOKEN = process.env.HACKMD_TOKEN || await getSecret("casimir-blog-hackmd-token") || ""
         process.env.WALLET_CONNECT_PROJECT_ID = process.env.WALLET_CONNECT_PROJECT_ID || await getSecret("casimir-wallet-connect-project-id") || ""
     } else {
         process.env.BIP39_SEED = process.env.BIP39_SEED || "inflict ball claim confirm cereal cost note dad mix donate traffic patient"
         process.env.CRYPTO_COMPARE_API_KEY = process.env.CRYPTO_COMPARE_API_KEY || ""
-        process.env.HACKMD_TOKEN = process.env.HACKMD_TOKEN || ""
         process.env.WALLET_CONNECT_PROJECT_ID = process.env.WALLET_CONNECT_PROJECT_ID || "8e6877b49198d7a9f9561b8712805726"
     }
 
@@ -119,7 +108,6 @@ async function root() {
     }
 
     process.env.PUBLIC_STAGE = process.env.STAGE
-    process.env.PUBLIC_BLOG_URL = process.env.BLOG_URL
     process.env.PUBLIC_USERS_URL = process.env.USERS_URL
     process.env.PUBLIC_ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL
     process.env.PUBLIC_ETHEREUM_WS_URL = process.env.ETHEREUM_WS_URL
