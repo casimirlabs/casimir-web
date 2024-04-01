@@ -17,7 +17,6 @@
     - [Environment Variables](#environment-variables)
   - [Apps](#apps)
     - [@casimir/app](#casimirapp)
-    - [@casimir/www](#casimirwww)
   - [Contracts](#contracts)
     - [@casimir/ethereum](#casimirethereum)
   - [Common](#common)
@@ -146,17 +145,6 @@ Run the main web app with an integrated development environment, including local
 
 See the [@casimir/app README.md](apps/app/README.md) for detailed documentation.
 
-#### @casimir/www
-
-Run the landing page app:
-
-  ```zsh
-  # From the root directory
-  npm run dev:www
-  ```
-
-See the [@casimir/www README.md](apps/www/README.md) for detailed documentation.
-
 ### Contracts
 
 The contracts packages provide the smart contracts for the project.
@@ -204,7 +192,6 @@ See the [@casimir/cdk README.md](infrastructure/cdk/README.md) for detailed docu
 
 The services packages provide the backend services for the project:
 
-- [@casimir/crawler](services/crawler): analytics crawler
 - [@casimir/functions](services/functions): Chainlink Functions source code
 - [@casimir/nodes]: relevant node configurations
 - [@casimir/oracle](services/oracle): DAO oracle
@@ -218,8 +205,8 @@ Code is organized into work directories (apps, common, contracts, infrastructure
 ├── .github/ (workflows and issue templates)
 |   └── workflows/ (gh actions workflows)
 ├── apps/ (frontend apps)
-|   |── www/ (landing page app)
-|   └── app/ (main web app)
+|   |── app/ (main web app)
+|   |–– docs/ (project documentation app)
 ├── common/ (shared code)
 |   ├── data/ (data schemas and operational workflows)
 |   └── helpers/ (general utilities)
@@ -228,10 +215,16 @@ Code is organized into work directories (apps, common, contracts, infrastructure
 ├── infrastructure/ (deployment resources)
 |   └── cdk/ (aws stacks)
 ├── scripts/ (devops and build scripts)
+|   ├── actions/ (github actions scripts)
+|   ├── cdk/ (cdk scripts)
 |   ├── ethereum/ (ethereum test and dev scripts)
+|   ├── migrations/ (database migration scripts)
 |   └── root/ (root install and dev scripts)
 ├── services/ (backend services)
+|   ├── functions/ (chainlink functions)
+|   ├── nodes/ (node configurations)
 |   ├── oracle/ (oracle service)
+|   ├── redirect/ (docs redirect service)
 |   └── users/ (users service)
 └── package.json (project-wide npm dependencies and scripts)
 ```

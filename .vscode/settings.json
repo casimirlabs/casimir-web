@@ -1,8 +1,6 @@
 {
     "css.lint.unknownAtRules": "ignore",
     "editor.codeActionsOnSave": {
-        
-
         "source.fixAll.eslint": "explicit"
     },
     "eslint.validate": [
@@ -20,6 +18,5 @@
     },
     "[json]": {
         "editor.defaultFormatter": "vscode.json-language-features"
-    },
-    "volar.inlayHints.eventArgumentInInlineHandlers": false,
+    }
 }

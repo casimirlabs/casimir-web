@@ -28,10 +28,8 @@ export class Config implements ProjectConfig {
         }
         this.rootDomain = `${this.stage === "prod" ? "" : `${this.stage}.`}casimir.co`
         this.subdomains = {
-            blog: "blog",
             docs: "docs",
             nodes: "nodes",
-            landing: "www",
             users: "users",
             web: "app",
             wildcard: "*"
