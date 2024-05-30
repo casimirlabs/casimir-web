@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from "vue"
 import ConnectWallet from "./components/ConnectedWallets.vue"
-import StakeCard from "./components/StakeCard.vue"
+import AVSDirectStake from "./components/AVSDirectStake.vue"
 import ActiveStakes from "./components/ActiveStakes.vue"
 import {
     TransitionRoot,
@@ -88,11 +88,11 @@ watch(showUserIsAnOperator, () => {
     </div>
 
     <div class="flex items-start gap-[24px] h-[510px] 900s:flex-wrap-reverse 900s:h-[1044px]">
-      <div class="w-9/12 h-full 900s:w-full 900s:h-[510px]">
-        <ConnectWallet />
+      <div class="w-9/12 h-full 900s:w-full 900s:h-[510px] min-w-[300px]">
+        <AVSDirectStake />
       </div>
-      <div class="w-3/12 h-full 900s:w-full 900s:h-[510px] min-w-[300px]">
-        <StakeCard />
+      <div class="w-3/12 h-full 900s:w-full 900s:h-[510px]">
+        <ConnectWallet />
       </div>
     </div>
     <div class="w-full mt-[24px] h-[540px]">

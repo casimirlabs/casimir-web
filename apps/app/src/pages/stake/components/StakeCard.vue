@@ -10,6 +10,9 @@ import { Switch } from "@headlessui/vue"
 import { 
     CheckIcon
 } from "@heroicons/vue/24/outline"
+import useAVSSelection from "@/composables/state/avsSelection"
+
+const { selectedAVS, selectAVS } = useAVSSelection()
 
 const { user } = useUser()
 const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
@@ -135,26 +138,35 @@ const handleStakingAction = async() => {
 </script>
 
 <template>
-  <div class="card w-full h-full shadow p-[24px] flex flex-col items-start justify-between gap-[24px] relative">
-    <div class="">
+  <div class="w-full flex flex-col items-start justify-between gap-[24px] relative">
+    <div class="text-left">
       <h1 class="card_title">
-        Quick Stake
+        AVS Direct Stake
       </h1>
       <p class="card_subtitle">
         Stake with any wallet and any amount
       </p>
     </div>
 
-    <div class="w-full">
+    <div class="w-full py-[12px] rounded-[6px] bg-lightBorder dark:bg-darkBorder">
+      <div class="mx-auto bg-white h-[50px] w-[50px] rounded-[999px] mb-[12px]">
+        <!-- TODO: Find a way to add the image dynmically based on the name -->
+      </div>
+      <h6>
+        {{ selectedAVS.AVSName }}
+      </h6>
+    </div>
+
+    <div class="w-full text-left">
       <label for="wallet_selection"><caption class="font-[500]">Wallet</caption></label>
       <div
         ref="wallet_selection"
-        class="input_container "
+        class="input_container outline-none"
         :class="showErrorBorder && !stakingWalletAddress? 'border border-red' : 'input_container_border'"
       > 
         <button 
           id="input_selector_button"
-          class="flex items-center justify-between gap-[8px] w-full h-full"
+          class="flex items-center justify-between gap-[8px] w-full h-full outline-none"
           :class="stakingWalletAddress ? 'text-black' : 'text-grey_4'"
           @click="openSelectWalletinput = !openSelectWalletinput"
         >
@@ -264,7 +276,7 @@ const handleStakingAction = async() => {
       </div>
     </div>
 
-    <div class="w-full">
+    <div class="w-full text-left">
       <label for="amount_selector"><caption class="font-[500]">Amount</caption></label>
       <div
         ref="amount_selector"
@@ -289,46 +301,22 @@ const handleStakingAction = async() => {
         </div>
       </div>
     </div>
-    <div class="flex items-center justify-between w-full">
-      <div class="flex items-center gap-[8px]">
-        <img
-          class="w-[16px] h-[16px]"
-          :src="isDark? '/eigen.svg' : '/eigen_black.svg'"
-          alt="EigenLayer Logo"
-        >
-        <caption class="font-[500] tracking-normal">
-          EigenLayer Restaking
-        </caption>
-      </div>
-      <div>
-        <Switch
-          :class="eigenLayerSelection ? 'bg-black dark:bg-white' : ' bg-gray_1 dark:bg-gray_6'"
-          class="switch_container"
-          @click="toggleEigenlayerSelection"
-        >
-          <span class="sr-only">EigenLayer Enabled</span>
-          <span
-            aria-hidden="true"
-            :class="eigenLayerSelection ? 'translate-x-4' : 'translate-x-0'"
-            class="switch_ball"
-          />
-        </Switch>
-      </div>
-    </div>
 
-    <div class="flex items-center justify-between w-full">
-      <small class="font-[500]">Fees</small>
-      <small class="font-[500]">{{ depositFees? depositFees : '- -' }}%</small>
-    </div>
+    <div class="w-full">
+      <div class="flex items-center justify-between w-full">
+        <small class="font-[500]">Fees</small>
+        <small class="font-[500]">{{ depositFees? depositFees : '- -' }}%</small>
+      </div>
 
-    <div
-      class="h-[24px] w-full"
-    >
-      <div 
-        :class="errorMessage? 'opacity-100' : 'opacity-0'"
-        style="transition: all 0.6s ease-in;"
+      <div
+        class="h-[24px] w-full mt-[6px]"
       >
-        <small class="text-red font-[500]">{{ errorMessage }}</small>
+        <div 
+          :class="errorMessage? 'opacity-100' : 'opacity-0'"
+          style="transition: all 0.6s ease-in;"
+        >
+          <small class="text-red font-[500]">{{ errorMessage }}</small>
+        </div>
       </div>
     </div>
 
