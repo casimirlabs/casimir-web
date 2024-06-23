@@ -12,7 +12,6 @@ const selectedAVS = ref({})
   
 export default function useAVSSelection() {
     const selectAVS = (value: any) => {
-        console.log(value)
         selectedAVS.value = value
     }
       

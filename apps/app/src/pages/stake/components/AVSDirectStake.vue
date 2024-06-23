@@ -21,40 +21,39 @@ import {
 // import useUser from "@/composables/services/user"
 import useAVSSelection from "@/composables/state/avsSelection"
 import { useStorage } from "@vueuse/core"
-import StakeCard from "./StakeCard.vue"
+import AVSCard from "./AVSCard.vue"
 
 const { selectedAVS, selectAVS } = useAVSSelection()
 // const { user } = useUser()
 // const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
 // TODO: @Chris change value attribute if neeeded once we get the payload and know what the values are called
 const columns = [
-    { title: "AVS", show: ref(true), value: "AVSName" }, 
-    { title: "Token", show: ref(true), value: "AVSToken" }, 
-    { title: "ETH Restaked", show: ref(true), value: "TotalETHRestaked" }, 
-    { title: "Eigen Restaked", show: ref(true), value: "TotalEigenRestaked" }, 
+    { title: "AVS", show: ref(true), value: "AVSName" },
+    { title: "ETH Restaked", show: ref(true), value: "TotalETHRestaked" },
+    { title: "Eigen Restaked", show: ref(false), value: "TotalEigenRestaked" },
     { title: "Stakers", show: ref(true), value: "TotalStakersAmount" },
-    { title: "Operator", show: ref(true), value: "OperatorName" },  // we might need a image and name here?
+    { title: "Operators", show: ref(true), value: "NumberOfOperators" },  // we might need a image and name here?
     { title: "Restake Concentration", show: ref(false), value: "OperatorRestakeConcentration" },
-    { title: "Status", show: ref(true), value: "OperatorStatus" },  // active or inactive
+    { title: "Status", show: ref(true), value: "AVSStatus" },  // active or inactive
 ]
 
 const tableHeaders = ref(columns)
 useStorage("chosenAVSDirectStakeTableHeaders", tableHeaders.value)
 
 
-const toggleColumnShowItem = (item) =>{
+const toggleColumnShowItem = (item) => {
     const index = columns.findIndex((col) => col === item)
 
     if (index > -1) {
         columns[index].show = ref(!item.show.value)
         tableHeaders.value = columns
     } else return
-    
+
     tableHeaders.value = columns.map((col) => ({
         title: col.title,
         show: ref(col.show.value),
         value: col.value
-    }))  
+    }))
 }
 
 
@@ -64,7 +63,7 @@ const openColumnsConfigurations = ref(false)
 const closeColumnsConfigurationsModal = () => {
     openColumnsConfigurations.value = false
 }
-const  openColumnsConfigurationsModal = () => {
+const openColumnsConfigurationsModal = () => {
     openColumnsConfigurations.value = true
 }
 
@@ -73,7 +72,7 @@ const stakeWithAVSModal = ref(false)
 const closeStakeWithAVSModal = () => {
     stakeWithAVSModal.value = false
 }
-const  openStakeWithAVSModal = () => {
+const openStakeWithAVSModal = () => {
     stakeWithAVSModal.value = true
 }
 
@@ -90,12 +89,12 @@ const goToStartPage = () => {
 }
 const goToPreviousPage = () => {
     if (currentPage.value > 1) {
-        currentPage.value --
+        currentPage.value--
     }
 }
 const goToNextPage = () => {
     if (currentPage.value < pagesAvailable.value) {
-        currentPage.value ++
+        currentPage.value++
     }
 }
 const goToLastPage = () => {
@@ -111,12 +110,12 @@ const findSwitchHeaderValue = (switchItem) => {
 }
 
 const searchInputValue = ref(null)
-watch(searchInputValue, () =>{
+watch(searchInputValue, () => {
     console.log("Filter through the AVS Here")
 })
 
 const AVSData = ref(null)
-const filteredAVS = computed(() =>{
+const filteredAVS = computed(() => {
     const data = sortAVSData()
     return data?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
 })
@@ -142,8 +141,8 @@ const sortAVSData = () => {
 }
 
 const compareValues = (key, order = "ascending") => {
-    return function(a, b) {
-        // eslint-disable-next-line no-prototype-builtins
+    return function (a, b) {
+    // eslint-disable-next-line no-prototype-builtins
         if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
             // Property doesn't exist on either object
             return 0
@@ -218,11 +217,11 @@ onMounted(() => {
       <div class="flex items-center gap-[8px] min-w-[210px]">
         <div>
           <h1 class="card_title">
-            AVS Direct Stake
+            AVS
           </h1>
-        
+
           <p class="card_subtitle">
-            Stake directly to an AVS of your choice
+            Browse and effortlessly stake to your chosen AVS selection
           </p>
         </div>
       </div>
@@ -231,7 +230,7 @@ onMounted(() => {
           class="w-full rounded-[6px] flex items-center 
           justify-between input_container_border min-w-[300px] gap-[12px] p-0 shadow-md"
         >
-          <input 
+          <input
             v-model="searchInputValue"
             type="text"
             placeholder="Search"
@@ -273,9 +272,7 @@ onMounted(() => {
               </th>
             </tr>
           </thead>
-          <tbody
-            class="w-full"
-          >
+          <tbody class="w-full">
             <tr
               v-for="AVS in filteredAVS"
               :key="AVS"
@@ -294,10 +291,8 @@ onMounted(() => {
                   class="px-[8px] flex items-center gap-[12px]"
                 >
                 </div> -->
-  
-                <div 
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
+
+                <div class="px-[8px] flex items-center gap-[12px]">
                   <small>
                     {{ AVS[item.value] }}
                   </small>
@@ -310,9 +305,7 @@ onMounted(() => {
     </div>
 
 
-    <div
-      class="flex items-center justify-between gap-[15px] w-full px-[8px]"
-    >
+    <div class="flex items-center justify-between gap-[15px] w-full px-[8px]">
       <div class="text-[#71717a] text-[12px] font-[400]">
         Page {{ currentPage }} of {{ pagesAvailable }}
       </div>
@@ -373,9 +366,7 @@ onMounted(() => {
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
-          <div
-            class="flex min-h-full items-center justify-center p-4 text-center"
-          >
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
             <TransitionChild
               as="template"
               enter="duration-300 ease-out"
@@ -385,15 +376,14 @@ onMounted(() => {
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel
-                class="card w-full max-w-[360px] p-[24px]"
-              >
+              <DialogPanel class="card w-full max-w-[360px] p-[24px]">
                 <div class="text-left pb-[24px] border-b border-b-lightBorder dark:border-b-darkBorder">
                   <h1 class="card_title">
                     Configure Columns
                   </h1>
                   <p class="card_subtitle">
-                    Change the layout of the transaction list and display only the columns and information that is most important to you.
+                    Change the layout of the transaction list and display only the columns and information that is most
+                    important to you.
                   </p>
                 </div>
 
@@ -405,13 +395,13 @@ onMounted(() => {
                   >
                     {{ item.title }}
 
-                    
+
                     <div class="flex items-center gap-[12px] text-[12px]">
                       <div class="flex items-center gap-[6px]">
                         <button
                           class="secondary_btn hover:outline outline-[0.5px] outline-lightBorder dark:outline-darkBorder"
                           style="gap: 0px; box-shadow: none; font-weight: 800; padding: 4px 6px;"
-                          :style="sortedItem === item.value && sortedDirection === 'ascending'? 'background: black; color: white;' : ''"
+                          :style="sortedItem === item.value && sortedDirection === 'ascending' ? 'background: black; color: white;' : ''"
                           @click="sortedItem = item.value, sortedDirection = 'ascending'"
                         >
                           A
@@ -422,7 +412,7 @@ onMounted(() => {
                         <button
                           class="secondary_btn hover:outline outline-[0.5px] outline-lightBorder dark:outline-darkBorder"
                           style="gap: 0px; box-shadow: none; font-weight: 800; padding: 4px 6px;"
-                          :style="sortedItem === item.value && sortedDirection === 'descending'? 'background: black; color: white;' : ''"
+                          :style="sortedItem === item.value && sortedDirection === 'descending' ? 'background: black; color: white;' : ''"
                           @click="sortedItem = item.value, sortedDirection = 'descending'"
                         >
                           a
@@ -432,7 +422,7 @@ onMounted(() => {
                         </button>
                       </div>
                       <Switch
-                        :class="findSwitchHeaderValue(item)? 'bg-black dark:bg-white' : ' bg-gray_1 dark:bg-gray_6'"
+                        :class="findSwitchHeaderValue(item) ? 'bg-black dark:bg-white' : ' bg-gray_1 dark:bg-gray_6'"
                         class="switch_container"
                         @click="toggleColumnShowItem(item)"
                       >
@@ -477,9 +467,7 @@ onMounted(() => {
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
-          <div
-            class="flex min-h-full items-center justify-center p-4 text-center"
-          >
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
             <TransitionChild
               as="template"
               enter="duration-300 ease-out"
@@ -491,9 +479,9 @@ onMounted(() => {
             >
               <DialogPanel
                 v-show="selectedAVS !== null"
-                class="card w-full max-w-[360px] p-[24px]"
+                class="card w-full min-w-[320px] max-w-[450px] p-[24px] mx-auto"
               >
-                <StakeCard />
+                <AVSCard :close-stake-with-a-v-s-modal="closeStakeWithAVSModal" />
               </DialogPanel>
             </TransitionChild>
           </div>
@@ -503,5 +491,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
-</style>
+<style></style>
