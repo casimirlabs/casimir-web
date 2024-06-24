@@ -28,15 +28,19 @@ const { fetchAllAVSs } = useAVS()
 const { selectedAVS, selectAVS } = useAVSSelection()
 // const { user } = useUser()
 // const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
-// TODO: @Chris change value attribute if neeeded once we get the payload and know what the values are called
+// TODO: @Chris change value attribute if needed once we get the payload and know what the values are called
 const columns = [
-    { title: "AVS", show: ref(true), value: "AVSName" },
-    { title: "ETH Restaked", show: ref(true), value: "TotalETHRestaked" },
-    { title: "Eigen Restaked", show: ref(false), value: "TotalEigenRestaked" },
-    { title: "Stakers", show: ref(true), value: "TotalStakersAmount" },
-    { title: "Operators", show: ref(true), value: "NumberOfOperators" },  // we might need a image and name here?
-    { title: "Restake Concentration", show: ref(false), value: "OperatorRestakeConcentration" },
-    { title: "Status", show: ref(true), value: "AVSStatus" },  // active or inactive
+    { title: "AVS", show: ref(true), value: "metadataName" },
+    { title: "Address", show: ref(true), value: "address" },
+    { title: "Logo", show: ref(false), value: "metadataLogo" },
+    { title: "Description", show: ref(false), value: "metadataDescription" },
+    { title: "Site", show: ref(false), value: "metadataWebsite" },
+    { title: "Twitter", show: ref(false), value: "metadataX" },
+    { title: "Total Operators", show: ref(true), value: "totalOperators" },
+    { title: "Total Stakers", show: ref(true), value: "totalStakers" },
+    { title: "ETH Restaked", show: ref(true), value: "tvl" },
+    { title: "Beacon Ether", show: ref(false), value: "tvlBeaconChain" },
+    { title: "LSTs", show: ref(false), value: "tvlRestaking" },
 ]
 
 const tableHeaders = ref(columns)
@@ -166,46 +170,6 @@ const compareValues = (key, order = "ascending") => {
         )
     }
 }
-// MOCK DATA GEN HERE
-const getRandomValue = (column) => {
-    switch (column.value) {
-    case "AVSName":
-        return `AVS ${Math.floor(Math.random() * 100)}`
-    case "AVSToken":
-        return `Token ${Math.floor(Math.random() * 1000)}`
-    case "TotalETHRestaked":
-        return (Math.random() * 100).toFixed(2)
-    case "TotalEigenRestaked":
-        return (Math.random() * 50).toFixed(2)
-    case "TotalStakersAmount":
-        return Math.floor(Math.random() * 1000)
-    case "OperatorName":
-        return `Operator ${Math.floor(Math.random() * 100)}`
-    case "OperatorRestakeConcentration":
-        return (Math.random() * 100).toFixed(2) + "%"
-    case "OperatorStatus":
-        return Math.random() > 0.5 ? "active" : "inactive"
-    default:
-        return "N/A"
-    }
-}
-
-// Method to generate an array of mocked items
-const generateMockedItems = (columns, numItems = 10) => {
-    const items = []
-
-    for (let i = 0; i < numItems; i++) {
-        const item = {}
-
-        columns.forEach(column => {
-            item[column.value] = getRandomValue(column)
-        })
-
-        items.push(item)
-    }
-
-    return items
-}
 
 /**
  * Notes on AVS Data
@@ -220,28 +184,21 @@ const generateMockedItems = (columns, numItems = 10) => {
  * Possibly look at Cardano / Omni for batch transactions UX
  */
 onMounted(async () => {
-    AVSData.value = generateMockedItems(columns, 100)
-    // const allAVSs = await fetchAllAVSs()
-    // // const allAVSs = []
-    // const transformedAVSData = allAVSs.map(avs => {
-    //     return {
-    //         AVSName: avs.metadataName,
-    //         // AVSToken: avs.token,
-    //         tvl: avs.tvl,
-    //         tvlBeaconChain: avs.tvl.tvlBeaconChain,
-    //         tvlRestaking: avs.tvl.tvlRestaking,
-    //         tvlStrategies: Object.values(avs.tvl.tvlStrategies).reduce((acc, val) => acc + val, 0),
-    //         tvlStrategiesEth: Object.values(avs.tvl.tvlStrategiesEth).reduce((acc, val) => acc + val, 0),
-    //         // shares: ethers.utils.formatEther(ethers.BigNumber.from(avs.shares.reduce((acc, val) => acc + parseFloat(val.shares), 0))),
-    //         // TotalETHRestaked: Object.values(avs.tvl.tvlStrategiesEth).reduce((acc, val) => acc + val, 0),
-    //         // TotalEigenRestaked: avs.tvl.tvlStrategies.Eigen,
-    //         // TotalStakersAmount: avs.totalStakers,
-    //         // OperatorName: avs.name,
-    //         // OperatorRestakeConcentration: "N/A",
-    //         // OperatorStatus: "active"
-    //     }
-    // })
-    // console.log("transformedAVSData", transformedAVSData)
+    AVSData.value = (await fetchAllAVSs()).map(avs => {
+        return {
+            metadataName: avs.metadataName,
+            address: avs.address,
+            tvl: avs.tvl.tvl,
+            tvlBeaconChain: avs.tvl.tvlBeaconChain,
+            tvlRestaking: avs.tvl.tvlRestaking,
+            metadataLogo: avs.metadataLogo,
+            metadataDescription: avs.metadataDescription,
+            metadataWebsite: avs.metadataWebsite,
+            metadataX: avs.metadataX,
+            totalOperators: avs.totalOperators,
+            totalStakers: avs.totalStakers
+        }
+    })
 })
 
 </script>
@@ -320,7 +277,19 @@ onMounted(async () => {
                 :key="index"
                 class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
               >
-                <!-- TODO: style out each table item -->
+                <!-- const columns = [
+    { title: "AVS", show: ref(true), value: "metadataName" },
+    { title: "Address", show: ref(true), value: "address" },
+    { title: "Logo", show: ref(false), value: "metadataLogo" },
+    { title: "Description", show: ref(false), value: "metadataDescription" },
+    { title: "Site", show: ref(false), value: "metadataWebsite" },
+    { title: "Twitter", show: ref(false), value: "metadataX" },
+    { title: "Total Operators", show: ref(true), value: "totalOperators" },
+    { title: "Total Stakers", show: ref(true), value: "totalStakers" },
+    { title: "ETH Restaked", show: ref(true), value: "tvl" },
+    { title: "Beacon Ether", show: ref(false), value: "tvlBeaconChain" },
+    { title: "LSTs", show: ref(false), value: "tvlRestaking" },
+] -->
                 <!--  <div
                   v-if="item.value === 'address'"
                   class="px-[8px] flex items-center gap-[12px]"
@@ -525,5 +494,3 @@ onMounted(async () => {
     </TransitionRoot>
   </div>
 </template>
-
-<style></style>
