@@ -57,8 +57,6 @@ const handleCreatePool = () => {
     }
 }
 
-// const tabs = ref([])
-
 const selectedTabIndex = ref(0)
 
 
