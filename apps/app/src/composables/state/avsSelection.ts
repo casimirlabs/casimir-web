@@ -7,8 +7,14 @@ import {
 
 const initializeComposable = ref(false)
 
-// TODO: create AVS type here
-const selectedAVS = ref({})
+// TODO: @ccali11 - create AVS type here
+interface AVS {
+    address: string,
+    name: string,
+    description: string,
+    image: string
+}
+const selectedAVS = ref<AVS>()
   
 export default function useAVSSelection() {
     const selectAVS = (value: any) => {

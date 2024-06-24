@@ -22,6 +22,8 @@ import {
 import useAVSSelection from "@/composables/state/avsSelection"
 import { useStorage } from "@vueuse/core"
 import AVSCard from "./AVSCard.vue"
+import { useAVS } from "@/composables/services/avs"
+const { fetchAllAVSs } = useAVS()
 
 const { selectedAVS, selectAVS } = useAVSSelection()
 // const { user } = useUser()
@@ -205,8 +207,41 @@ const generateMockedItems = (columns, numItems = 10) => {
     return items
 }
 
-onMounted(() => {
+/**
+ * Notes on AVS Data
+ * # of stakers
+ * # of operators
+ * Start Eigen Restake as hidden for now
+ * Remove (hide) token
+ * Keep status (or uptime)
+ * * Build your AVS Staking Portfolio (default divided equally, but can adjust as desired) *
+ * * Design pop up with CTA of "Add to Portfolio" *
+ * * Replace Connect Wallet Component with "Stake Portfolio" action *
+ * Possibly look at Cardano / Omni for batch transactions UX
+ */
+onMounted(async () => {
     AVSData.value = generateMockedItems(columns, 100)
+    // const allAVSs = await fetchAllAVSs()
+    // // const allAVSs = []
+    // const transformedAVSData = allAVSs.map(avs => {
+    //     return {
+    //         AVSName: avs.metadataName,
+    //         // AVSToken: avs.token,
+    //         tvl: avs.tvl,
+    //         tvlBeaconChain: avs.tvl.tvlBeaconChain,
+    //         tvlRestaking: avs.tvl.tvlRestaking,
+    //         tvlStrategies: Object.values(avs.tvl.tvlStrategies).reduce((acc, val) => acc + val, 0),
+    //         tvlStrategiesEth: Object.values(avs.tvl.tvlStrategiesEth).reduce((acc, val) => acc + val, 0),
+    //         // shares: ethers.utils.formatEther(ethers.BigNumber.from(avs.shares.reduce((acc, val) => acc + parseFloat(val.shares), 0))),
+    //         // TotalETHRestaked: Object.values(avs.tvl.tvlStrategiesEth).reduce((acc, val) => acc + val, 0),
+    //         // TotalEigenRestaked: avs.tvl.tvlStrategies.Eigen,
+    //         // TotalStakersAmount: avs.totalStakers,
+    //         // OperatorName: avs.name,
+    //         // OperatorRestakeConcentration: "N/A",
+    //         // OperatorStatus: "active"
+    //     }
+    // })
+    // console.log("transformedAVSData", transformedAVSData)
 })
 
 </script>
