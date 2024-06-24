@@ -4,6 +4,7 @@ import { AddAccountOptions } from "./interfaces/AddAccountOptions"
 import { AnalyticsData } from "./interfaces/AnalyticsData"
 import { ApiResponse } from "./interfaces/ApiResponse"
 import { Article } from "./interfaces/Article"
+import { AVS } from "./interfaces/AVS"
 import { BalanceSnapshot } from "./interfaces/BalanceSnapshot"
 import { BreakdownAmount } from "./interfaces/BreakdownAmount"
 import { BreakdownString } from "./interfaces/BreakdownString"
@@ -51,6 +52,7 @@ export type {
     AddAccountOptions,
     AnalyticsData,
     Article,
+    AVS,
     BalanceSnapshot,
     BreakdownAmount,
     BreakdownString,

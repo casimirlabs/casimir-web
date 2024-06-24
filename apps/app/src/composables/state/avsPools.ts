@@ -1,3 +1,4 @@
+import { AVS } from "@casimir/types"
 import { 
     onMounted,
     onUnmounted,
@@ -10,7 +11,7 @@ const initializeComposable = ref(false)
 // TODO: create AVS pool type here
 const avsPools = ref([] as {
     poolName: string, 
-    avsPool: { avName: string, allocatedPercentage: number }[] 
+    avsPool: { avs: AVS, allocatedPercentage: number }[] 
     }[]
 ) 
 // Will include pool name (that the user creates), and addeed avs's and their allocatedpercentage
@@ -26,7 +27,7 @@ export default function useAvsPools() {
     }
 
     // add pool with an avs selected at once
-    const addPoolWithAVS = (name: string, avs: { avName: string, allocatedPercentage: number }) => {
+    const addPoolWithAVS = (name: string, avs: { avs: AVS, allocatedPercentage: number }) => {
         avsPools.value.push({
             poolName: name,
             avsPool: [avs]
@@ -40,19 +41,19 @@ export default function useAvsPools() {
         }
     }
 
-    const addAVSToPool = (index: number, avs: { avName: string, allocatedPercentage: number }) => {
+    const addAVSToPool = (index: number, avs: { avs: AVS, allocatedPercentage: number }) => {
         if (index >= 0 && index < avsPools.value.length) {
             avsPools.value[index].avsPool.push(avs)
         }
     }
 
-    const removeAVSFromPool = (index: number, avs: { avName: string, allocatedPercentage: number }) => {
+    const removeAVSFromPool = (index: number, avs: { avs: AVS, allocatedPercentage: number }) => {
         if (index >= 0 && index < avsPools.value.length) {
             const pool = avsPools.value[index]
     
             // Find the index of the AVS to remove within the avsPool array
             const avsIndex = pool.avsPool.findIndex(item =>
-                item.avName === avs.avName && item.allocatedPercentage === avs.allocatedPercentage
+                item.avs.address === avs.avs.address
             )
     
             

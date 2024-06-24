@@ -1,3 +1,4 @@
+import { AVS } from "@casimir/types"
 import { 
     onMounted,
     onUnmounted,
@@ -7,13 +8,6 @@ import {
 
 const initializeComposable = ref(false)
 
-// TODO: @ccali11 - create AVS type here
-interface AVS {
-    address: string,
-    name: string,
-    description: string,
-    image: string
-}
 const selectedAVS = ref<AVS>()
   
 export default function useAVSSelection() {

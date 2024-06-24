@@ -15,6 +15,7 @@ import {
     Dialog,
     DialogPanel,
 } from "@headlessui/vue"
+import useFormat from "@/composables/services/format"
 
 const {
     avsPools,
@@ -24,6 +25,8 @@ const {
 } = useAvsPools()
 
 const openAddPool = ref(false)
+
+const { convertString } = useFormat()
 
 const closeAddPoolModal = () => {
     openAddPool.value = false
@@ -73,13 +76,10 @@ const updatePercentage = (index, newValue) => {
     // Code to adjust other sliders proportionally can be added here
 }
 
-// watch(avsPools.value[selectedTabIndex].avsPool, (newValue) => {
-//     const totalPercentage = newValue.reduce((sum, avs) => sum + avs.allocatedPercentage, 0)
-//     if (totalPercentage > 100) {
-//         // Adjust the percentages to ensure the total is 100%
-//         // This part is optional and can be customized based on your needs
-//     }
-// }, { deep: true })
+
+const handleImageError = (event) => {
+    event.target.src = "/casimir.svg"
+}
 
 </script>
 
@@ -120,7 +120,7 @@ const updatePercentage = (index, newValue) => {
       </div>
     </div>
     <div class="flex justify-between items-center mb-[24px]">
-      <TabGroup>
+      <TabGroup v-show="avsPools.length > 0">
         <TabList class="tabs_container">
           <Tab
             v-for="(pool, index) in avsPools"
@@ -143,28 +143,29 @@ const updatePercentage = (index, newValue) => {
     >
       <div
         v-for="(avs, index) in avsPools[selectedTabIndex].avsPool "
-        :key="avs"
+        :key="index"
         class="p-[12px] bg-gray_4 dark:bg-gray_6 rounded-[6px] w-full min-w-[300px] max-w-[350px]"
       >
         <div class="text-left pb-[24px] flex items-start justify-between">
           <div class="flex items-start gap-[12px]">
             <div class="w-[32px] h-[32px] bg-gray_5 rounded-[999px] overflow-hidden">
               <img
-                src=""
+                :src="avs.avs.metadataLogo"
                 alt=""
-                class="w-full h-full"
+                class="w-[90%] h-[90%] mx-auto my-auto"
+                @error="handleImageError"
               >
             </div>
             <div>
               <h1 class="card_title">
-                AVS Name Here
+                {{ avs.avs.metadataName }}
               </h1>
               <div
                 class="tooltip_container flex items-center gap-[6px]"
                 @click="copyTextToClipboard('address here')"
               >
                 <p class="card_subtitle">
-                  asd...123 
+                  {{ convertString(avs.avs.address) }}
                 </p>
                 <div>
                   <DocumentDuplicateIcon class="w-[12px] h-[12px]" />
@@ -180,21 +181,21 @@ const updatePercentage = (index, newValue) => {
           </button>
         </div>
         <div class="text-[12px] tracking-normal mb-[12px] h-[50px] truncate">
-          description here
+          {{ avs.avs.metadataDescription }}
         </div>
 
         <div class="w-full">
           <div class="flex items-center w-full justify-between">
             <small class="font-[500]">Total Operators</small>
-            <small class="font-[500] opacity-50"># here</small>
+            <small class="font-[500] opacity-50">{{ avs.avs.totalOperators }}</small>
           </div>
           <div class="flex items-center w-full justify-between mt-[12px]">
             <small class="font-[500]">Total Stakers</small>
-            <small class="font-[500] opacity-50"># here</small>
+            <small class="font-[500] opacity-50">{{ avs.avs.totalStakers }}</small>
           </div>
           <div class="flex items-center w-full justify-between mt-[12px]">
             <small class="font-[500]">Total ETH Staked</small>
-            <small class="font-[500] opacity-50"># here ETH</small>
+            <small class="font-[500] opacity-50">{{ avs.avs.tvl }} ETH</small>
           </div>
         </div>
 

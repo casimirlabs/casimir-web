@@ -19,6 +19,9 @@ import {
 import useToasts from "@/composables/state/toasts"
 import useFormat from "@/composables/services/format"
 import useAvsPools from "@/composables/state/avsPools"
+import useAVSSelection from "@/composables/state/avsSelection"
+
+const { selectedAVS } = useAVSSelection()
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
@@ -89,7 +92,7 @@ const selectedPool = ref(null)
 const handleCreatePool = () => {
     if (newPoolName.value !== "") {
         props.closeStakeWithAVSModal()
-        addPoolWithAVS(newPoolName, { avName: "AVS Name here", allocatedPercentage: 0.00 })
+        addPoolWithAVS(newPoolName, { avs: selectedAVS.value, allocatedPercentage: 0.00 })
     } else {
         showErrorBorder.value = true
     }
@@ -99,7 +102,7 @@ const handleAddToPool = () => {
     const selectedPoolIndex = avsPools.value.findIndex(item => item.poolName === selectedPool.value.poolName)
     if (selectedPoolIndex !== -1) {
         props.closeStakeWithAVSModal()
-        addAVSToPool(selectedPoolIndex, { avName: "AVS Name here", allocatedPercentage: 0.00 })
+        addAVSToPool(selectedPoolIndex, { avs: selectedAVS.value, allocatedPercentage: 0.00 })
     } else {
         showErrorBorder.value = true
     }
@@ -122,27 +125,21 @@ const handleAddToPool = () => {
           class="w-[12px] h-[12px] bg-green rounded-[999px] absolute top-[2px] left-[2px]"
         />
         <div class="tooltip whitespace-nowrap w-[200px]">
-          Status here
+          Active
         </div>
       </div>
       <div class="flex items-center gap-[12px]">
         <a
-          href=""
+          :href="selectedAVS.metadataX"
           target="_blank"
-          class="outline-none"
+          class="outline-none  p-[5px]"
         >
-          <div class="w-[12px] h-[12px]">
-            <img
-              src="/x-logo.png"
-              alt=""
-              class="w-full h-full"
-            >
-          </div>
+          <small class="font-[600] text-[10.22px]">Twitter</small>
         </a>
         <a
-          href=""
+          :href="selectedAVS.metadataWebsite"
           target="_blank"
-          class="text-blue-500 outline-none"
+          class="text-blue-500 dark:text-blue-200 outline-none"
         >
           <GlobeAltIcon class="w-[16px] h-[16px]" />
         </a>
@@ -150,23 +147,23 @@ const handleAddToPool = () => {
     </div>
 
     <div class="flex items-center gap-[12px]">
-      <div class="w-[50px] h-[50px] bg-gray-300 rounded-[999px] overflow-hidden">
+      <div class="w-[50px] h-[50px] bg-transparent rounded-[999px] overflow-hidden">
         <img
-          src=""
+          :src="selectedAVS.metadataLogo"
           class="w-full h-full"
           alt=""
         > 
       </div>
       <div>
         <h1 class="card_title">
-          AVS Name Here
+          {{ selectedAVS.metadataName }}
         </h1>
         <div
           class="tooltip_container flex items-center gap-[6px]"
           @click="copyTextToClipboard('address here')"
         >
           <p class="card_subtitle">
-            asd...123 
+            {{ convertString(selectedAVS.address) }}
           </p>
           <div>
             <DocumentDuplicateIcon class="w-[12px] h-[12px]" />
@@ -178,22 +175,24 @@ const handleAddToPool = () => {
       </div>
     </div>
 
-    <div class="text-[12px] tracking-normal">
-      description here
+    <!-- {{ selectedAVS }} -->
+
+    <div class="text-[12px] tracking-normal text-left">
+      {{ selectedAVS.metadataDescription }}
     </div>
 
     <div class="w-full">
       <div class="flex items-center w-full justify-between">
         <small class="font-[500]">Total Operators</small>
-        <small class="font-[500]"># here</small>
+        <small class="font-[500]">{{ selectedAVS.totalOperators }}</small>
       </div>
       <div class="flex items-center w-full justify-between mt-[12px]">
         <small class="font-[500]">Total Stakers</small>
-        <small class="font-[500]"># here</small>
+        <small class="font-[500]">{{ selectedAVS.totalStakers }}</small>
       </div>
       <div class="flex items-center w-full justify-between mt-[12px]">
         <small class="font-[500]">Total ETH Staked</small>
-        <small class="font-[500]"># here ETH</small>
+        <small class="font-[500]">{{ selectedAVS.tvl }} ETH</small>
       </div>
     </div>
 
