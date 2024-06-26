@@ -1,5 +1,8 @@
 <script setup>
-import { ref } from "vue"
+import { 
+    ref,
+    onMounted
+} from "vue"
 import { 
     TabGroup,
     TabList,
@@ -108,6 +111,12 @@ const handleAddToPool = () => {
     }
 }
 
+
+onMounted (() => {
+    if (avsPools.value.length > 0) {
+        selectedPool.value = avsPools.value[0]
+    }
+})
 
 
 

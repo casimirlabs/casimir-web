@@ -150,7 +150,7 @@ const handleImageError = (event) => {
               <img
                 :src="avs.avs.metadataLogo"
                 alt=""
-                class="w-[90%] h-[90%] mx-auto my-auto"
+                class="w-full h-full mx-auto my-auto"
                 @error="handleImageError"
               >
             </div>
@@ -178,7 +178,7 @@ const handleImageError = (event) => {
             <XMarkIcon class="w-[16px] h-[16px]" />
           </button>
         </div>
-        <div class="text-[12px] tracking-normal mb-[12px] h-[50px] truncate">
+        <div class="text-[12px] tracking-normal mb-[12px] truncate">
           {{ avs.avs.metadataDescription }}
         </div>
 
@@ -196,7 +196,6 @@ const handleImageError = (event) => {
             <small class="font-[500] opacity-50">{{ avs.avs.tvl }} ETH</small>
           </div>
         </div>
-
 
         <div class="mt-[24px] mb-[6px]">
           <small>Allocated Stake Percentage</small>

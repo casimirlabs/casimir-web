@@ -447,7 +447,7 @@ onMounted(async () => {
       </Dialog>
     </TransitionRoot>
 
-    <!-- Stake Modal-->
+    <!-- AVS Card Modal-->
     <TransitionRoot
       appear
       :show="stakeWithAVSModal && selectedAVS !== null"
