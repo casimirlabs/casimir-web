@@ -53,6 +53,7 @@ export default function useAvsPools() {
         if (index >= 0 && index < avsPools.value.length) {
             avsPools.value.splice(index, 1)
         }
+        console.log("avsPools.value :>> ", avsPools.value)
     }
 
     const distributeAllocationPercentages = (index: number) => {
@@ -138,6 +139,7 @@ export default function useAvsPools() {
         addPoolWithAVS,
         removePool,
         addAVSToPool,
-        removeAVSFromPool
+        removeAVSFromPool,
+        distributeAllocationPercentages
     }
 }

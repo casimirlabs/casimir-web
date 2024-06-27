@@ -290,10 +290,13 @@ onMounted(async () => {
     { title: "Beacon Ether", show: ref(false), value: "tvlBeaconChain" },
     { title: "LSTs", show: ref(false), value: "tvlRestaking" },
 ] -->
-                <!--  <div
-                  v-if="item.value === 'address'"
+                <!-- <div
+                  v-if="item.value === 'metadataName'"
                   class="px-[8px] flex items-center gap-[12px]"
                 >
+                  <div class="w-[20px] h-[20px] rounded-[999px]">
+                    <img :src="" alt="">
+                  </div>
                 </div> -->
 
                 <div class="px-[8px] flex items-center gap-[12px]">

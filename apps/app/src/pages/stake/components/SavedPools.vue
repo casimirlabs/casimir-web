@@ -1,9 +1,12 @@
 <script setup>
 import { 
     XMarkIcon,
-    DocumentDuplicateIcon
+    DocumentDuplicateIcon,
+    ArrowPathRoundedSquareIcon,
+    ChevronUpDownIcon,
+    CheckIcon
 } from "@heroicons/vue/24/outline"
-import { ref, watch } from "vue"
+import { ref, watch, computed } from "vue"
 import useAvsPools from "@/composables/state/avsPools"
 import StakeCard from "./StakeCard.vue"
 import { 
@@ -14,6 +17,11 @@ import {
     TransitionChild,
     Dialog,
     DialogPanel,
+    Listbox,
+    ListboxLabel,
+    ListboxButton,
+    ListboxOptions,
+    ListboxOption,
 } from "@headlessui/vue"
 import useFormat from "@/composables/services/format"
 
@@ -21,7 +29,8 @@ const {
     avsPools,
     addPool,
     removeAVSFromPool,
-    removePool
+    removePool,
+    distributeAllocationPercentages
 } = useAvsPools()
 
 const openAddPool = ref(false)
@@ -59,21 +68,91 @@ const handleCreatePool = () => {
 
 const selectedTabIndex = ref(0)
 
+const totalAllocatedPercentages = computed(() => {
+    const totalAllocatedPercentage = avsPools.value[selectedTabIndex.value].avsPool.reduce((acc, avs) => {
+        return acc + parseFloat(avs.allocatedPercentage)
+    }, 0)
 
+    return totalAllocatedPercentage
+})
+
+const overAllocated = computed(() => {
+    // check if all the avs's total is over 100% if so return by how much, else return 0
+    if (totalAllocatedPercentages.value > 100) {
+        return totalAllocatedPercentages.value - 100
+    } else {
+        return 0
+    }
+})
+
+const underAllocated = computed(() => {
+    // check if all the avs's total is under 100% if so return by how much, else return 0
+    if (totalAllocatedPercentages.value < 100) {
+        return 100 - totalAllocatedPercentages.value
+    } else {
+        return 0
+    }
+})
 const updatePercentage = (index, newValue) => {
     // Remove non-numeric characters except for the dot and handle empty input
     let valueStr = newValue.toString().replace(/[^0-9.]/g, "")
+    // if input is empty
     if (valueStr === "") {
         avsPools.value[selectedTabIndex].avsPool[index].allocatedPercentage = 0.00
-        return
     }
-
-    avsPools.value[selectedTabIndex].avsPool[index].allocatedPercentage = valueStr
-
-    // Optional: Adjust other sliders proportionally if needed
-    // Code to adjust other sliders proportionally can be added here
+    avsPools.value[selectedTabIndex.value].avsPool[index].allocatedPercentage = valueStr
 }
 
+const selectedAVSForReallocation = ref({})
+
+watch(selectedAVSForReallocation, () =>{
+    if (overAllocated.value > 0) {
+        // remove the percentage from the selected avs
+        avsPools.value[selectedTabIndex.value].avsPool.forEach((avs) => {
+            if (avs.avs.address === selectedAVSForReallocation.value.avs.address) {
+                const subtraction = (parseFloat(avs.allocatedPercentage) - overAllocated.value).toFixed(2)
+                avs.allocatedPercentage = subtraction < 0? 0 : subtraction
+            }
+        })
+    } else if (underAllocated.value > 0) {
+        // add the percentage to the selected avs
+        avsPools.value[selectedTabIndex.value].avsPool.forEach((avs) => {
+            if (avs.avs.address === selectedAVSForReallocation.value.avs.address) {
+                avs.allocatedPercentage = (parseFloat(avs.allocatedPercentage) + underAllocated.value).toFixed(2)
+            }
+        })
+    }
+
+    selectedAVSForReallocation.value = {}
+})
+
+const distributeEvenly = () => {
+    const add = underAllocated.value
+    const subtract = overAllocated.value
+    const percentageToDistribute = add || subtract
+    const totalAVSs = avsPools.value[selectedTabIndex.value].avsPool.length
+    const evenlyDistributedPercentage = percentageToDistribute < 0.01 ? 0.01 : Math.floor((percentageToDistribute / totalAVSs) * 100) / 100
+    
+    avsPools.value[selectedTabIndex.value].avsPool.forEach((avs, index) => {
+        if (add > 0) {
+            if (evenlyDistributedPercentage === 0.01) {
+                if (index === 0) avs.allocatedPercentage = (parseFloat(avs.allocatedPercentage) + evenlyDistributedPercentage).toFixed(2)
+            } else {
+                avs.allocatedPercentage = (parseFloat(avs.allocatedPercentage) + evenlyDistributedPercentage).toFixed(2)
+            }
+        } else if (subtract > 0) {
+            if (evenlyDistributedPercentage === 0.01) {
+                if (index === 0) avs.allocatedPercentage = (parseFloat(avs.allocatedPercentage) - evenlyDistributedPercentage).toFixed(2)
+            } else {
+                avs.allocatedPercentage = (parseFloat(avs.allocatedPercentage) - evenlyDistributedPercentage).toFixed(2)
+            }
+        }
+    })
+
+    const totalAllocated = avsPools.value[selectedTabIndex.value].avsPool.reduce((acc, avs) => acc + parseFloat(avs.allocatedPercentage), 0)
+    const remainder = Math.floor(Math.abs(100 - totalAllocated) * 100) / 100
+    avsPools.value[selectedTabIndex.value].avsPool[0].allocatedPercentage = (parseFloat(avsPools.value[selectedTabIndex.value].avsPool[0].allocatedPercentage) + parseFloat(remainder)).toFixed(2)
+}
 
 const handleImageError = (event) => {
     event.target.src = "/casimir.svg"
@@ -84,7 +163,7 @@ const handleImageError = (event) => {
 <template>
   <div
     class="card w-full shadow p-[24px] "
-    style="transition: all ease 0.3s;"
+    style="transition: all ease 0.3s; overflow: visible"
   >
     <div class="flex items-start justify-between gap-[12px]">
       <div class="text-left pb-[24px]">
@@ -117,8 +196,11 @@ const handleImageError = (event) => {
         </button>
       </div>
     </div>
-    <div class="flex justify-between items-center mb-[24px]">
-      <TabGroup v-show="avsPools.length > 0">
+    <div
+      v-show="avsPools.length > 0"
+      class="flex justify-between items-center mb-[24px]"
+    >
+      <TabGroup>
         <TabList class="tabs_container">
           <Tab
             v-for="(pool, index) in avsPools"
@@ -134,9 +216,24 @@ const handleImageError = (event) => {
           </Tab>
         </TabList>
       </TabGroup>
+
+      <button
+        class="secondary_btn tooltip_container"
+        @click="distributeAllocationPercentages(selectedTabIndex), mostUpdatedAt = []"
+      >
+        <ArrowPathRoundedSquareIcon class="w-[20px] h-[20px]" />
+        <div
+          class="tooltip w-[200px] shadow-none"
+          style="right: 5px;"
+        >
+          <small> Reset all allocations to the selected pool</small>
+        </div>
+      </button>
     </div>
+
+    
     <div
-      v-if="avsPools.length > 0"
+      v-if="avsPools.length > 0 && avsPools[selectedTabIndex].avsPool"
       class="w-full flex flex-wrap items-center gap-[24px]"
     >
       <div
@@ -209,7 +306,7 @@ const handleImageError = (event) => {
               class="w-[50px] text-left outline-none bg-transparent"
               @input="updatePercentage(index, $event.target.value)"
             >
-            <small>%</small>
+            <span class="text-[10.22px]">%</span>
           </div>
           <div class="w-full">
             <input
@@ -227,7 +324,100 @@ const handleImageError = (event) => {
       </div>
     </div>
 
+    <div class="mt-[12px]">
+      <div>
+        <div
+          v-if="overAllocated > 0"
+          class="text-red"
+        >
+          Your allocation is at {{ (overAllocated + 100).toFixed(2) }}%, would you like to remove the {{ overAllocated.toFixed(2) }}% from a specific AVS or remove it evenly across the entire pool?
+        </div>
+        
+        <div
+          v-if="underAllocated > 0"
+          class="text-orange-400"
+        >
+          Your allocation is at {{ (100 - underAllocated).toFixed(2) }}%, would you like to add the {{ underAllocated.toFixed(2) }}% to a specific AVS or evenly across the entire pool?
+        </div>
+      </div>
+      <div
+        v-if="underAllocated > 0 || overAllocated > 0"
+        class="flex items-center gap-[12px] my-[12px]"
+      >
+        <div>
+          <Listbox v-model="selectedAVSForReallocation">
+            <div class="relative">
+              <ListboxButton
+                class="relative w-[300px] input_container input_container_border flex items-center gap-[12px]"
+                style="margin-top: 0px;"
+              >
+                <small class="whitespace-nowrap">{{ overAllocated > 0 ? 'Remove from' : underAllocated > 0 ? 'Add to' : '' }}</small>
+                <div
+                  class="pointer-events-none inset-y-0 right-0 flex items-center pr-2"
+                >
+                  <ChevronUpDownIcon
+                    class="h-5 w-5 text-gray-400"
+                    aria-hidden="true"
+                  />
+                </div>
+              </ListboxButton>
 
+              <transition
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+              >
+                <ListboxOptions
+                  class="absolute top-0 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-darkBg py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                >
+                  <div>
+                    <ListboxOption
+                      v-for="avs in avsPools[selectedTabIndex].avsPool"
+                      v-slot="{ active, selected }"
+                      :key="avs.avs.address"
+                      :value="avs"
+                      as="template"
+                    >
+                      <li
+                        :class="[
+                          active ? 'bg-gray_3 dark:bg-black/70 text-black dark:text-white' : 'text-gray-900 dark:text-white',
+                          'relative cursor-default select-none py-2 pl-10 pr-4',
+                        ]"
+                      >
+                        <span
+                          :class="[
+                            selected ? 'font-medium' : 'font-normal',
+                            'block truncate',
+                          ]"
+                        >
+                          {{ avs.avs.metadataName }}
+                        </span>
+                        <span
+                          v-if="selected"
+                          class="absolute inset-y-0 left-0 flex items-center pl-3 text-black dark:text-white"
+                        >
+                          <CheckIcon
+                            class="h-5 w-5"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </li>
+                    </ListboxOption>
+                  </div>
+                </ListboxOptions>
+              </transition>
+            </div>
+          </Listbox>
+        </div>
+        <button
+          class="secondary_btn"
+          style="padding: 8px 12px; box-shadow: none;"
+          @click="distributeEvenly"
+        >
+          <small>Distribute Evenly</small>
+        </button>
+      </div>
+    </div>
     <div
       v-if="avsPools.length >= 0 && avsPools[selectedTabIndex]?.avsPool.length === 0"
       class="w-full flex flex-col items-center justify-center bg-gray_4 dark:bg-gray_2 p-[12px] rounded-[6px]"
