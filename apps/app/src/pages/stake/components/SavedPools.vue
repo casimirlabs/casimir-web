@@ -6,7 +6,7 @@ import {
     ChevronUpDownIcon,
     CheckIcon
 } from "@heroicons/vue/24/outline"
-import { ref, watch, computed } from "vue"
+import { ref, watch, computed, onMounted } from "vue"
 import useAvsPools from "@/composables/state/avsPools"
 import StakeCard from "./StakeCard.vue"
 import { 
@@ -66,10 +66,10 @@ const handleCreatePool = () => {
     }
 }
 
-const selectedTabIndex = ref(0)
+const selectedTabIndex = ref(-1)
 
 const totalAllocatedPercentages = computed(() => {
-    const totalAllocatedPercentage = avsPools.value[selectedTabIndex.value].avsPool.reduce((acc, avs) => {
+    const totalAllocatedPercentage = avsPools.value[selectedTabIndex.value]?.avsPool?.reduce((acc, avs) => {
         return acc + parseFloat(avs.allocatedPercentage)
     }, 0)
 
@@ -157,6 +157,10 @@ const distributeEvenly = () => {
 const handleImageError = (event) => {
     event.target.src = "/casimir.svg"
 }
+
+onMounted(() => {
+    selectedTabIndex.value = 0
+})
 
 </script>
 
@@ -325,7 +329,7 @@ const handleImageError = (event) => {
     </div>
 
     <div class="mt-[12px]">
-      <div>
+      <div v-if="avsPools[selectedTabIndex].avsPool.length > 0">
         <div
           v-if="overAllocated > 0"
           class="text-red"

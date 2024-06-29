@@ -7,7 +7,8 @@ import {
     ChevronDoubleRightIcon,
     MagnifyingGlassIcon,
     ArrowLongUpIcon,
-    ArrowLongDownIcon
+    ArrowLongDownIcon,
+    ArrowTopRightOnSquareIcon
 } from "@heroicons/vue/24/outline"
 import { ref, computed, onMounted, watch } from "vue"
 import {
@@ -17,7 +18,7 @@ import {
     DialogPanel,
     Switch
 } from "@headlessui/vue"
-// import useFormat from "@/composables/services/format"
+import useFormat from "@/composables/services/format"
 // import useUser from "@/composables/services/user"
 import useAVSSelection from "@/composables/state/avsSelection"
 import { useStorage } from "@vueuse/core"
@@ -27,13 +28,12 @@ const { fetchAllAVSs } = useAVS()
 
 const { selectedAVS, selectAVS } = useAVSSelection()
 // const { user } = useUser()
-// const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
-// TODO: @Chris change value attribute if needed once we get the payload and know what the values are called
+const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
 const columns = [
     { title: "AVS", show: ref(true), value: "metadataName" },
     { title: "Address", show: ref(true), value: "address" },
     { title: "Logo", show: ref(false), value: "metadataLogo" },
-    { title: "Description", show: ref(false), value: "metadataDescription" },
+    // { title: "Description", show: ref(false), value: "metadataDescription" },
     { title: "Site", show: ref(false), value: "metadataWebsite" },
     { title: "Twitter", show: ref(false), value: "metadataX" },
     { title: "Total Operators", show: ref(true), value: "totalOperators" },
@@ -201,6 +201,10 @@ onMounted(async () => {
     })
 })
 
+const handleImageError = (event) => {
+    event.target.src = "/casimir.svg"
+}
+
 </script>
 
 <template>
@@ -249,7 +253,7 @@ onMounted(async () => {
     </div>
     <div class="w-full h-full">
       <div class="w-full border border-lightBorder dark:border-darkBorder rounded-[6px] overflow-x-auto">
-        <table class="w-full overflow-x-auto">
+        <table class="w-full overflow-x-auto overflow-y-visible">
           <thead>
             <tr class="border-b border-b-lightBorder dark:border-b-darkBorder">
               <th
@@ -277,29 +281,87 @@ onMounted(async () => {
                 :key="index"
                 class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
               >
-                <!-- const columns = [
-    { title: "AVS", show: ref(true), value: "metadataName" },
-    { title: "Address", show: ref(true), value: "address" },
-    { title: "Logo", show: ref(false), value: "metadataLogo" },
-    { title: "Description", show: ref(false), value: "metadataDescription" },
-    { title: "Site", show: ref(false), value: "metadataWebsite" },
-    { title: "Twitter", show: ref(false), value: "metadataX" },
-    { title: "Total Operators", show: ref(true), value: "totalOperators" },
-    { title: "Total Stakers", show: ref(true), value: "totalStakers" },
+                <!-- 
     { title: "ETH Restaked", show: ref(true), value: "tvl" },
     { title: "Beacon Ether", show: ref(false), value: "tvlBeaconChain" },
     { title: "LSTs", show: ref(false), value: "tvlRestaking" },
 ] -->
-                <!-- <div
+                <div
                   v-if="item.value === 'metadataName'"
                   class="px-[8px] flex items-center gap-[12px]"
                 >
                   <div class="w-[20px] h-[20px] rounded-[999px]">
-                    <img :src="" alt="">
+                    <img
+                      :src="AVS.metadataLogo"
+                      :alt="`AVS Logo: ${AVS.metadataLogo}`"
+                      class="w-full h-full"
+                      @error="handleImageError"
+                    >
                   </div>
-                </div> -->
+                  <small class="w-[150px] truncate">{{ AVS.metadataName }}</small>
+                </div>
 
-                <div class="px-[8px] flex items-center gap-[12px]">
+                <div
+                  v-else-if="item.value === 'address'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <small>{{ convertString(AVS.address ) }}</small>
+                </div>
+
+                <div
+                  v-else-if="item.value === 'metadataLogo'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <div class="w-[20px] h-[20px] rounded-[999px]">
+                    <img
+                      :src="AVS.metadataLogo"
+                      :alt="`AVS Logo: ${AVS.metadataLogo}`"
+                      class="w-full h-full"
+                      @error="handleImageError"
+                    >
+                  </div>
+                </div>
+
+                <div
+                  v-else-if="item.value === 'metadataWebsite'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <small>
+                    {{ AVS.metadataWebsite }}
+                  </small>
+                </div>
+
+                <div
+                  v-else-if="item.value === 'tvl'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <small>
+                    {{ AVS.tvl }} ETH
+                  </small>
+                </div>
+
+                <div
+                  v-else-if="item.value === 'tvlBeaconChain'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <small>
+                    {{ AVS.tvlBeaconChain }} ETH
+                  </small>
+                </div>
+
+                <div
+                  v-else-if="item.value === 'tvlRestaking'"
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
+                  <small>
+                    {{ AVS.tvlRestaking }} ETH
+                  </small>
+                </div>
+
+                <div
+                  v-else
+                  class="px-[8px] flex items-center gap-[12px]"
+                >
                   <small>
                     {{ AVS[item.value] }}
                   </small>

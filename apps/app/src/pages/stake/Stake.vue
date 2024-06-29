@@ -69,7 +69,7 @@ watch(showUserIsAnOperator, () => {
     </div>
 
 
-    <div
+    <!-- <div
       class="w-full overflow-hidden"
       :style="showOperatorView === true? 
         'height: 540px; padding-bottom: 24px;' :
@@ -86,7 +86,7 @@ watch(showUserIsAnOperator, () => {
           <OperatorView />
         </div>
       </transition>
-    </div>
+    </div> -->
 
     <div class="flex items-start gap-[24px] h-[530px] 900s:flex-wrap-reverse 900s:h-[1044px]">
       <div class="w-9/12 h-full 900s:w-full 900s:h-[530px] min-w-[300px]">

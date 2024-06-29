@@ -281,7 +281,8 @@ body caption{
   justify-content: center;
   align-items: center;
   border-radius: 8px;
-  background: #F4F4F5;
+  @apply bg-white dark:bg-darkBg;
+  /* background: #F4F4F5; */
 }
 
 .tab_item {
@@ -298,6 +299,7 @@ body caption{
   font-weight: 500;
   line-height: normal;
   letter-spacing: 0.3px;
+  @apply text-black/60 dark:text-white/60;
 }
 
 .tab_item_selected {
@@ -308,7 +310,6 @@ body caption{
   align-items: center;
   gap: 10px;
   border-radius: 8px;;
-  background: #FFF;
   box-shadow: 1px 3px 4px 0px rgba(0, 0, 0, 0.13);
   font-family: Inter;
   font-size: 14px;
@@ -316,6 +317,7 @@ body caption{
   font-weight: 500;
   line-height: normal;
   letter-spacing: 0.3px;
+  @apply text-black dark:text-white;
 }
 
 .slidecontainer {
