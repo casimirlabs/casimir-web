@@ -292,7 +292,6 @@ body caption{
   align-items: center;
   gap: 10px;
   border-radius: 8px;
-  color: #C3C3CB;
   font-family: Inter;
   font-size: 14px;
   font-style: normal;
@@ -303,7 +302,6 @@ body caption{
 }
 
 .tab_item_selected {
-  color: #09090B;
   display: flex;
   padding: 4px 12px;
   justify-content: center;
