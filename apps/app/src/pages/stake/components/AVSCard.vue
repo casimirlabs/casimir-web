@@ -1,27 +1,13 @@
 <script setup>
-import { 
-    ref,
-    onMounted
-} from "vue"
-import { 
-    TabGroup,
-    TabList,
-    Tab,
-    Listbox,
-    ListboxButton,
-    ListboxOptions,
-    ListboxOption,
-} from "@headlessui/vue"
+import { ref } from "vue"
 import { 
     CheckIcon,
     GlobeAltIcon,
     DocumentDuplicateIcon,
     ChevronUpDownIcon
 } from "@heroicons/vue/24/outline"
-
 import useToasts from "@/composables/state/toasts"
 import useFormat from "@/composables/services/format"
-import useAvsPools from "@/composables/state/avsPools"
 import useAVSSelection from "@/composables/state/avsSelection"
 
 const { selectedAVS } = useAVSSelection()
@@ -34,27 +20,14 @@ const props = defineProps({
     },
 })
 
-const tabs = ref([
-    "Add to Pool",
-    "Creat New Pool"
-])
+const { addToast } = useToasts()
+const { convertString } = useFormat()
 
 const selectedTabIndex = ref(0)
-
-const {
-    avsPools,
-    addPoolWithAVS,
-    addAVSToPool
-} = useAvsPools()
-
-
-const {
-    addToast,
-} = useToasts()
-
-const { 
-    convertString,
-} = useFormat()
+async function handleRestake() {
+    // TODO: implement restake
+    props.closeStakeWithAVSModal()
+}
 
 function copyTextToClipboard(text) {
     navigator.clipboard.writeText(text)
@@ -87,40 +60,6 @@ function copyTextToClipboard(text) {
             }, 1000)
         })
 }
-
-const newPoolName = ref("")
-const showErrorBorder = ref(false)
-const selectedPool = ref(null)
-
-const handleCreatePool = () => {
-    if (newPoolName.value !== "") {
-        props.closeStakeWithAVSModal()
-        addPoolWithAVS(newPoolName, { avs: selectedAVS.value, allocatedPercentage: 0.00 })
-    } else {
-        showErrorBorder.value = true
-    }
-}
-
-const handleAddToPool = () => {
-    const selectedPoolIndex = avsPools.value.findIndex(item => item.poolName === selectedPool.value.poolName)
-    if (selectedPoolIndex !== -1) {
-        props.closeStakeWithAVSModal()
-        addAVSToPool(selectedPoolIndex, { avs: selectedAVS.value, allocatedPercentage: 0.00 })
-    } else {
-        showErrorBorder.value = true
-    }
-}
-
-
-onMounted (() => {
-    if (avsPools.value.length > 0) {
-        selectedPool.value = avsPools.value[0]
-    }
-})
-
-
-
-
 </script>
 
 <template>
@@ -205,133 +144,15 @@ onMounted (() => {
       </div>
     </div>
 
-    <div class="flex justify-between items-center">
-      <TabGroup>
-        <TabList class="tabs_container">
-          <Tab
-            v-for="(tab, index) in tabs"
-            :key="index"
-            class="outline-none"
-            :class="index === selectedTabIndex? 'tab_item_selected' : 'tab_item'"
-            @click="selectedTabIndex = index"
-          >
-            <small class="font-[600] opacity-80">{{ tab }}</small>
-          </Tab>
-        </TabList>
-      </TabGroup>
-    </div>
-
     <div
       v-if="selectedTabIndex === 0"
       class="w-full"
     >
-      <div class="w-full text-left">
-        <label for="amount_selector"><caption class="font-[500] whitespace-nowrap">Select Pool</caption></label>
-        
-        <Listbox v-model="selectedPool">
-          <div class="relative mt-1">
-            <ListboxButton
-              class="relative w-full input_container"
-              :class="showErrorBorder? 'border border-red' : 'input_container_border'"
-            >
-              <small class="block truncate">{{ selectedPool? selectedPool.poolName : 'Select Pool' }}</small>
-              <span
-                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
-              >
-                <ChevronUpDownIcon
-                  class="h-5 w-5 text-gray-400"
-                  aria-hidden="true"
-                />
-              </span>
-            </ListboxButton>
-
-            <transition
-              leave-active-class="transition duration-100 ease-in"
-              leave-from-class="opacity-100"
-              leave-to-class="opacity-0"
-            >
-              <ListboxOptions
-                class="absolute bottom-0 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-darkBg py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-              >
-                <div
-                  v-if="avsPools.length === 0"
-                  class="px-[12px]"
-                >
-                  <small>No pools exists</small>
-                </div>
-                <div v-else>
-                  <ListboxOption
-                    v-for="avs in avsPools"
-                    v-slot="{ active, selected }"
-                    :key="avs.poolName"
-                    :value="avs"
-                    as="template"
-                  >
-                    <li
-                      :class="[
-                        active ? 'bg-gray_3 dark:bg-black/70 text-black dark:text-white' : 'text-gray-900 dark:text-white',
-                        'relative cursor-default select-none py-2 pl-10 pr-4',
-                      ]"
-                    >
-                      <span
-                        :class="[
-                          selected ? 'font-medium' : 'font-normal',
-                          'block truncate',
-                        ]"
-                      >{{ avs.poolName }}</span>
-                      <span
-                        v-if="selected"
-                        class="absolute inset-y-0 left-0 flex items-center pl-3 text-black dark:text-white"
-                      >
-                        <CheckIcon
-                          class="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </li>
-                  </ListboxOption>
-                </div>
-              </ListboxOptions>
-            </transition>
-          </div>
-        </Listbox>
-      </div>
       <button
         class="primary_btn w-full mt-[24px]"
-        @click="handleAddToPool"
+        @click="handleRestake"
       >
-        <small>Add to Pool</small>
-      </button>
-    </div>
-
-    <div
-      v-else-if="selectedTabIndex === 1"
-      class="w-full"
-    >
-      <div class="w-full text-left">
-        <label for="amount_selector"><caption class="font-[500] whitespace-nowrap">Pool Name</caption></label>
-        <div
-          ref="amount_selector"
-          class="input_container"
-          :class="showErrorBorder? 'border border-red' : 'input_container_border'"
-        > 
-          <div class="flex items-center gap-[8px] w-full">
-            <input
-              id="amount_input"
-              v-model="newPoolName"
-              type="text"
-              pattern="\d+(\.\d{1,18})?"
-              placeholder="Pool Name"
-              class="outline-none bg-transparent w-full text-[14.22px]"
-            >
-          </div>
-        </div>
-      </div>
-      <button
-        class="primary_btn w-full mt-[24px]"
-        @click="handleCreatePool"
-      >
-        <small>Create Pool</small>
+        <small>Restake to AVS</small>
       </button>
     </div>
   </div>
