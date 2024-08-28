@@ -26,7 +26,21 @@ import {
 } from "@heroicons/vue/24/outline"
 import useToasts from "@/composables/state/toasts"
 import useAvsPools from "@/composables/state/avsPools"
+import useAVSSelection from "@/composables/state/avsSelection"
 
+const { selectedAVS, selectAVS } = useAVSSelection()
+
+// eslint-disable-next-line no-undef
+const props = defineProps({
+    closeStakeWithAVSModal: {
+        type: Function,
+        required: true,
+    },
+    updateModalStep: {
+        type: Function,
+        required: true,
+    },
+})
 
 const {
     stakingWalletAddress,
@@ -130,48 +144,67 @@ const handleStakingAction = async() => {
 </script>
 
 <template>
-  <div class="">
-    <div class="text-left pb-[24px]">
-      <h1 class="card_title">
-        Stake
-      </h1>
-      <p class="card_subtitle">
-        Select your AVS pool to stake to
-      </p>
-    </div>
+  <div>
+    <nav
+      class="breadcrumb mb-[24px] text-sm"
+      aria-label="Breadcrumb"
+    >
+      <ol class="flex items-center">
+        <li class="flex items-center">
+          <button 
+            class="text-blue-500 hover:text-blue-700 font-semibold flex items-center gap-2" 
+            @click="updateModalStep(1)"
+          >
+            <img 
+              :src="selectedAVS.metadataLogo" 
+              alt="AVS Logo" 
+              class="w-6 h-6 rounded-full"
+            >
+            {{ selectedAVS.metadataName }}
+          </button>
+          <span class="mx-2">/</span>
+        </li>
+        <li
+          aria-current="page"
+          class="font-semibold text-gray-500"
+        >
+          Stake
+        </li>
+      </ol>
+    </nav>
 
-    <div class="w-full text-left">
-      <label for="amount_selector"><caption class="font-[500] whitespace-nowrap">Wallet</caption></label>
-        
+    <div class="w-full text-left">        
       <Listbox v-model="selectedWallet">
         <div class="relative mt-1">
           <ListboxButton
             class="relative w-full input_container"
             :class="showErrorBorder? 'border border-red' : 'input_container_border'"
           >
-            <div
-              v-if="stakingWalletAddress"
-              class="tooltip_container"
-            >
-              <small class="dark:text-white">
-                {{ convertString(stakingWalletAddress) }} 
-                ({{ formatEthersCasimir(formatDecimalString(user?.accounts[user?.accounts.findIndex(item => item.address == stakingWalletAddress)].balance)) }}) ETH
-              </small>
-              <div class="tooltip whitespace-nowrap">
-                <small>{{ user?.accounts[user?.accounts.findIndex(item => item.address == stakingWalletAddress)].balance }}</small>
+            <div class="p-[4px]">
+              <div
+                v-if="stakingWalletAddress"
+                class="tooltip_container"
+              >
+                <small class="dark:text-white">
+                  {{ convertString(stakingWalletAddress) }} 
+                  ({{ formatEthersCasimir(formatDecimalString(user?.accounts[user?.accounts.findIndex(item => item.address == stakingWalletAddress)].balance)) }}) ETH
+                </small>
+                <div class="tooltip whitespace-nowrap">
+                  <small>{{ user?.accounts[user?.accounts.findIndex(item => item.address == stakingWalletAddress)].balance }}</small>
+                </div>
               </div>
+              <div v-else>
+                <small>Select Wallet</small>
+              </div>
+              <span
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
+              >
+                <ChevronUpDownIcon
+                  class="h-5 w-5 text-gray-400"
+                  aria-hidden="true"
+                />
+              </span>
             </div>
-            <div v-else>
-              <small>Select Wallet</small>
-            </div>
-            <span
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
-            >
-              <ChevronUpDownIcon
-                class="h-5 w-5 text-gray-400"
-                aria-hidden="true"
-              />
-            </span>
           </ListboxButton>
 
           <transition
@@ -234,79 +267,6 @@ const handleStakingAction = async() => {
     </div>
 
     <div class="w-full text-left mt-[24px]">
-      <label for="amount_selector"><caption class="font-[500] whitespace-nowrap">Select Pool</caption></label>
-        
-      <Listbox v-model="selectedPool">
-        <div class="relative mt-1">
-          <ListboxButton
-            class="relative w-full input_container"
-            :class="showErrorBorder? 'border border-red' : 'input_container_border'"
-          >
-            <small class="block truncate">{{ selectedPool? selectedPool.poolName : 'Select Pool' }}</small>
-            <span
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
-            >
-              <ChevronUpDownIcon
-                class="h-5 w-5 text-gray-400"
-                aria-hidden="true"
-              />
-            </span>
-          </ListboxButton>
-
-          <transition
-            leave-active-class="transition duration-100 ease-in"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
-          >
-            <ListboxOptions
-              class="absolute bottom-0 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-darkBg py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-            >
-              <div
-                v-if="avsPools.length === 0"
-                class="px-[12px]"
-              >
-                <small>No pools exists</small>
-              </div>
-              <div v-else>
-                <ListboxOption
-                  v-for="avs in avsPools"
-                  v-slot="{ active, selected }"
-                  :key="avs.poolName"
-                  :value="avs"
-                  as="template"
-                >
-                  <li
-                    :class="[
-                      active ? 'bg-gray_3 dark:bg-black/70 text-black dark:text-white' : 'text-gray-900 dark:text-white',
-                      'relative cursor-default select-none py-2 pl-10 pr-4',
-                    ]"
-                  >
-                    <span
-                      :class="[
-                        selected ? 'font-medium' : 'font-normal',
-                        'block truncate',
-                      ]"
-                    >{{ avs.poolName }}</span>
-                    <span
-                      v-if="selected"
-                      class="absolute inset-y-0 left-0 flex items-center pl-3 text-black dark:text-white"
-                    >
-                      <CheckIcon
-                        class="h-5 w-5"
-                        aria-hidden="true"
-                      />
-                    </span>
-                  </li>
-                </ListboxOption>
-              </div>
-            </ListboxOptions>
-          </transition>
-        </div>
-      </Listbox>
-    </div>
-
-    <div class="w-full text-left mt-[24px]">
-      <label for="amount_selector"><caption class="font-[500]">Amount</caption></label>
       <div
         ref="amount_selector"
         class="input_container"
@@ -319,7 +279,7 @@ const handleStakingAction = async() => {
             type="text"
             pattern="\d+(\.\d{1,18})?"
             placeholder="0.00"
-            class="outline-none bg-transparent w-full"
+            class="outline-none bg-transparent w-full p-[4px]"
             @input="handleInputAmountToStake"
           >
         </div>
@@ -332,7 +292,7 @@ const handleStakingAction = async() => {
     </div>
 
     
-    <div class="flex items-center justify-between w-full mt-[24px]">
+    <div class="flex items-center justify-between w-full mt-[24px] px-2">
       <small class="font-[500]">Fees</small>
       <small class="font-[500]">{{ depositFees? depositFees : '- -' }}%</small>
     </div>
