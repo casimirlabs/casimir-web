@@ -24,9 +24,14 @@ import useAVSSelection from "@/composables/state/avsSelection"
 import { useStorage } from "@vueuse/core"
 import AVSCard from "./AVSCard.vue"
 import { useAVS } from "@/composables/services/avs"
+import StakeCard from "./StakeCard.vue"
 const { fetchAllAVSs } = useAVS()
 
 const { selectedAVS, selectAVS } = useAVSSelection()
+const modalStep = ref(1)
+function updateModalStep(step) {
+    modalStep.value = step
+}
 // const { user } = useUser()
 const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
 const columns = [
@@ -79,6 +84,7 @@ const closeStakeWithAVSModal = () => {
     stakeWithAVSModal.value = false
 }
 const openStakeWithAVSModal = () => {
+    updateModalStep(1)
     stakeWithAVSModal.value = true
 }
 
@@ -209,51 +215,48 @@ const handleImageError = (event) => {
 
 <template>
   <div class="card w-full h-full shadow p-[24px] flex flex-col items-start justify-between gap-[24px]">
-    <div class="w-full flex items-center justify-between flex-wrap gap-[12px]">
-      <div class="flex items-center gap-[8px] min-w-[210px]">
-        <div>
-          <h1 class="card_title">
-            AVS
-          </h1>
+    <!-- Title and Subtitle -->
+    <div class="w-full flex items-center gap-[8px] min-w-[210px]">
+      <div>
+        <h1 class="card_title">
+          AVS
+        </h1>
 
-          <p class="card_subtitle">
-            Browse and effortlessly stake to your chosen AVS selection
-          </p>
-        </div>
+        <p class="card_subtitle">
+          Browse and select an AVS to begin restaking
+        </p>
       </div>
-      <div class="flex items-center gap-[12px] 900s:w-full">
-        <div
-          class="w-full rounded-[6px] flex items-center 
-          justify-between input_container_border min-w-[300px] gap-[12px] p-0 shadow-md"
+    </div>
+
+    <!-- Search Bar -->
+    <div class="flex items-center gap-[12px] w-full">
+      <div
+        class="w-full rounded-[6px] flex items-center 
+        justify-between input_container_border gap-[12px] p-0 shadow-md"
+      >
+        <input
+          v-model="searchInputValue"
+          type="text"
+          placeholder="Search"
+          class="flex items-center text-[14.22px] justify-between gap-[8px] w-full h-full outline-none bg-transparent
+          text-black dark:text-white px-[6px]"
         >
-          <input
-            v-model="searchInputValue"
-            type="text"
-            placeholder="Search"
-            class="flex items-center text-[14.22px] justify-between gap-[8px] w-full h-full outline-none bg-transparent
-            text-black dark:text-white px-[6px]"
-          >
-          <button
-            class="rounded-r-[6px] px-[12px] py-[6px] flex items-center justify-center gap-[8px]
-            bg-gray_4 text-black dark:bg-gray_5 dark:text-white
-            hover:bg-gray_4/60 active:bg-gray_4/80 dark:hover:bg-gray_5/60
-            dark:active:bg-gray_5/80;
-            border-l border-l-lightBorder dark:border-l-darkBorder"
-          >
-            <MagnifyingGlassIcon class="w-[20px] h-[20px]" />
-          </button>
-        </div>
         <button
-          class="secondary_btn shadow-none"
-          @click="openColumnsConfigurationsModal()"
+          class="rounded-r-[6px] px-[12px] py-[6px] flex items-center justify-center gap-[8px]
+          bg-gray_4 text-black dark:bg-gray_5 dark:text-white
+          hover:bg-gray_4/60 active:bg-gray_4/80 dark:hover:bg-gray_5/60
+          dark:active:bg-gray_5/80;
+          border-l border-l-lightBorder dark:border-l-darkBorder"
         >
-          <AdjustmentsVerticalIcon class="w-[20px] h-[20px]" />
+          <MagnifyingGlassIcon class="w-[20px] h-[20px]" />
         </button>
       </div>
     </div>
+
+    <!-- Table -->
     <div class="w-full h-full">
-      <div class="w-full border border-lightBorder dark:border-darkBorder rounded-[6px] overflow-x-auto">
-        <table class="w-full overflow-x-auto overflow-y-visible">
+      <div class="w-full border border-lightBorder dark:border-darkBorder rounded-[6px] overflow-x-auto overflow-y-scroll">
+        <table class="w-full overflow-x-auto">
           <thead>
             <tr class="border-b border-b-lightBorder dark:border-b-darkBorder">
               <th
@@ -268,7 +271,7 @@ const handleImageError = (event) => {
               </th>
             </tr>
           </thead>
-          <tbody class="w-full">
+          <tbody class="w-full overflow-scroll">
             <tr
               v-for="AVS in filteredAVS"
               :key="AVS"
@@ -373,7 +376,7 @@ const handleImageError = (event) => {
       </div>
     </div>
 
-
+    <!-- Pagination Navigation -->
     <div class="flex items-center justify-between gap-[15px] w-full px-[8px]">
       <div class="text-[#71717a] text-[12px] font-[400]">
         Page {{ currentPage }} of {{ pagesAvailable }}
@@ -512,7 +515,7 @@ const handleImageError = (event) => {
       </Dialog>
     </TransitionRoot>
 
-    <!-- AVS Card Modal-->
+    <!-- AVS Card & Staking Modal-->
     <TransitionRoot
       appear
       :show="stakeWithAVSModal && selectedAVS !== null"
@@ -550,7 +553,17 @@ const handleImageError = (event) => {
                 v-show="selectedAVS !== null"
                 class="card w-full min-w-[320px] max-w-[450px] p-[24px] mx-auto"
               >
-                <AVSCard :close-stake-with-a-v-s-modal="closeStakeWithAVSModal" />
+                <AVSCard 
+                  v-if="modalStep === 1"
+                  :close-stake-with-a-v-s-modal="closeStakeWithAVSModal"
+                  :update-modal-step="updateModalStep"
+                />
+                <StakeCard 
+                  v-else-if="modalStep === 2"
+                  :close-stake-with-a-v-s-modal="closeStakeWithAVSModal"
+                  :update-modal-step="updateModalStep"
+                  :selected-avs="selectedAVS"
+                />
               </DialogPanel>
             </TransitionChild>
           </div>

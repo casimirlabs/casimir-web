@@ -10,6 +10,9 @@ import useToasts from "@/composables/state/toasts"
 import useFormat from "@/composables/services/format"
 import useAVSSelection from "@/composables/state/avsSelection"
 
+const { addToast } = useToasts()
+const { convertString } = useFormat()
+
 const { selectedAVS } = useAVSSelection()
 
 // eslint-disable-next-line no-undef
@@ -18,15 +21,15 @@ const props = defineProps({
         type: Function,
         required: true,
     },
+    updateModalStep: {
+        type: Function,
+        required: true,
+    },
 })
 
-const { addToast } = useToasts()
-const { convertString } = useFormat()
-
 const selectedTabIndex = ref(0)
-async function handleRestake() {
-    // TODO: implement restake
-    props.closeStakeWithAVSModal()
+async function proceedToRestake() {
+    props.updateModalStep(2)
 }
 
 function copyTextToClipboard(text) {
@@ -66,14 +69,19 @@ function copyTextToClipboard(text) {
   <div class="w-full flex flex-col items-start justify-between gap-[24px] relative">
     <div class="flex items-center justify-between w-full">
       <div class="tooltip_container whitespace-nowrap">
-        <div
-          class="w-[16px] h-[16px] bg-green rounded-[999px] blur-[6px]"
-        />
-        <div 
-          class="w-[12px] h-[12px] bg-green rounded-[999px] absolute top-[2px] left-[2px]"
-        />
-        <div class="tooltip whitespace-nowrap w-[200px]">
-          Active
+        <div class="flex items-center gap-[12px]">
+          <div class="w-[50px] h-[50px] bg-transparent rounded-[999px] overflow-hidden">
+            <img
+              :src="selectedAVS.metadataLogo"
+              class="w-full h-full"
+              alt=""
+            > 
+          </div>
+          <div>
+            <h1 class="card_title">
+              {{ selectedAVS.metadataName }}
+            </h1>
+          </div>
         </div>
       </div>
       <div class="flex items-center gap-[12px]">
@@ -91,35 +99,6 @@ function copyTextToClipboard(text) {
         >
           <GlobeAltIcon class="w-[16px] h-[16px]" />
         </a>
-      </div>
-    </div>
-
-    <div class="flex items-center gap-[12px]">
-      <div class="w-[50px] h-[50px] bg-transparent rounded-[999px] overflow-hidden">
-        <img
-          :src="selectedAVS.metadataLogo"
-          class="w-full h-full"
-          alt=""
-        > 
-      </div>
-      <div>
-        <h1 class="card_title">
-          {{ selectedAVS.metadataName }}
-        </h1>
-        <div
-          class="tooltip_container flex items-center gap-[6px]"
-          @click="copyTextToClipboard('address here')"
-        >
-          <p class="card_subtitle">
-            {{ convertString(selectedAVS.address) }}
-          </p>
-          <div>
-            <DocumentDuplicateIcon class="w-[12px] h-[12px]" />
-          </div>
-          <div class="tooltip w-[200px]">
-            Service Manager Address
-          </div>
-        </div>
       </div>
     </div>
 
@@ -142,6 +121,23 @@ function copyTextToClipboard(text) {
         <small class="font-[500]">Total ETH Staked</small>
         <small class="font-[500]">{{ selectedAVS.tvl }} ETH</small>
       </div>
+      <div class="flex items-center w-full justify-between mt-[12px]">
+        <small class="font-[500]">Address</small>
+        <div
+          class="tooltip_container flex items-center gap-[6px]"
+          @click="copyTextToClipboard('address here')"
+        >
+          <p class="card_subtitle">
+            {{ convertString(selectedAVS.address) }}
+          </p>
+          <div>
+            <DocumentDuplicateIcon class="w-[12px] h-[12px]" />
+          </div>
+          <div class="tooltip w-[200px]">
+            Service Manager Address
+          </div>
+        </div>
+      </div>
     </div>
 
     <div
@@ -150,9 +146,9 @@ function copyTextToClipboard(text) {
     >
       <button
         class="primary_btn w-full mt-[24px]"
-        @click="handleRestake"
+        @click="proceedToRestake"
       >
-        <small>Restake to AVS</small>
+        <small>Proceed to Stake</small>
       </button>
     </div>
   </div>
