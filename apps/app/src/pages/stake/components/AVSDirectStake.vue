@@ -24,28 +24,24 @@ import useAVSSelection from "@/composables/state/avsSelection"
 import { useStorage } from "@vueuse/core"
 import AVSCard from "./AVSCard.vue"
 import { useAVS } from "@/composables/services/avs"
-import StakeCard from "./StakeCard.vue"
-const { fetchAllAVSs } = useAVS()
 
+
+const { fetchAllAVSs } = useAVS()
 const { selectedAVS, selectAVS } = useAVSSelection()
-const modalStep = ref(1)
-function updateModalStep(step) {
-    modalStep.value = step
-}
 // const { user } = useUser()
-const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
+const { convertString } = useFormat()
 const columns = [
     { title: "AVS", show: ref(true), value: "metadataName" },
-    { title: "Address", show: ref(true), value: "address" },
+    // { title: "Address", show: ref(true), value: "address" },
     { title: "Logo", show: ref(false), value: "metadataLogo" },
     // { title: "Description", show: ref(false), value: "metadataDescription" },
-    { title: "Site", show: ref(false), value: "metadataWebsite" },
-    { title: "Twitter", show: ref(false), value: "metadataX" },
-    { title: "Total Operators", show: ref(true), value: "totalOperators" },
-    { title: "Total Stakers", show: ref(true), value: "totalStakers" },
-    { title: "ETH Restaked", show: ref(true), value: "tvl" },
-    { title: "Beacon Ether", show: ref(false), value: "tvlBeaconChain" },
-    { title: "LSTs", show: ref(false), value: "tvlRestaking" },
+    // { title: "Site", show: ref(false), value: "metadataWebsite" },
+    // { title: "Twitter", show: ref(false), value: "metadataX" },
+    // { title: "Total Operators", show: ref(true), value: "totalOperators" },
+    // { title: "Total Stakers", show: ref(true), value: "totalStakers" },
+    // { title: "ETH Restaked", show: ref(true), value: "tvl" },
+    // { title: "Beacon Ether", show: ref(false), value: "tvlBeaconChain" },
+    // { title: "LSTs", show: ref(false), value: "tvlRestaking" },
 ]
 
 const tableHeaders = ref(columns)
@@ -84,16 +80,14 @@ const closeStakeWithAVSModal = () => {
     stakeWithAVSModal.value = false
 }
 const openStakeWithAVSModal = () => {
-    updateModalStep(1)
     stakeWithAVSModal.value = true
 }
 
-
 const currentPage = ref(1)
-const itemsPerPage = ref(9)
+const itemsPerPage = 7
 const pagesAvailable = computed(() => {
     // add filtering method here too
-    return Math.ceil(AVSData?.value?.length / itemsPerPage.value)
+    return Math.ceil(AVSData?.value?.length / itemsPerPage)
 })
 
 const goToStartPage = () => {
@@ -129,7 +123,7 @@ watch(searchInputValue, () => {
 const AVSData = ref(null)
 const filteredAVS = computed(() => {
     const data = sortAVSData()
-    return data?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
+    return data?.slice((currentPage.value - 1) * itemsPerPage, currentPage.value * itemsPerPage)
 })
 
 const sortAVSData = () => {
@@ -376,7 +370,7 @@ const handleImageError = (event) => {
       </div>
     </div>
 
-    <!-- Pagination Navigation -->
+    <!-- Pagination Controls -->
     <div class="flex items-center justify-between gap-[15px] w-full px-[8px]">
       <div class="text-[#71717a] text-[12px] font-[400]">
         Page {{ currentPage }} of {{ pagesAvailable }}
@@ -553,16 +547,8 @@ const handleImageError = (event) => {
                 v-show="selectedAVS !== null"
                 class="card w-full min-w-[320px] max-w-[450px] p-[24px] mx-auto"
               >
-                <AVSCard 
-                  v-if="modalStep === 1"
+                <AVSCard
                   :close-stake-with-a-v-s-modal="closeStakeWithAVSModal"
-                  :update-modal-step="updateModalStep"
-                />
-                <StakeCard 
-                  v-else-if="modalStep === 2"
-                  :close-stake-with-a-v-s-modal="closeStakeWithAVSModal"
-                  :update-modal-step="updateModalStep"
-                  :selected-avs="selectedAVS"
                 />
               </DialogPanel>
             </TransitionChild>

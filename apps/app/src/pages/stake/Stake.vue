@@ -16,6 +16,7 @@ import TermsOfService from "@/components/elements/TermsOfService.vue"
 import useOperatorStatus from "@/composables/state/operatorStatus"
 import OperatorPrompt from "./components/OperatorPrompt.vue"
 import OperatorView from "./components/OperatorView.vue"
+import AVSStage from "./components/AVSStage.vue"
 
 const openTermsAndConditions = ref(false)
 
@@ -94,6 +95,10 @@ watch(showUserIsAnOperator, () => {
       <div class="w-3/12 h-full 900s:w-full 900s:h-[530px]">
         <AVSDirectStake />
       </div>
+    </div>
+
+    <div class="w-full mt-[24px]">
+      <AVSStage />
     </div>
 
     <div class="w-full mt-[24px] h-[540px]">

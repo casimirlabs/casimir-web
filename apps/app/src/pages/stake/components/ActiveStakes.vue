@@ -20,10 +20,12 @@ import useUser from "@/composables/services/user"
 import { useStorage } from "@vueuse/core"
 import useStakingState from "@/composables/state/staking"
 
+// TODO: Refactor to use userStakeDetails instead of sampleUserStakeDetails
 const {
     setWithdrawAmount,
     handleWithdraw,
-    userStakeDetails
+    userStakeDetails,
+    sampleUserStakeDetails
 } = useStakingState()
 
 
@@ -89,7 +91,8 @@ const  openOpenActiveStakeOptions = () => {
 const currentPage = ref(1)
 const itemsPerPage = ref(9)
 const pagesAvailable = computed(() => {
-    return Math.ceil(userStakeDetails?.value?.length / itemsPerPage.value)
+    const pages = Math.ceil(sampleUserStakeDetails?.value?.length / itemsPerPage.value)
+    return pages > 0 ? pages : 1
 })
 
 const goToStartPage = () => {
@@ -147,12 +150,11 @@ const clearErrorMessage = () => {
     }, 3500)
 }
 
-
 const filteredStakeDetail = computed(() => {
-    if (userStakeDetails.value?.length > itemsPerPage.value) {
-        return userStakeDetails.value?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
+    if (sampleUserStakeDetails.value?.length > itemsPerPage.value) {
+        return sampleUserStakeDetails.value?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
     } else {
-        return userStakeDetails.value
+        return sampleUserStakeDetails.value
     }
 })
 
@@ -177,15 +179,16 @@ const findSwitchHeaderValue = (switchItem) => {
 
 <template>
   <div class="card w-full h-full shadow p-[24px] flex flex-col items-start justify-between gap-[24px]">
+    <!-- Header and Table Filter -->
     <div class="w-full flex items-center justify-between">
       <div class="flex items-center gap-[8px]">
         <h1 class="card_title">
-          Active Stakes
+          Actively Staked
         </h1>
         <div class="mb-[3px] tooltip_container">
           <InformationCircleIcon class="w-[20px] h-[20px]" />
           <div class="tooltip w-[200px]">
-            View all current active stakes. Click stake for withdraw optionality.
+            Select a previous stake to view more details and/or withdraw your rewards.
           </div>
         </div>
       </div>
@@ -196,6 +199,8 @@ const findSwitchHeaderValue = (switchItem) => {
         <AdjustmentsVerticalIcon class="w-[20px] h-[20px]" />
       </button>
     </div>
+
+    <!-- Table -->
     <div class="w-full h-full">
       <div class="w-full border border-lightBorder dark:border-darkBorder rounded-[6px] overflow-x-auto">
         <table class="w-full overflow-x-auto">
@@ -292,7 +297,7 @@ const findSwitchHeaderValue = (switchItem) => {
       </div>
     </div>
 
-
+    <!-- Pagination Controls -->
     <div
       class="flex items-center justify-between gap-[15px] w-full px-[8px]"
     >
@@ -330,7 +335,6 @@ const findSwitchHeaderValue = (switchItem) => {
         </button>
       </div>
     </div>
-
 
     <!-- Table Configurations -->
     <TransitionRoot

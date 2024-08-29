@@ -22,9 +22,12 @@ const userSavedPools = useStorage(
     "userSavedPools",
     avsPools
 )
-// Will include pool name (that the user creates), and addeed avs's and their allocatedpercentage
+// Will include pool name (that the user creates), and added avs's and their allocated percentage
+
+// Declare stage to be a ref array of avs's
+const stage = ref([] as AVS[])
   
-export default function useAvsPools() {
+export default function useAvsStage() {
 
     // add an empty pool by name
     const addPool = (name: string) => {
@@ -71,6 +74,32 @@ export default function useAvsPools() {
         const remainder = 100 - totalDistributedPercentage
         const sum = remainder + avsPools.value[index].avsPool[0].allocatedPercentage
         avsPools.value[index].avsPool[0].allocatedPercentage = parseFloat(sum.toFixed(2))
+    }
+
+    function addAVSToStage(avs: AVS) {
+        const avsExists = stage.value.findIndex(item => item.address === avs.address)
+        if (avsExists === -1) {
+            stage.value.push(avs)
+        } else {
+            addToast(
+                {
+                    id: `attempt_to_add_duplicate_avs_${avs.address}`,
+                    type: "failed",
+                    iconUrl: "",
+                    title: "Duplicate AVS",
+                    subtitle: "The AVS selected already exist in the stage",
+                    timed: true,
+                    loading: false
+                }
+            )
+        }
+    }
+
+    function removeAVSFromStage(avs: AVS) {
+        const avsIndex = stage.value.findIndex(item => item.address === avs.address)
+        if (avsIndex !== -1) {
+            stage.value.splice(avsIndex, 1)
+        }
     }
 
     const addAVSToPool = (index: number, avs: { avs: AVS, allocatedPercentage: number }) => {
@@ -134,6 +163,9 @@ export default function useAvsPools() {
     })
 
     return {
+        stage,
+        addAVSToStage,
+        removeAVSFromStage,
         avsPools: avsPools,
         addPool,
         addPoolWithAVS,

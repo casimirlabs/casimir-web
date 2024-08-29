@@ -6,13 +6,16 @@ import {
     DocumentDuplicateIcon,
     ChevronUpDownIcon
 } from "@heroicons/vue/24/outline"
-import useToasts from "@/composables/state/toasts"
-import useFormat from "@/composables/services/format"
 import useAVSSelection from "@/composables/state/avsSelection"
+import useAvsStage from "@/composables/state/avsStage"
+import useFormat from "@/composables/services/format"
+import useToasts from "@/composables/state/toasts"
 
 const { addToast } = useToasts()
 const { convertString } = useFormat()
 
+const selectedTabIndex = ref(0)
+const { addAVSToStage } = useAvsStage()
 const { selectedAVS } = useAVSSelection()
 
 // eslint-disable-next-line no-undef
@@ -21,16 +24,8 @@ const props = defineProps({
         type: Function,
         required: true,
     },
-    updateModalStep: {
-        type: Function,
-        required: true,
-    },
 })
 
-const selectedTabIndex = ref(0)
-async function proceedToRestake() {
-    props.updateModalStep(2)
-}
 
 function copyTextToClipboard(text) {
     navigator.clipboard.writeText(text)
@@ -146,9 +141,9 @@ function copyTextToClipboard(text) {
     >
       <button
         class="primary_btn w-full mt-[24px]"
-        @click="proceedToRestake"
+        @click="addAVSToStage(selectedAVS), props.closeStakeWithAVSModal()"
       >
-        <small>Proceed to Stake</small>
+        <small>Add To Stage</small>
       </button>
     </div>
   </div>

@@ -25,7 +25,6 @@ import {
     ChevronUpDownIcon
 } from "@heroicons/vue/24/outline"
 import useToasts from "@/composables/state/toasts"
-import useAvsPools from "@/composables/state/avsPools"
 import useAVSSelection from "@/composables/state/avsSelection"
 
 const { selectedAVS, selectAVS } = useAVSSelection()
@@ -53,10 +52,6 @@ const {
     handleStake,
     depositFees
 } = useStakingState()
-
-const {
-    avsPools,
-} = useAvsPools()
 
 const {
     addToast,
