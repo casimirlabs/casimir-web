@@ -1,44 +1,23 @@
 <script setup>
-import { ref, watch, computed } from "vue"
+import { ref } from "vue"
 import useStakingState from "@/composables/state/staking"
 import useUser from "@/composables/services/user"
 import useFormat from "@/composables/services/format"
 import { 
-    useDark,
-} from "@vueuse/core"
-import { 
-    Switch,
-    TabGroup,
-    TabList,
-    Tab,
     Listbox,
-    ListboxLabel,
     ListboxButton,
     ListboxOptions,
     ListboxOption,
 } from "@headlessui/vue"
-import { 
-    CheckIcon,
-    GlobeAltIcon,
-    DocumentDuplicateIcon,
-    ArrowTopRightOnSquareIcon,
-    ChevronUpDownIcon
-} from "@heroicons/vue/24/outline"
+import {  CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/24/outline"
 import useToasts from "@/composables/state/toasts"
-import useAVSSelection from "@/composables/state/avsSelection"
-
-const { selectedAVS, selectAVS } = useAVSSelection()
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
     closeStakeWithAVSModal: {
         type: Function,
         required: true,
-    },
-    updateModalStep: {
-        type: Function,
-        required: true,
-    },
+    }
 })
 
 const {
@@ -53,16 +32,11 @@ const {
     depositFees
 } = useStakingState()
 
-const {
-    addToast,
-} = useToasts()
+const { addToast } = useToasts()
 
 const { user } = useUser()
-const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
-
 const selectedWallet = ref(null)
-const selectedPool = ref(null)
-
+const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
 
 const errorMessage = ref(null)
 
@@ -140,34 +114,6 @@ const handleStakingAction = async() => {
 
 <template>
   <div>
-    <nav
-      class="breadcrumb mb-[24px] text-sm"
-      aria-label="Breadcrumb"
-    >
-      <ol class="flex items-center">
-        <li class="flex items-center">
-          <button 
-            class="text-blue-500 hover:text-blue-700 font-semibold flex items-center gap-2" 
-            @click="updateModalStep(1)"
-          >
-            <img 
-              :src="selectedAVS.metadataLogo" 
-              alt="AVS Logo" 
-              class="w-6 h-6 rounded-full"
-            >
-            {{ selectedAVS.metadataName }}
-          </button>
-          <span class="mx-2">/</span>
-        </li>
-        <li
-          aria-current="page"
-          class="font-semibold text-gray-500"
-        >
-          Stake
-        </li>
-      </ol>
-    </nav>
-
     <div class="w-full text-left">        
       <Listbox v-model="selectedWallet">
         <div class="relative mt-1">
@@ -287,7 +233,7 @@ const handleStakingAction = async() => {
     </div>
 
     
-    <div class="flex items-center justify-between w-full mt-[24px] px-2">
+    <div class="flex items-center justify-between w-full mt-[24px]">
       <small class="font-[500]">Fees</small>
       <small class="font-[500]">{{ depositFees? depositFees : '- -' }}%</small>
     </div>
@@ -305,8 +251,8 @@ const handleStakingAction = async() => {
       </div>
     </div>
 
-    <div class="w-full mt-[24px]">
-      <div class="flex items-center gap-[12px]">
+    <div class="w-full">
+      <div class="flex items-center gap-[12px] mb-6">
         <button
           class="checkbox_button bg-transparent"
           @click="toggleTerms"
@@ -322,11 +268,8 @@ const handleStakingAction = async() => {
         class="primary_btn w-full mt-[8px]"
         @click="handleStakingAction"
       >
-        <small class="font-[500]">Stake</small>
+        <small class="font-[500] p-[4px]">Stake</small>
       </button>
     </div>
   </div>
 </template>
-
-<style>
-</style>
