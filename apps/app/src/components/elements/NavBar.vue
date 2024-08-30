@@ -9,34 +9,18 @@ import {
     ArrowLongUpIcon
 } from "@heroicons/vue/24/outline"
 import router from "@/composables/services/router"
-import { 
-    useDark,
-    useToggle,
-    useStorage
-} from "@vueuse/core"
-import { 
-    ref, computed, watch
-} from "vue"
+import {  useDark, useToggle, useStorage } from "@vueuse/core"
+import {  ref, computed, watch } from "vue"
 import useNavMenu from "@/composables/state/navMenu"
-import { 
-    Menu, 
-    MenuButton, 
-    MenuItems, 
-    MenuItem,
-} from "@headlessui/vue"
+import {  Menu,  MenuButton,  MenuItems } from "@headlessui/vue"
 import useConnectWalletModal from "@/composables/state/connectWalletModal"
 import useAuth from "@/composables/services/auth"
 import useUser from "@/composables/services/user"
 import useFormat from "@/composables/services/format"
 import useOperatorStatus from "@/composables/state/operatorStatus"
 
-const {
-    showUserIsAnOperator,
-    toggleUserOperator
-} = useOperatorStatus()
-
-const { convertString } = useFormat()
-
+const { showUserIsAnOperator, toggleUserOperator } = useOperatorStatus()
+const { copyTextToClipboard, convertString } = useFormat()
 const { toggleConnectWalletModal } = useConnectWalletModal()
 
 const matchRoutes = (routes) => {
@@ -77,23 +61,6 @@ const handleLogout = async() => {
     await logout()
     userMenu.value = false
 }
-
-function copyTextToClipboard(text) {
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            copySuccessful.value = "copied"
-            setTimeout(() => {
-                copySuccessful.value = ""
-            }, 1000)
-        })
-        .catch(err => {
-            copySuccessful.value = "failed"
-            setTimeout(() => {
-                copySuccessful.value = ""
-            }, 1000)
-        })
-}
-
 
 const userSecondaryAccounts = computed(() =>{
     let secondaryAccounts = []

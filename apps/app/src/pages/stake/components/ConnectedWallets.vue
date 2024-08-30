@@ -3,16 +3,8 @@ import { ref, computed } from "vue"
 import useUser from "@/composables/services/user"
 import useConnectWalletModal from "@/composables/state/connectWalletModal"
 import useFormat from "@/composables/services/format"
-import useToasts from "@/composables/state/toasts"
 
-const {
-    addToast,
-} = useToasts()
-
-const { 
-    convertString,
-    formatEthersCasimir,
-} = useFormat()
+const { copyTextToClipboard, convertString, formatEthersCasimir } = useFormat()
 import { 
     DocumentDuplicateIcon,
     MinusIcon,
@@ -70,38 +62,6 @@ const goToLastPage = () => {
     const start = Math.max(0, userSecondaryAccounts.value.length - pageSize)
     const end = userSecondaryAccounts.value.length - 1
     currentSecondaryWallets.value = [start, end]
-}
-
-function copyTextToClipboard(text) {
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            setTimeout(() => {
-                addToast(
-                    {
-                        id: "copy_address_" + text,
-                        type: "success",
-                        title: "Address Copied",
-                        subtitle: "Copied Address " + convertString(text),
-                        timed: true,
-                        loading: false
-                    }
-                )
-            }, 1000)
-        })
-        .catch(err => {
-            setTimeout(() => {
-                addToast(
-                    {
-                        id: "copy_address_" + text,
-                        type: "failed",
-                        title: "Failed to Copy Address",
-                        subtitle: "Something went wrong, please try again later",
-                        timed: true,
-                        loading: false
-                    }
-                )
-            }, 1000)
-        })
 }
 </script>
 
