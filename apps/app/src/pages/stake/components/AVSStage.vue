@@ -1,20 +1,18 @@
 <script setup>
 import { ref } from "vue"
-import {  XMarkIcon, DocumentDuplicateIcon } from "@heroicons/vue/24/outline"
+import { XMarkIcon, DocumentDuplicateIcon } from "@heroicons/vue/24/outline"
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
 import StakeCard from "./StakeCard.vue"
 import useAvsStage from "@/composables/state/avsStage"
 import useFormat from "@/composables/services/format"
 
 const { convertString } = useFormat()
-const { stage, removeAVSFromStage } = useAvsStage()
+const { stage, adjustAllocation, removeAVSFromStage } = useAvsStage()
 
 const stakeModal = ref(false)
 
-// TODO: Refactor this logic to use sliders / logic from previously identified sources
-const updatePercentage = (index, newValue) => {
-    // Remove non-numeric characters except for the dot and handle empty input
-    let valueStr = newValue.toString().replace(/[^0-9.]/g, "")
+const onAllocationChange = (index, newPercentage) => {
+    adjustAllocation(index, newPercentage)
 }
 
 function handleImageError(event) {
@@ -24,7 +22,7 @@ function handleImageError(event) {
 
 <template>
   <div
-    class="card w-full shadow p-[24px] "
+    class="card w-full shadow p-[24px]"
     style="transition: all ease 0.3s; overflow: visible"
   >
     <!-- Header, Title/Subtitle, Stake Button -->
@@ -124,7 +122,7 @@ function handleImageError(event) {
               type="text"
               :placeholder="avs.allocatedPercentage"
               class="w-[50px] text-left outline-none bg-transparent"
-              @input="updatePercentage(index, $event.target.value)"
+              @input="onAllocationChange(index, $event.target.value)"
             >
             <span class="text-[10.22px]">%</span>
           </div>
@@ -137,7 +135,7 @@ function handleImageError(event) {
               max="100"
               step="0.01"
               class="slider"
-              @input="updatePercentage(index, $event.target.value)"
+              @input="onAllocationChange(index, avs.allocatedPercentage)"
             >
           </div>
         </div>
@@ -192,6 +190,3 @@ function handleImageError(event) {
     </TransitionRoot>
   </div>
 </template>
-
-<style>
-</style>

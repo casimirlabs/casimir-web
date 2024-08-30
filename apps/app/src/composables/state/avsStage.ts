@@ -1,9 +1,5 @@
-import { AVS } from "@casimir/types"
-import { 
-    onMounted,
-    onUnmounted,
-    ref
-} from "vue"
+import { onMounted, ref } from "vue"
+import { AVSWithAllocation } from "@casimir/types"
 import useToasts from "@/composables/state/toasts"
 import { useStorage } from "@vueuse/core"
 
@@ -11,167 +7,133 @@ const { addToast } = useToasts()
 
 const initializeComposable = ref(false)
 
-// TODO: create AVS pool type here
-const avsPools = ref([] as {
-    poolName: string, 
-    avsPool: { avs: AVS, allocatedPercentage: number, updatedAt: Date }[] 
-    }[]
-) 
-
-const userSavedPools = useStorage(
-    "userSavedPools",
-    avsPools
+const stage = ref([] as AVSWithAllocation[])
+const userSavedStage = useStorage(
+    "userSavedStage",
+    stage
 )
-// Will include pool name (that the user creates), and added avs's and their allocated percentage
 
-// Declare stage to be a ref array of avs's
-const stage = ref([] as AVS[])
   
 export default function useAvsStage() {
-
-    // add an empty pool by name
-    const addPool = (name: string) => {
-        avsPools.value.push({
-            poolName: name,
-            avsPool: []
-        })
-    }
-
-    // add pool with an avs selected at once
-    const addPoolWithAVS = (name: string, avs: { avs: AVS, allocatedPercentage: number }) => {
-        avsPools.value.push({
-            poolName: name,
-            avsPool: [
-                {
-                    avs: avs.avs,
-                    allocatedPercentage: 100.00,
-                    updatedAt: new Date()
-                }
-            ]
-        })
-    }
-
-    // removed pool by index
-    const removePool = (index: number) => {
-        if (index >= 0 && index < avsPools.value.length) {
-            avsPools.value.splice(index, 1)
-        }
-        console.log("avsPools.value :>> ", avsPools.value)
-    }
-
-    const distributeAllocationPercentages = (index: number) => {
-        let evenlyDistributedPercentage = 100
-        if (avsPools.value[index].avsPool.length >= 1) {
-            const value = 100 / avsPools.value[index].avsPool.length
-            evenlyDistributedPercentage = Math.floor(value * 100) / 100
-        }
-        if (avsPools.value[index].avsPool.length >= 1) {
-            for (let i = 0; i < avsPools.value[index].avsPool.length; i++) {
-                avsPools.value[index].avsPool[i].allocatedPercentage = evenlyDistributedPercentage
-            }
-        }
-        const totalDistributedPercentage = avsPools.value[index].avsPool.reduce((acc, item) => acc + item.allocatedPercentage, 0)
-        const remainder = 100 - totalDistributedPercentage
-        const sum = remainder + avsPools.value[index].avsPool[0].allocatedPercentage
-        avsPools.value[index].avsPool[0].allocatedPercentage = parseFloat(sum.toFixed(2))
-    }
-
-    function addAVSToStage(avs: AVS) {
-        const avsExists = stage.value.findIndex(item => item.address === avs.address)
-        if (avsExists === -1) {
-            stage.value.push(avs)
-        } else {
-            addToast(
-                {
-                    id: `attempt_to_add_duplicate_avs_${avs.address}`,
-                    type: "failed",
-                    iconUrl: "",
-                    title: "Duplicate AVS",
-                    subtitle: "The AVS selected already exist in the stage",
-                    timed: true,
-                    loading: false
-                }
-            )
-        }
-    }
-
-    function removeAVSFromStage(avs: AVS) {
-        const avsIndex = stage.value.findIndex(item => item.address === avs.address)
-        if (avsIndex !== -1) {
-            stage.value.splice(avsIndex, 1)
-        }
-    }
-
-    const addAVSToPool = (index: number, avs: { avs: AVS, allocatedPercentage: number }) => {
-        const avsExsits = avsPools.value[index].avsPool.findIndex(item =>  item.avs.address === avs.avs.address)
-
-        
-        if (avsExsits === -1) {
-            if (index >= 0 && index < avsPools.value.length) {
-                avsPools.value[index].avsPool.push(
-                    {
-                        avs: avs.avs,
-                        allocatedPercentage: 0,
-                        updatedAt: new Date()
-                    }
-                )
-
-                distributeAllocationPercentages(index)
-            }
-        } else {
-            addToast(
-                {
-                    id: `attempt_to_add_duplicate_avs_${avs.avs.address}`,
-                    type: "failed",
-                    iconUrl: "",
-                    title: "Duplicate AVS",
-                    subtitle: "The AVS selected already exist under this pool",
-                    timed: true,
-                    loading: false
-                }
-            )
-        }
-    }
-
-    const removeAVSFromPool = (index: number, avs: { avs: AVS, allocatedPercentage: number }) => {
-        if (index >= 0 && index < avsPools.value.length) {
-            const pool = avsPools.value[index]
-    
-            // Find the index of the AVS to remove within the avsPool array
-            const avsIndex = pool.avsPool.findIndex(item =>
-                item.avs.address === avs.avs.address
-            )
-    
-            
-            if (avsIndex !== -1) {
-                // Remove the AVS from avsPool array
-                pool.avsPool.splice(avsIndex, 1)
-            }
-            distributeAllocationPercentages(index)
-        }
-    }
-      
     onMounted(() => {
         if (!initializeComposable.value) {
             initializeComposable.value = true
-            avsPools.value = userSavedPools.value
+            stage.value = userSavedStage.value
         }
     })
-    
-    onUnmounted(() =>{
-        // 
-    })
 
+    function addAVSToStage(avs: AVSWithAllocation) {
+        const avsExists = stage.value.findIndex(item => item.address === avs.address)
+        if (avsExists === -1) {
+            // Add the new AVS to the stage
+            stage.value.push(avs)
+            
+            // Distribute allocation percentages evenly
+            distributeAllocationPercentages()
+        } else {
+            addToast({
+                id: `attempt_to_add_duplicate_avs_${avs.address}`,
+                type: "failed",
+                iconUrl: "",
+                title: "Duplicate AVS",
+                subtitle: "The AVS selected already exists in the stage",
+                timed: true,
+                loading: false,
+            })
+        }
+        console.log("stage.value :>> ", stage.value)
+    }
+    
+    function removeAVSFromStage(avs: AVSWithAllocation) {
+        const avsIndex = stage.value.findIndex(item => item.address === avs.address)
+        if (avsIndex !== -1) {
+            // Remove the AVS from the stage
+            stage.value.splice(avsIndex, 1)
+            
+            // Distribute allocation percentages evenly
+            distributeAllocationPercentages()
+        }
+    }
+
+    function adjustAllocation(index: number, newPercentage: string) {
+        const avsCount = stage.value.length
+        if (avsCount > 1) {
+            const validNewPercentage = parseFloat(newPercentage)
+
+            // Set the new percentage for the adjusted AVS
+            stage.value[index].allocatedPercentage = validNewPercentage
+
+            const totalRemainingPercentage = parseFloat((100 - validNewPercentage).toFixed(2))
+
+            const remainingAVSs = stage.value.filter((_, i) => i !== index)
+
+            if (remainingAVSs.length > 0) {
+                const remainingAllocatedPercentage = remainingAVSs.reduce(
+                    (acc, item) => acc + item.allocatedPercentage,
+                    0
+                )
+
+                // Distribute the remaining percentage among the other AVSs
+                remainingAVSs.forEach((avs) => {
+                    const proportionalShare = (avs.allocatedPercentage / remainingAllocatedPercentage) * totalRemainingPercentage
+                    avs.allocatedPercentage = parseFloat(proportionalShare.toFixed(2))
+                })
+
+                // Correct any rounding errors by adjusting the first AVS
+                const totalDistributedPercentage = stage.value.reduce(
+                    (acc, item) => acc + item.allocatedPercentage,
+                    0
+                )
+
+                const remainder = parseFloat((100 - totalDistributedPercentage).toFixed(2))
+                stage.value[0].allocatedPercentage += remainder
+            }
+        } else if (avsCount === 1) {
+            stage.value[0].allocatedPercentage = 100
+        }
+    }
+    
+    function distributeAllocationPercentages() {
+        const totalItems = stage.value.length
+    
+        if (totalItems > 0) {
+            // Calculate the evenly distributed percentage
+            const evenPercentage = Math.floor((100 / totalItems) * 100) / 100
+            
+            // Assign the even percentage to each item
+            stage.value.forEach(item => {
+                item.allocatedPercentage = evenPercentage
+            })
+    
+            // Adjust the first item's allocation to handle any rounding discrepancies
+            const totalDistributedPercentage = stage.value.reduce((acc, item) => acc + item.allocatedPercentage, 0)
+            const remainder = 100 - totalDistributedPercentage
+            stage.value[0].allocatedPercentage += remainder
+        }
+    }
+    
     return {
         stage,
         addAVSToStage,
         removeAVSFromStage,
-        avsPools: avsPools,
-        addPool,
-        addPoolWithAVS,
-        removePool,
-        addAVSToPool,
-        removeAVSFromPool,
-        distributeAllocationPercentages
+        adjustAllocation,
     }
 }
+
+
+// const distributeAllocationPercentages = (index: number) => {
+//     let evenlyDistributedPercentage = 100
+//     if (avsPools.value[index].avsPool.length >= 1) {
+//         const value = 100 / avsPools.value[index].avsPool.length
+//         evenlyDistributedPercentage = Math.floor(value * 100) / 100
+//     }
+//     if (avsPools.value[index].avsPool.length >= 1) {
+//         for (let i = 0; i < avsPools.value[index].avsPool.length; i++) {
+//             avsPools.value[index].avsPool[i].allocatedPercentage = evenlyDistributedPercentage
+//         }
+//     }
+//     const totalDistributedPercentage = avsPools.value[index].avsPool.reduce((acc, item) => acc + item.allocatedPercentage, 0)
+//     const remainder = 100 - totalDistributedPercentage
+//     const sum = remainder + avsPools.value[index].avsPool[0].allocatedPercentage
+//     avsPools.value[index].avsPool[0].allocatedPercentage = parseFloat(sum.toFixed(2))
+// }

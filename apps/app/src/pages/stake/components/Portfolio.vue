@@ -5,6 +5,7 @@
 import PieChart from "./PieChart.vue"  // Import the PieChart component
 
 const user = {
+    walletETH: 100,
     currentlyRestakedETH: 100,
     totalRewardsEarned: 5.25,
     availableToWithdrawNow: 2,
@@ -40,6 +41,14 @@ const avsAllocation = {
 
       <!-- Right: Metrics -->
       <div class="w-1/2 flex flex-col justify-around p-[12px] gap-[12px]">
+        <div class="p-[12px]">
+          <h2 class="card_title">
+            Non-Staked ETH
+          </h2>
+          <p class="card_title">
+            {{ user.walletETH }} ETH
+          </p>
+        </div>
         <div class="p-[12px]">
           <h2 class="card_title">
             Currently Restaked ETH

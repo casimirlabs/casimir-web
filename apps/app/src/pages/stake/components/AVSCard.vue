@@ -1,11 +1,6 @@
 <script setup>
 import { ref } from "vue"
-import { 
-    CheckIcon,
-    GlobeAltIcon,
-    DocumentDuplicateIcon,
-    ChevronUpDownIcon
-} from "@heroicons/vue/24/outline"
+import { GlobeAltIcon, DocumentDuplicateIcon } from "@heroicons/vue/24/outline"
 import useAVSSelection from "@/composables/state/avsSelection"
 import useAvsStage from "@/composables/state/avsStage"
 import useFormat from "@/composables/services/format"

@@ -5,6 +5,7 @@ import { AnalyticsData } from "./interfaces/AnalyticsData"
 import { ApiResponse } from "./interfaces/ApiResponse"
 import { Article } from "./interfaces/Article"
 import { AVS } from "./interfaces/AVS"
+import { AVSWithAllocation } from "./interfaces/AVSWithAllocation"
 import { BalanceSnapshot } from "./interfaces/BalanceSnapshot"
 import { BreakdownAmount } from "./interfaces/BreakdownAmount"
 import { BreakdownString } from "./interfaces/BreakdownString"
@@ -53,6 +54,7 @@ export type {
     AnalyticsData,
     Article,
     AVS,
+    AVSWithAllocation,
     BalanceSnapshot,
     BreakdownAmount,
     BreakdownString,
