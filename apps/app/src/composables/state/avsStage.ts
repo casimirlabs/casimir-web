@@ -13,7 +13,6 @@ const userSavedStage = useStorage(
     stage
 )
 
-  
 export default function useAvsStage() {
     onMounted(() => {
         if (!initializeComposable.value) {
@@ -25,10 +24,7 @@ export default function useAvsStage() {
     function addAVSToStage(avs: AVSWithAllocation) {
         const avsExists = stage.value.findIndex(item => item.address === avs.address)
         if (avsExists === -1) {
-            // Add the new AVS to the stage
             stage.value.push(avs)
-            
-            // Distribute allocation percentages evenly
             distributeAllocationPercentages()
         } else {
             addToast({
@@ -41,74 +37,111 @@ export default function useAvsStage() {
                 loading: false,
             })
         }
-        console.log("stage.value :>> ", stage.value)
     }
     
     function removeAVSFromStage(avs: AVSWithAllocation) {
         const avsIndex = stage.value.findIndex(item => item.address === avs.address)
         if (avsIndex !== -1) {
-            // Remove the AVS from the stage
             stage.value.splice(avsIndex, 1)
-            
-            // Distribute allocation percentages evenly
             distributeAllocationPercentages()
         }
     }
 
-    function adjustAllocation(index: number, newPercentage: string) {
-        const avsCount = stage.value.length
-        if (avsCount > 1) {
-            const validNewPercentage = parseFloat(newPercentage)
-
-            // Set the new percentage for the adjusted AVS
-            stage.value[index].allocatedPercentage = validNewPercentage
-
-            const totalRemainingPercentage = parseFloat((100 - validNewPercentage).toFixed(2))
-
-            const remainingAVSs = stage.value.filter((_, i) => i !== index)
-
-            if (remainingAVSs.length > 0) {
-                const remainingAllocatedPercentage = remainingAVSs.reduce(
-                    (acc, item) => acc + item.allocatedPercentage,
-                    0
-                )
-
-                // Distribute the remaining percentage among the other AVSs
-                remainingAVSs.forEach((avs) => {
-                    const proportionalShare = (avs.allocatedPercentage / remainingAllocatedPercentage) * totalRemainingPercentage
-                    avs.allocatedPercentage = parseFloat(proportionalShare.toFixed(2))
-                })
-
-                // Correct any rounding errors by adjusting the first AVS
-                const totalDistributedPercentage = stage.value.reduce(
-                    (acc, item) => acc + item.allocatedPercentage,
-                    0
-                )
-
-                const remainder = parseFloat((100 - totalDistributedPercentage).toFixed(2))
-                stage.value[0].allocatedPercentage += remainder
-            }
-        } else if (avsCount === 1) {
-            stage.value[0].allocatedPercentage = 100
-        }
-    }
-    
     function distributeAllocationPercentages() {
         const totalItems = stage.value.length
     
         if (totalItems > 0) {
-            // Calculate the evenly distributed percentage
-            const evenPercentage = Math.floor((100 / totalItems) * 100) / 100
-            
-            // Assign the even percentage to each item
-            stage.value.forEach(item => {
-                item.allocatedPercentage = evenPercentage
-            })
+            const lockedItems = stage.value.filter(item => item.isLocked)
+            const unlockedItems = stage.value.filter(item => !item.isLocked)
     
-            // Adjust the first item's allocation to handle any rounding discrepancies
-            const totalDistributedPercentage = stage.value.reduce((acc, item) => acc + item.allocatedPercentage, 0)
-            const remainder = 100 - totalDistributedPercentage
-            stage.value[0].allocatedPercentage += remainder
+            const totalUnlockedItems = unlockedItems.length
+    
+            if (totalUnlockedItems > 0) {
+                const evenPercentage = Math.floor((100 / totalUnlockedItems) * 100) / 100
+    
+                unlockedItems.forEach(item => {
+                    item.allocatedPercentage = evenPercentage
+                })
+    
+                const totalDistributedPercentage = stage.value.reduce((acc, item) => acc + (item.isLocked ? 0 : item.allocatedPercentage), 0)
+                const remainder = 100 - totalDistributedPercentage
+    
+                if (unlockedItems.length > 0) {
+                    unlockedItems[0].allocatedPercentage += remainder
+                }
+            }
+        }
+    }
+
+    function onAllocationChange(index: number, newPercentage: string) {
+        const parsedPercentage = parseFloat(newPercentage)
+        if (isNaN(parsedPercentage)) {
+            stage.value[index].allocatedPercentage = 0
+            return
+        }
+    
+        const currentAVS = stage.value[index]
+        if (currentAVS.isLocked) return
+    
+        const lockedPercentage = stage.value.reduce((acc, avs) => acc + (avs.isLocked ? avs.allocatedPercentage : 0), 0)
+        const maxPercentage = 100 - lockedPercentage
+    
+        currentAVS.allocatedPercentage = Math.min(parsedPercentage, maxPercentage)
+        
+        const totalUnlockedPercentage = stage.value.reduce((acc, avs) => acc + (avs.isLocked ? 0 : avs.allocatedPercentage), 0)
+        const difference = maxPercentage - totalUnlockedPercentage
+    
+        if (difference !== 0) {
+            // Get remaining unlocked AVSs excluding the current one
+            const remainingAVSs = stage.value.filter(avs => !avs.isLocked && avs !== currentAVS)
+            
+            if (remainingAVSs.length > 0) {
+                // Calculate total allocated percentage for remaining AVSs
+                const totalRemaining = remainingAVSs.reduce((acc, avs) => acc + avs.allocatedPercentage, 0)
+    
+                if (totalRemaining > 0) {
+                    // Adjust remaining AVSs proportionally
+                    remainingAVSs.forEach(avs => {
+                        avs.allocatedPercentage = Math.max(0, avs.allocatedPercentage + (avs.allocatedPercentage / totalRemaining) * difference)
+                    })
+                } else {
+                    // Distribute difference evenly if all remaining AVSs have 0 allocated percentage
+                    const equalDistribution = difference / remainingAVSs.length
+                    remainingAVSs.forEach(avs => {
+                        avs.allocatedPercentage = Math.max(0, avs.allocatedPercentage + equalDistribution)
+                    })
+                }
+            } else {
+                // If no remaining AVSs, adjust the current AVS to fix the total
+                currentAVS.allocatedPercentage = Math.max(0, currentAVS.allocatedPercentage + difference)
+            }
+        }
+    
+        // Ensure the total allocation sums to exactly maxPercentage
+        const finalTotalPercentage = stage.value.reduce((acc, avs) => acc + (avs.isLocked ? 0 : avs.allocatedPercentage), 0)
+        if (finalTotalPercentage !== maxPercentage) {
+            const finalAdjustment = maxPercentage - finalTotalPercentage
+    
+            // Apply the final adjustment to the first unlocked AVS
+            const firstUnlockedAVS = stage.value.find(avs => !avs.isLocked)
+            if (firstUnlockedAVS) {
+                firstUnlockedAVS.allocatedPercentage = Math.max(0, firstUnlockedAVS.allocatedPercentage + finalAdjustment)
+            }
+        }
+    }
+    
+
+    function lockAVSAllocation(avs: AVSWithAllocation) {
+        const avsItem = stage.value.find(item => item.address === avs.address)
+        if (avsItem) {
+            avsItem.isLocked = true
+        }
+    }
+
+    function unlockAVSAllocation(avs: AVSWithAllocation) {
+        const avsItem = stage.value.find(item => item.address === avs.address)
+        if (avsItem) {
+            avsItem.isLocked = false
         }
     }
     
@@ -116,24 +149,8 @@ export default function useAvsStage() {
         stage,
         addAVSToStage,
         removeAVSFromStage,
-        adjustAllocation,
+        onAllocationChange,
+        lockAVSAllocation,
+        unlockAVSAllocation,
     }
 }
-
-
-// const distributeAllocationPercentages = (index: number) => {
-//     let evenlyDistributedPercentage = 100
-//     if (avsPools.value[index].avsPool.length >= 1) {
-//         const value = 100 / avsPools.value[index].avsPool.length
-//         evenlyDistributedPercentage = Math.floor(value * 100) / 100
-//     }
-//     if (avsPools.value[index].avsPool.length >= 1) {
-//         for (let i = 0; i < avsPools.value[index].avsPool.length; i++) {
-//             avsPools.value[index].avsPool[i].allocatedPercentage = evenlyDistributedPercentage
-//         }
-//     }
-//     const totalDistributedPercentage = avsPools.value[index].avsPool.reduce((acc, item) => acc + item.allocatedPercentage, 0)
-//     const remainder = 100 - totalDistributedPercentage
-//     const sum = remainder + avsPools.value[index].avsPool[0].allocatedPercentage
-//     avsPools.value[index].avsPool[0].allocatedPercentage = parseFloat(sum.toFixed(2))
-// }

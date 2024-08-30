@@ -1,19 +1,15 @@
 <script setup>
 import { ref } from "vue"
-import { XMarkIcon, DocumentDuplicateIcon } from "@heroicons/vue/24/outline"
+import { XMarkIcon, DocumentDuplicateIcon, LockOpenIcon, LockClosedIcon } from "@heroicons/vue/24/outline"
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
 import StakeCard from "./StakeCard.vue"
 import useAvsStage from "@/composables/state/avsStage"
 import useFormat from "@/composables/services/format"
 
-const { convertString } = useFormat()
-const { stage, adjustAllocation, removeAVSFromStage } = useAvsStage()
+const { copyTextToClipboard, convertString } = useFormat()
+const { stage, removeAVSFromStage, lockAVSAllocation, unlockAVSAllocation, onAllocationChange } = useAvsStage()
 
 const stakeModal = ref(false)
-
-const onAllocationChange = (index, newPercentage) => {
-    adjustAllocation(index, newPercentage)
-}
 
 function handleImageError(event) {
     event.target.src = "/casimir.svg"
@@ -42,9 +38,7 @@ function handleImageError(event) {
           style="box-shadow: none;"
           @click="stakeModal = true"
         >
-          <small>
-            Stake
-          </small>
+          <small>Stake</small>
         </button>
       </div>
     </div>
@@ -75,7 +69,7 @@ function handleImageError(event) {
               </h1>
               <div
                 class="tooltip_container flex items-center gap-[6px]"
-                @click="copyTextToClipboard('address here')"
+                @click="copyTextToClipboard(avs.address)"
               >
                 <p class="card_subtitle">
                   {{ convertString(avs.address) }}
@@ -122,6 +116,7 @@ function handleImageError(event) {
               type="text"
               :placeholder="avs.allocatedPercentage"
               class="w-[50px] text-left outline-none bg-transparent"
+              :disabled="avs.isLocked"
               @input="onAllocationChange(index, $event.target.value)"
             >
             <span class="text-[10.22px]">%</span>
@@ -133,60 +128,78 @@ function handleImageError(event) {
               type="range"
               min="0"
               max="100"
-              step="0.01"
+              step="1"
               class="slider"
+              :disabled="avs.isLocked"
               @input="onAllocationChange(index, avs.allocatedPercentage)"
             >
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stake Modal -->
-    <TransitionRoot
-      appear
-      :show="stakeModal"
-      as="template"
-    >
-      <Dialog
-        as="div"
-        class="relative z-10"
-        @close="stakeModal = false"
-      >
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/25" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div
-            class="flex min-h-full items-center justify-center p-4 text-center"
-          >
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
+          <!-- Lock/Unlock -->
+          <div class="flex items-center justify-between">
+            <button
+              v-if="!avs.isLocked"
+              class="flex items-center gap-[6px]"
+              @click="lockAVSAllocation(avs)"
             >
-              <DialogPanel
-                class="card w-full max-w-[360px] p-[24px] max-h-[500px] overflow-auto relative"
-              >
-                <StakeCard />
-              </DialogPanel>
-            </TransitionChild>
+              <LockOpenIcon class="w-[16px] h-[16px]" />
+            </button>
+            <button
+              v-else
+              class="flex items-center gap-[6px]"
+              @click="unlockAVSAllocation(avs)"
+            >
+              <LockClosedIcon class="w-[16px] h-[16px]" />
+            </button>
           </div>
         </div>
-      </Dialog>
-    </TransitionRoot>
+      </div>
+
+      <!-- Stake Modal -->
+      <TransitionRoot
+        appear
+        :show="stakeModal"
+        as="template"
+      >
+        <Dialog
+          as="div"
+          class="relative z-10"
+          @close="stakeModal = false"
+        >
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0"
+            enter-to="opacity-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100"
+            leave-to="opacity-0"
+          >
+            <div class="fixed inset-0 bg-black/25" />
+          </TransitionChild>
+
+          <div class="fixed inset-0 overflow-y-auto">
+            <div
+              class="flex min-h-full items-center justify-center p-4 text-center"
+            >
+              <TransitionChild
+                as="template"
+                enter="duration-300 ease-out"
+                enter-from="opacity-0 scale-95"
+                enter-to="opacity-100 scale-100"
+                leave="duration-200 ease-in"
+                leave-from="opacity-100 scale-100"
+                leave-to="opacity-0 scale-95"
+              >
+                <DialogPanel
+                  class="card w-full max-w-[360px] p-[24px] max-h-[500px] overflow-auto relative"
+                >
+                  <StakeCard />
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </div>
+        </Dialog>
+      </TransitionRoot>
+    </div>
   </div>
 </template>

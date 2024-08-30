@@ -4,10 +4,8 @@ import { GlobeAltIcon, DocumentDuplicateIcon } from "@heroicons/vue/24/outline"
 import useAVSSelection from "@/composables/state/avsSelection"
 import useAvsStage from "@/composables/state/avsStage"
 import useFormat from "@/composables/services/format"
-import useToasts from "@/composables/state/toasts"
 
-const { addToast } = useToasts()
-const { convertString } = useFormat()
+const { copyTextToClipboard, convertString } = useFormat()
 
 const selectedTabIndex = ref(0)
 const { addAVSToStage } = useAvsStage()
@@ -20,39 +18,6 @@ const props = defineProps({
         required: true,
     },
 })
-
-
-function copyTextToClipboard(text) {
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            setTimeout(() => {
-                addToast(
-                    {
-                        id: "copy_address_" + text,
-                        type: "success",
-                        title: "Address Copied",
-                        subtitle: "Copied Address " + convertString(text),
-                        timed: true,
-                        loading: false
-                    }
-                )
-            }, 1000)
-        })
-        .catch(err => {
-            setTimeout(() => {
-                addToast(
-                    {
-                        id: "copy_address_" + text,
-                        type: "failed",
-                        title: "Failed to Copy Address",
-                        subtitle: "Something went wrong, please try again later",
-                        timed: true,
-                        loading: false
-                    }
-                )
-            }, 1000)
-        })
-}
 </script>
 
 <template>
@@ -115,7 +80,7 @@ function copyTextToClipboard(text) {
         <small class="font-[500]">Address</small>
         <div
           class="tooltip_container flex items-center gap-[6px]"
-          @click="copyTextToClipboard('address here')"
+          @click="copyTextToClipboard(selectedAVS.address)"
         >
           <p class="card_subtitle">
             {{ convertString(selectedAVS.address) }}
