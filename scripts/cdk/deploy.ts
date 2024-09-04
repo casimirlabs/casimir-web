@@ -14,9 +14,6 @@ void async function () {
     process.env.AWS_ACCOUNT = await getSecret("casimir-aws-account")
 
     // Hardcode app url to dev in prod to link goerli testnet
-    process.env.APP_URL = process.env.STAGE === "prod" ? /*'https://app.casimir.co'*/"https://app.dev.casimir.co" : `https://app.${process.env.STAGE}.casimir.co`
-    process.env.BLOG_URL = process.env.STAGE === "prod" ? "https://blog.casimir.co" : `https://blog.${process.env.STAGE}.casimir.co`
-    process.env.DOCS_URL = process.env.STAGE === "prod" ? "https://docs.casimir.co" : `https://docs.${process.env.STAGE}.casimir.co`
     process.env.USERS_URL = process.env.STAGE === "prod" ? "https://users.casimir.co" : `https://users.${process.env.STAGE}.casimir.co`
     process.env.WEBSITE_URL = process.env.STAGE === "prod" ? "https://casimir.co" : `https://${process.env.STAGE}.casimir.co`
     process.env.CRYPTO_COMPARE_API_KEY = await getSecret("casimir-crypto-compare-api-key")
@@ -28,9 +25,6 @@ void async function () {
     process.env.SSV_NETWORK_ADDRESS = ETHEREUM_CONTRACTS[networkKey]?.SSV_NETWORK_ADDRESS
     process.env.SSV_VIEWS_ADDRESS = ETHEREUM_CONTRACTS[networkKey]?.SSV_VIEWS_ADDRESS
     
-    process.env.PUBLIC_APP_URL = process.env.APP_URL
-    process.env.PUBLIC_BLOG_URL = process.env.BLOG_URL
-    process.env.PUBLIC_DOCS_URL = process.env.DOCS_URL
     process.env.PUBLIC_USERS_URL = process.env.USERS_URL
     process.env.PUBLIC_WEBSITE_URL = process.env.WEBSITE_URL
     process.env.PUBLIC_CRYPTO_COMPARE_API_KEY = process.env.CRYPTO_COMPARE_API_KEY
@@ -43,12 +37,8 @@ void async function () {
     process.env.PUBLIC_WALLET_CONNECT_PROJECT_ID = await getSecret("casimir-wallet-connect-project-id")
     
     await run("npm run build --workspace @casimir/ethereum")
-    await run("npm run docgen --workspace @casimir/docs")
-    await run("npm run build --workspace @casimir/docs")
-    await run("npm run build --workspace @casimir/redirect")
-    await run("npm run build --workspace @casimir/www")
     await run("npm run build --workspace @casimir/users")
-    await run("npm run build --workspace @casimir/mvp")
+    await run("npm run build --workspace @casimir/app")
 
     await run("npm run bootstrap --workspace @casimir/cdk")
     await run("npm run synth --workspace @casimir/cdk")

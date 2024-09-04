@@ -3,7 +3,6 @@ import { AccountWithStakingAndOperatorInfo } from "./interfaces/AccountWithStaki
 import { AddAccountOptions } from "./interfaces/AddAccountOptions"
 import { AnalyticsData } from "./interfaces/AnalyticsData"
 import { ApiResponse } from "./interfaces/ApiResponse"
-import { Article } from "./interfaces/Article"
 import { AVS } from "./interfaces/AVS"
 import { AVSWithAllocation } from "./interfaces/AVSWithAllocation"
 import { BalanceSnapshot } from "./interfaces/BalanceSnapshot"
@@ -21,7 +20,6 @@ import { Event } from "./interfaces/Event"
 import { ExistingUserCheck } from "./interfaces/ExistingUserCheck"
 import { FormattedWalletOption } from "./interfaces/FormattedWalletOption"
 import { GasEstimate } from "./interfaces/GasEstimate"
-import { HackmdArticle } from "./interfaces/HackmdArticle"
 import { LoginCredentials } from "./interfaces/LoginCredentials"
 import { ManagerConfig } from "./interfaces/ManagerConfig"
 import { MessageRequest } from "./interfaces/MessageRequest"
@@ -52,7 +50,6 @@ export type {
     ApiResponse,
     AddAccountOptions,
     AnalyticsData,
-    Article,
     AVS,
     AVSWithAllocation,
     BalanceSnapshot,
@@ -70,7 +67,6 @@ export type {
     ExistingUserCheck,
     FormattedWalletOption,
     GasEstimate,
-    HackmdArticle,
     LoginCredentials,
     ManagerConfig,
     MessageRequest,

@@ -1,9 +1,7 @@
-import * as glue from "@aws-cdk/aws-glue-alpha"
 import { JsonSchema } from "../interfaces/JsonSchema"
 import { snakeCase } from "@casimir/format"
 
 export type JsonType = "string" | "number" | "integer" | "boolean" | "object" | "array" | "null"
-export type GlueType = glue.Type
 export type PostgresType = "STRING" | "INTEGER" | "BOOLEAN" | "DOUBLE" | "DECIMAL" | "BIGINT" | "TIMESTAMP" | "JSON" | "DATE"
 
 export class Schema {
@@ -20,32 +18,6 @@ export class Schema {
      */
     constructor(jsonSchema: JsonSchema) {
         this.jsonSchema = jsonSchema
-    }
-
-    /**
-     * Get an array of Glue columns from the JSON schema object.
-     * @returns {glue.Column[]} Array of Glue columns
-     * 
-     * @example
-     * ```typescript
-     * const schema = new Schema(jsonSchema)
-     * const columns = schema.getGlueColumns()
-     * ```
-     */
-    getGlueColumns(): glue.Column[] {
-        return Object.keys(this.jsonSchema.properties).map((name: string) => {
-            const property = this.jsonSchema.properties[name]
-
-            // 'STRING' | 'INTEGER' | 'BOOLEAN' | 'DOUBLE' | 'DECIMAL' | 'BIG_INT' | 'TIMESTAMP' | 'JSON' | 'DATE'
-            const typeKey = property.type.toUpperCase() as keyof glue.Schema
-
-            let type: GlueType = glue.Schema[typeKey]
-
-            if (name == "timestamp") type = glue.Schema.TIMESTAMP
-
-            const comment = property.description
-            return { name, type, comment }
-        })
     }
 
     /**

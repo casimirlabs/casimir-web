@@ -1,8 +1,0 @@
-.DS_Store
-.idea
-.vscode
-log.txt
-.env
-build
-data
-logs.ndjson
