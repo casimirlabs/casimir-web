@@ -38,26 +38,21 @@ Configure the following prerequisite global dependency versions:
 
 1. [Git (v2.x)](https://git-scm.com/downloads).
 
-    > 🚩 **GitHub submodule support:** You also need to make sure to have at least one SSH authentication key on your GitHub account (for the git cloning of submodules within submodules). See [Adding a new SSH key to your GitHub account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
-
 2. [Docker (v24.x)](https://docs.docker.com/engine/install).
 
 3. [Go (v1.20.x)](https://golang.org/doc/install).
 
 4. [Node.js (LTS)](https://nodejs.org/en/download).
 
-    > 🚩 **Using NVM**: Install [NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) and run `nvm install --lts && nvm alias default lts/*` to set the default version to the latest LTS. You will need to rerun this command whenever the latest LTS changes.
-
-5. [AWS CLI (v2.x)](https://aws.amazon.com/cli).
-
-    > 🚩 **Consensus Networks team only**: Create an [AWS profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) named `consensus-networks-dev`.
+    > [!NOTE]
+    > **Using NVM**: Install [NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) and run `nvm install --lts && nvm alias default lts/*` to set the default version to the latest LTS.
 
 ### Setup
 
 Clone the repository and checkout a new branch from develop:
 
   ```zsh
-  git clone https://github.com/consensusnetworks/casimir.git
+  git clone https://github.com/casimirlabs/casimir.git
   cd casimir
   git checkout -b <"feature || bug || enhancement">/<"your-branch-name" develop
   ```
@@ -68,12 +63,6 @@ Install all repository dependencies and build necessary types:
 
   ```zsh
   npm install
-  ```
-
-Clean all repository dependencies and reinstall:
-
-  ```zsh
-  npm run clean
   ```
 
 Install a dev dependency to the root:
@@ -96,26 +85,10 @@ Install a dependency or dev dependency to a specific workspace:
 
 Customize and override the development environment configuration by creating a [.env](.env) file in the root directory.
 
-**If you are on the Consensus Networks organization**, make sure your AWS CLI and profile are configured correctly. By default, the scripts look for the `consensus-networks-dev` named profile, but you can override the `AWS_PROFILE` name to be used in the [.env](.env) file. Optionally, override the `AWS_PROFILE` name in your [.env](.env) file:
-
-  ```zsh
-  # From the root directory
-  echo "AWS_PROFILE=<"your-aws-profile-name">" > .env
-  ```
-
-**If you are outside of the Consensus Networks organization**, set `USE_SECRETS` to `false` in your [.env](.env) file:
-
-  ```zsh
-  # From the root directory
-  echo "USE_SECRETS=false" > .env
-  ```
-
 #### Environment Variables
 
 | Name | Description | Default |
 | - | - | - |
-| `USE_SECRETS` | Whether to use AWS secrets (set false for external access) | `true` |
-| `AWS_PROFILE` | AWS profile name for accessing secrets | `consensus-networks-dev` |
 | `PROJECT` | Project name | `casimir` |
 | `STAGE` | Environment stage name (`prod || dev || local`) | `local` |
 | `ETHEREUM_FORK_BLOCK` | Starting block number for local fork network | (current block) |

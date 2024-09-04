@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@casimirlabs/casimir-contracts": "^0.0.1",
     "@headlessui/vue": "^1.7.16",
     "@heroicons/vue": "^2.0.18",
     "@vueuse/core": "^10.7.0",

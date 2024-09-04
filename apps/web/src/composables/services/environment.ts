@@ -1,6 +1,6 @@
 import { ethers } from "ethers"
 import { CasimirFactory } from "@casimir/ethereum/build/@types"
-import ICasimirFactoryAbi from "@casimir/ethereum/build/abi/ICasimirFactory.json"
+import { abi as ICasimirFactory } from "@casimirlabs/casimir-contracts/abi/ICasimirFactory.sol/ICasimirFactory.json"
 
 /* Browser environment */
 const domain = window.location.host
@@ -23,7 +23,7 @@ const requiredNetwork: "1" | "5" = origin.includes("localhost") ? "5" : origin.i
 
 /* Addresses */
 const factoryAddress = import.meta.env.PUBLIC_FACTORY_ADDRESS
-const factory = new ethers.Contract(factoryAddress, ICasimirFactoryAbi, provider) as CasimirFactory
+const factory = new ethers.Contract(factoryAddress, ICasimirFactory, provider) as CasimirFactory
 const ssvNetworkAddress = import.meta.env.PUBLIC_SSV_NETWORK_ADDRESS
 const ssvViewsAddress = import.meta.env.PUBLIC_SSV_VIEWS_ADDRESS
 

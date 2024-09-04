@@ -49,4 +49,5 @@ SELECT u.*, json_agg(a.*) AS accounts FROM users u JOIN accounts a ON u.address 
 
 ```
 
-> 🚩 To iterate on a schema in context, use the commands above. To deploy a schema change, create a branch from `develop`, edit the JSON, and then make a PR to `develop`.
+> [!NOTE]
+> To iterate on a schema in context, use the commands above. To deploy a schema change, create a branch from `develop`, edit the JSON, and then make a PR to `develop`.
