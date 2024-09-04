@@ -30,7 +30,7 @@ export class Config implements ProjectConfig {
         this.subdomains = {
             docs: "docs",
             nodes: "nodes",
-            users: "users",
+            api: "api",
             web: "app",
             wildcard: "*"
         }

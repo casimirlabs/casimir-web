@@ -24,18 +24,18 @@ import { run, runSync } from "@casimir/shell"
  */
 async function root() {
     const apps = {
-        app: {
+        web: {
             contracts: true,
             port: 3001,
             services: {
-                users: {
+                api: {
                     port: 4000,
                 }
             }
         }
     }
 
-    const app = process.env.APP || "app"
+    const app = process.env.APP || "web"
     if (!apps[app]) {
         throw new Error(`App ${app} is not supported`)
     }
@@ -108,7 +108,7 @@ async function root() {
     }
 
     process.env.PUBLIC_STAGE = process.env.STAGE
-    process.env.PUBLIC_USERS_URL = process.env.USERS_URL
+    process.env.PUBLIC_API_URL = process.env.API_URL
     process.env.PUBLIC_ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL
     process.env.PUBLIC_ETHEREUM_WS_URL = process.env.ETHEREUM_WS_URL
     process.env.PUBLIC_FACTORY_ADDRESS = process.env.FACTORY_ADDRESS
@@ -119,16 +119,16 @@ async function root() {
     process.env.PUBLIC_WALLET_CONNECT_PROJECT_ID = process.env.WALLET_CONNECT_PROJECT_ID
 
     if (process.env.BUILD_PREVIEW === "true") {
-        await run(`npm run build --workspace @casimir/${app}`)
-        run(`npm run preview --workspace @casimir/${app}`)
+        await run("npm run build --workspace @casimir/web")
+        run("npm run preview --workspace @casimir/web")
     } else {
-        run(`npm run dev --workspace @casimir/${app}`)
+        run("npm run dev --workspace @casimir/web")
     }
 
-    if (process.env.MOCK_SERVICES === "true" && app === "app") {
+    if (process.env.MOCK_SERVICES === "true") {
         process.on("SIGINT", () => {
-            console.log("🧹 Cleaning up users service")
-            runSync("npm run clean --workspace @casimir/users")
+            console.log("🧹 Cleaning up api service")
+            runSync("npm run clean --workspace @casimir/api")
             process.exit()
         })
     }

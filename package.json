@@ -5,30 +5,23 @@
   "type": "module",
   "workspaces": [
     "apps/*",
-    "common/*",
-    "contracts/*",
+    "packages/*",
     "infrastructure/*",
     "services/*"
   ],
   "scripts": {
     "clean": "npx esno scripts/deprecated/root/clean.ts",
-    "debug:ethereum": "npx esno -r dotenv/config scripts/deprecated/ethereum/debug.ts",
     "deploy:cdk": "npx esno -r dotenv/config scripts/staged/deploy.ts",
-    "deploy:ethereum": "npx esno -r dotenv/config scripts/deprecated/ethereum/deploy.ts",
     "dev": "npx esno -r dotenv/config scripts/deprecated/root/dev.ts",
     "dev:next": "npx esno -r dotenv/config scripts/dev.ts",
-    "docgen": "npm run docgen --workspace @casimir/ethereum",
     "lint": "eslint --ext .vue,.ts ./ --fix",
     "migrations:users": "npx esno -r dotenv/config scripts/staged/migrate.ts",
-    "postinstall": "npx esno scripts/deprecated/root/check.ts && npm run build --workspace @casimir/ethereum",
     "preinstall": "git submodule sync && git submodule update --init --recursive",
     "prepare": "husky install",
     "release": "release-it",
-    "report:ethereum": "npx esno -r dotenv/config scripts/deprecated/ethereum/report.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:actions": "npx esno -r dotenv/config scripts/deprecated/actions/test.ts",
-    "test:cdk": "npx esno -r dotenv/config scripts/staged/test.ts",
-    "upgrade:ethereum": "npx esno -r dotenv/config scripts/deprecated/ethereum/upgrade.ts"
+    "test:cdk": "npx esno -r dotenv/config scripts/staged/test.ts"
   },
   "repository": {
     "type": "git",

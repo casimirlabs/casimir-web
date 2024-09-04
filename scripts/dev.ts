@@ -1,4 +1,4 @@
 import { $ } from "zx"
 
-// $`npm run dev -w @casimir/users`
-// $`npm run dev -w @casimir/app`
+// $`npm run dev -w @casimir/api`
+// $`npm run dev -w @casimir/web`

@@ -12,9 +12,8 @@ void async function () {
     await loadCredentials()
     process.env.AWS_ACCOUNT = await getSecret("casimir-aws-account")
 
-    await run("npm run build --workspace @casimir/ethereum")
-    await run("npm run build --workspace @casimir/users")
-    await run("npm run build --workspace @casimir/app")
+    await run("npm run build --workspace @casimir/api")
+    await run("npm run build --workspace @casimir/web")
 
     console.log("🚀 Testing CDK app")
     await run("npm run test --workspace @casimir/cdk")

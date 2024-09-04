@@ -16,10 +16,8 @@
   - [Configure](#configure)
     - [Environment Variables](#environment-variables)
   - [Apps](#apps)
-    - [@casimir/app](#casimirapp)
-  - [Contracts](#contracts)
-    - [@casimir/ethereum](#casimirethereum)
-  - [Common](#common)
+    - [@casimir/web](#casimirweb)
+  - [Packages](#packages)
   - [Infrastructure](#infrastructure)
     - [@casimir/cdk](#casimircdk)
   - [Services](#services)
@@ -134,7 +132,7 @@ Customize and override the development environment configuration by creating a [
 
 The apps packages provide a UI to end-users.
 
-#### @casimir/app
+#### @casimir/web
 
 Run the main web app with an integrated development environment, including local contracts and services:
 
@@ -143,35 +141,20 @@ Run the main web app with an integrated development environment, including local
   npm run dev
   ```
 
-See the [@casimir/app README.md](apps/app/README.md) for detailed documentation.
+See the [@casimir/web README.md](apps/web/README.md) for detailed documentation.
 
-### Contracts
+### Packages
 
-The contracts packages provide the smart contracts for the project.
+Theses common packages provide shared code for the project:
 
-#### @casimir/ethereum
+- [@casimir/aws](packages/aws): AWS helpers
+- [@casimir/data](packages/data): data schemas and operational workflows
+- [@casimir/ssv](packages/ssv): SSV helpers
+- [@casimir/types](packages/types): shared types
+- [@casimir/uniswap](packages/uniswap): Uniswap helpers
+- [@casimir/wallets](packages/wallets): wallet helpers
 
-Test the Ethereum contracts:
-
-  ```zsh
-  # From the root directory
-  npm run test --workspace @casimir/ethereum
-  ```
-
-See the [@casimir/ethereum README.md](contracts/ethereum/README.md) for detailed documentation.
-
-### Common
-
-The common packages provide shared code for the project:
-
-- [@casimir/aws](common/aws): AWS helpers
-- [@casimir/data](common/data): data schemas and operational workflows
-- [@casimir/ssv](common/ssv): SSV helpers
-- [@casimir/types](common/types): shared types
-- [@casimir/uniswap](common/uniswap): Uniswap helpers
-- [@casimir/wallets](common/wallets): wallet helpers
-
-Check for a README.md file in each common package directory for detailed usage instructions.
+Check for a README.md file in each package directory for detailed usage instructions.
 
 ### Infrastructure
 
@@ -192,10 +175,7 @@ See the [@casimir/cdk README.md](infrastructure/cdk/README.md) for detailed docu
 
 The services packages provide the backend services for the project:
 
-- [@casimir/functions](services/functions): Chainlink Functions source code
-- [@casimir/nodes]: relevant node configurations
-- [@casimir/oracle](services/oracle): DAO oracle
-- [@casimir/users](services/users): users server and database
+- [@casimir/api](services/api): api server and database
 
 ## Layout
 
@@ -205,26 +185,17 @@ Code is organized into work directories (apps, common, contracts, infrastructure
 ├── .github/ (workflows and issue templates)
 |   └── workflows/ (gh actions workflows)
 ├── apps/ (frontend apps)
-|   |── app/ (main web app)
-|   |–– docs/ (project documentation app)
-├── common/ (shared code)
+|   └── web/ (main web app)
+├── packages/ (shared code)
 |   ├── data/ (data schemas and operational workflows)
-|   └── helpers/ (general utilities)
-├── contracts/ (blockchain contracts)
-|   └── ethereum/ (ethereum contracts)
+|   └── types/ (shared types)
 ├── infrastructure/ (deployment resources)
 |   └── cdk/ (aws stacks)
 ├── scripts/ (devops and build scripts)
-|   ├── actions/ (github actions scripts)
-|   ├── cdk/ (cdk scripts)
-|   ├── ethereum/ (ethereum test and dev scripts)
-|   ├── migrations/ (database migration scripts)
-|   └── root/ (root install and dev scripts)
+|   ├── deprecated/ (old scripts)
+|   ├── staged/ (unfinalized scripts)
+|   └── dev.ts (local dev script)
 ├── services/ (backend services)
-|   ├── functions/ (chainlink functions)
-|   ├── nodes/ (node configurations)
-|   ├── oracle/ (oracle service)
-|   ├── redirect/ (docs redirect service)
 |   └── users/ (users service)
 └── package.json (project-wide npm dependencies and scripts)
 ```

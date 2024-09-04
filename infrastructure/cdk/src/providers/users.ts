@@ -78,7 +78,7 @@ export class UsersStack extends cdk.Stack {
 
         const imageAsset = new ecrAssets.DockerImageAsset(this, config.getFullStackResourceName(this.name, "image"), {
             directory: "../../",
-            file: "services/users/Dockerfile",
+            file: "services/api/Dockerfile",
             platform: ecrAssets.Platform.LINUX_AMD64,
             ignoreMode: cdk.IgnoreMode.GIT
         })
@@ -103,7 +103,7 @@ export class UsersStack extends cdk.Stack {
             assignPublicIp: true,
             certificate,
             cluster: ecsCluster,
-            domainName: `${subdomains.users}.${rootDomain}`, // e.g. users.casimir.co or users.dev.casimir.co
+            domainName: `${subdomains.api}.${rootDomain}`, // e.g. api.casimir.co or api.dev.casimir.co
             domainZone: hostedZone,
             taskImageOptions: {
                 containerPort: 4000,
@@ -111,7 +111,7 @@ export class UsersStack extends cdk.Stack {
                 environment: {
                     PROJECT: project,
                     STAGE: stage,
-                    USERS_URL: `https://${subdomains.users}.${rootDomain}`,
+                    API_URL: `https://${subdomains.api}.${rootDomain}`,
                     WEB_URL: `https://${subdomains.web}.${rootDomain}`
                 },
                 secrets: { ...requiredSecrets, ...optionalSecrets }

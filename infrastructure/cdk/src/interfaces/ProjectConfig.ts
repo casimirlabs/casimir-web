@@ -7,7 +7,7 @@ export interface ProjectConfig {
     stage: string
     rootDomain: string
     subdomains: {
-        users: string
+        api: string
         web: string
         wildcard: string
     }
