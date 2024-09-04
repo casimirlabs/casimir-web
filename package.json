@@ -79,10 +79,5 @@
     "hooks": {
       "after:bump": "npx auto-changelog -p"
     }
-  },
-  "dependencies": {
-    "@vueuse/core": "^10.7.0",
-    "chart.js": "^4.4.4",
-    "vue-chartjs": "^5.3.1"
   }
 }
