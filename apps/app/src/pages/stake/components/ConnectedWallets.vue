@@ -3,16 +3,8 @@ import { ref, computed } from "vue"
 import useUser from "@/composables/services/user"
 import useConnectWalletModal from "@/composables/state/connectWalletModal"
 import useFormat from "@/composables/services/format"
-import useToasts from "@/composables/state/toasts"
 
-const {
-    addToast,
-} = useToasts()
-
-const { 
-    convertString,
-    formatEthersCasimir,
-} = useFormat()
+const { copyTextToClipboard, convertString, formatEthersCasimir } = useFormat()
 import { 
     DocumentDuplicateIcon,
     MinusIcon,
@@ -71,38 +63,6 @@ const goToLastPage = () => {
     const end = userSecondaryAccounts.value.length - 1
     currentSecondaryWallets.value = [start, end]
 }
-
-function copyTextToClipboard(text) {
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            setTimeout(() => {
-                addToast(
-                    {
-                        id: "copy_address_" + text,
-                        type: "success",
-                        title: "Address Copied",
-                        subtitle: "Copied Address " + convertString(text),
-                        timed: true,
-                        loading: false
-                    }
-                )
-            }, 1000)
-        })
-        .catch(err => {
-            setTimeout(() => {
-                addToast(
-                    {
-                        id: "copy_address_" + text,
-                        type: "failed",
-                        title: "Failed to Copy Address",
-                        subtitle: "Something went wrong, please try again later",
-                        timed: true,
-                        loading: false
-                    }
-                )
-            }, 1000)
-        })
-}
 </script>
 
 <template>
@@ -113,13 +73,13 @@ function copyTextToClipboard(text) {
           Wallets Connected
         </h1>
         <p class="card_subtitle">
-          Connect and manage the wallets you want under your account
+          Easily manage connected wallets
         </p>
       </div>
 
-      <div>
+      <div class="w-full">
         <button
-          class="secondary_btn w-[122px] 600s:sr-only"
+          class="secondary_btn w-full"
           @click="toggleConnectWalletModal"
         >
           <caption class=" whitespace-nowrap font-[500] tracking-wide mt-[2px]">
@@ -153,20 +113,17 @@ function copyTextToClipboard(text) {
 
             <div class="card_title font-[400] mb-0 text-gray_5">
               <small class="font-[500]">
-                {{ user.walletProvider }}
+                {{ user.walletProvider }} 
               </small><br>
-              <caption class="whitespace-nowrap font-[400] not-sr-only 630s:sr-only">
-                {{ convertStringLong(user.address) }}
-              </caption>
-              <caption class="whitespace-nowrap font-[400] sr-only 630s:not-sr-only">
-                {{ convertString(user.address) }}
+              <caption class="whitespace-nowrap font-[400]">
+                {{ convertString(user.address) }} 
               </caption>
             </div>
           </div>
 
           <div>
             <h6 class="630s:text-[12px] whitespace-nowrap">
-              {{ formatEthersCasimir(user.accounts[user.accounts.findIndex(item => item.address == user.address)].balance) }} ETH
+              {{ formatEthersCasimir(user.accounts[user.accounts.findIndex(item => item.address == user.address)].balance) }} ETH 
             </h6>
           </div>
         </div>
@@ -218,10 +175,7 @@ function copyTextToClipboard(text) {
                 <small class="font-[500]">
                   {{ wallet.walletProvider }} {{ wallet.id }}
                 </small><br>
-                <caption class="whitespace-nowrap font-[400] not-sr-only 630s:sr-only">
-                  {{ convertStringLong(wallet.address) }}
-                </caption>
-                <caption class="whitespace-nowrap font-[400] sr-only 630s:not-sr-only">
+                <caption class="whitespace-nowrap font-[400]">
                   {{ convertString(wallet.address) }}
                 </caption>
               </div>
@@ -229,7 +183,7 @@ function copyTextToClipboard(text) {
 
             <div>
               <h6 class="630s:text-[12px] whitespace-nowrap">
-                {{ formatEthersCasimir(wallet.balance ) }} ETH
+                {{ formatEthersCasimir(wallet.balance ) }} ETH 
               </h6>
             </div>
           </div>
@@ -260,6 +214,7 @@ function copyTextToClipboard(text) {
       </div>
 
       <div
+      
         v-else
         class="flex flex-col gap-[12px]"
       >
@@ -330,7 +285,7 @@ function copyTextToClipboard(text) {
         class="flex items-center justify-between 600s:justify-end gap-[15px] px-[36px] absolute bottom-0 w-full pb-[12px]"
       >
         <div class="text-[#71717a] text-[12px] font-[400] 630s:sr-only">
-          Secondary Wallets ( {{ (currentSecondaryWallets[0] + 1 ) + ' to ' + (currentSecondaryWallets[1] + 1) }} ) of {{ userSecondaryAccounts?.length }}
+          {{ (currentSecondaryWallets[0] + 1 ) + ' to ' + (currentSecondaryWallets[1] + 1) }} of {{ userSecondaryAccounts?.length }}
         </div>
         <div class="flex items-center gap-[5px] text-[#71717a]">
           <button
@@ -362,9 +317,11 @@ function copyTextToClipboard(text) {
             <ChevronDoubleRightIcon class="h-[14px] w-[14px]" />
           </button>
         </div>
-      </div>
+      </div> 
     </div>
 
+    
+      
     <div
       v-else
       class="h-full flex items-center justify-center"
@@ -372,7 +329,7 @@ function copyTextToClipboard(text) {
       <p class="text-mainDarkText/30 dark:text-mainLightText/30">
         No Wallets Connected
       </p>
-    </div>
+    </div> 
   </div>
 </template>
 

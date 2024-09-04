@@ -1,8 +1,8 @@
 <script setup>
 import { ref, watch, onMounted } from "vue"
-import ConnectWallet from "./components/ConnectedWallets.vue"
-import StakeCard from "./components/StakeCard.vue"
+import AVSDirectStake from "./components/AVSDirectStake.vue"
 import ActiveStakes from "./components/ActiveStakes.vue"
+import Portfolio from "./components/Portfolio.vue"
 import {
     TransitionRoot,
     TransitionChild,
@@ -16,6 +16,7 @@ import TermsOfService from "@/components/elements/TermsOfService.vue"
 import useOperatorStatus from "@/composables/state/operatorStatus"
 import OperatorPrompt from "./components/OperatorPrompt.vue"
 import OperatorView from "./components/OperatorView.vue"
+import AVSStage from "./components/AVSStage.vue"
 
 const openTermsAndConditions = ref(false)
 
@@ -68,7 +69,7 @@ watch(showUserIsAnOperator, () => {
     </div>
 
 
-    <div
+    <!-- <div
       class="w-full overflow-hidden"
       :style="showOperatorView === true? 
         'height: 540px; padding-bottom: 24px;' :
@@ -85,16 +86,21 @@ watch(showUserIsAnOperator, () => {
           <OperatorView />
         </div>
       </transition>
+    </div> -->
+
+    <div class="flex items-start gap-[24px] h-[530px] 900s:flex-wrap-reverse 900s:h-[1044px]">
+      <div class="w-9/12 h-full 900s:w-full 900s:h-[530px] min-w-[300px]">
+        <Portfolio />
+      </div>
+      <div class="w-3/12 h-full 900s:w-full 900s:h-[530px]">
+        <AVSDirectStake />
+      </div>
     </div>
 
-    <div class="flex items-start gap-[24px] h-[510px] 900s:flex-wrap-reverse 900s:h-[1044px]">
-      <div class="w-9/12 h-full 900s:w-full 900s:h-[510px]">
-        <ConnectWallet />
-      </div>
-      <div class="w-3/12 h-full 900s:w-full 900s:h-[510px] min-w-[300px]">
-        <StakeCard />
-      </div>
+    <div class="w-full mt-[24px]">
+      <AVSStage />
     </div>
+
     <div class="w-full mt-[24px] h-[540px]">
       <ActiveStakes />
     </div>
