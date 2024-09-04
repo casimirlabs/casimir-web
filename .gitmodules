@@ -1,8 +1,0 @@
-[submodule "contracts/ethereum/lib/ssv-network"]
-	path = contracts/ethereum/lib/ssv-network
-	url = https://github.com/bloxapp/ssv-network.git
-	branch = jato-v2
-[submodule "services/oracle/lib/dkg"]
-	path = services/oracle/lib/dkg
-	url = https://github.com/consensusnetworks/ssv-dkg.git
-	branch = update/makefile
