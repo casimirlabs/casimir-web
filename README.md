@@ -14,8 +14,11 @@
   - [Prerequisites](#prerequisites)
   - [Setup](#setup)
   - [Configure](#configure)
-  - [Usage](#apps)
-    - [@casimir/web](#casimirweb)
+  - [Usage](#usage)
+    - [Install](#install)
+    - [Dev](#dev)
+    - [Build](#build)
+    - [Preview](#preview)
 - [License](#license)
 
 ## About
@@ -56,9 +59,9 @@ Customize and override the development environment configuration by creating a [
 
 | Name | Description | Default |
 | - | - | - |
-| `PUBLIC_NETWORK` | Network name (`mainnet || holesky) | `holesky` |
+| `PUBLIC_NETWORK` | Network name (`mainnet` or `holesky`) | `holesky` |
 | `PUBLIC_ETHEREUM_RPC_URL` | Ethereum RPC URL | `http://127.0.0.1:8545` |
-| `PUBLIC_CRYPTO_COMPARE_API_KEY` | CryptoCompare API key | `` |
+| `PUBLIC_CRYPTO_COMPARE_API_KEY` | CryptoCompare API key | `""` |
 
 ### Usage
 
