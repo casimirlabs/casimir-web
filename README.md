@@ -62,6 +62,7 @@ Customize and override the development environment configuration by creating a [
 | `PUBLIC_NETWORK` | Network name (`mainnet` or `holesky`) | `holesky` |
 | `PUBLIC_ETHEREUM_RPC_URL` | Ethereum RPC URL | `http://127.0.0.1:8545` |
 | `PUBLIC_CRYPTO_COMPARE_API_KEY` | CryptoCompare API key | `""` |
+| `PUBLIC_WALLET_CONNECT_PROJECT_ID` | WalletConnect project ID | `""` |
 
 ### Usage
 
