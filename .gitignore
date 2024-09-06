@@ -1,17 +1,5 @@
-.env
-__pycache__
-.secrets
 .DS_Store
-node_modules
-template.out
-aws.env
+.env
 *.log
-.idea
-cdk-outputs.json
-
-# Sensitive
-**/**/secrets/*.json
-
-services/crawler/.env
-
-.out
+node_modules
+dist

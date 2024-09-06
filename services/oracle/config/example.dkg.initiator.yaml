@@ -1,3 +1,0 @@
-network: 'prater'
-privKey: ./keys/example.encrypted.initiator.json
-privKeyPassword: ./keys/example.password.initiator.txt
