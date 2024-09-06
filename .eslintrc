@@ -7,8 +7,7 @@
     "extends": [
         "eslint:recommended",
         "plugin:vue/recommended",
-        "plugin:@typescript-eslint/recommended",
-        "@vue/eslint-config-typescript"
+        "plugin:@typescript-eslint/recommended"
     ],
     "parser": "vue-eslint-parser",
     "parserOptions": {
@@ -22,6 +21,7 @@
     ],
     "rules": {
         "indent": ["error", 4],
+        "vue/html-indent": ["error", 4],
         "semi": ["error", "never"],
         "quotes": ["error", "double"],
         "space-before-blocks": ["error", "always"],
@@ -33,9 +33,6 @@
     },
     "ignorePatterns": [
         "**/node_modules/**",
-        "**/build/**",
-        "**/dist/**",
-        "**/lib/**",
-        "cdk.out"
+        "**/dist/**"
     ]
 }

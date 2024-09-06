@@ -12,69 +12,69 @@ const toastExists = (t) => {
 </script>
 
 <template>
-  <div
-    v-if="toasts && toasts.length < 5" 
-    class="toasts_container_vertical"
-  >
-    <transition-group
-      name="toast_vertical"
-      tag="div"
-      class="overflow-hidden pb-[12px] "
+    <div
+        v-if="toasts && toasts.length < 5" 
+        class="toasts_container_vertical"
     >
-      <div
-        v-for="i in toasts"
-        :key="i"
-        class="toast relative overflow-hidden"
-      >
-        <ToastContent
-          :toast="i"
-        />
-        <div
-          v-if="i.timed"
-          class="absolute bottom-0 left-0 w-full h-[4px]"
+        <transition-group
+            name="toast_vertical"
+            tag="div"
+            class="overflow-hidden pb-[12px] "
         >
-          <div class="expand bg-black dark:bg-white h-full" />
-        </div>
-      </div>
-    </transition-group>
-  </div>
-  <div
-    v-else-if="toasts.length > 4"
-    class="toasts_container_horizontal overflow-hidden"
-  >
-    <transition
-      name="mini_toast_expand"
-      tag="div"
-      class="overflow-hidden border"
+            <div
+                v-for="i in toasts"
+                :key="i"
+                class="toast relative overflow-hidden"
+            >
+                <ToastContent
+                    :toast="i"
+                />
+                <div
+                    v-if="i.timed"
+                    class="absolute bottom-0 left-0 w-full h-[4px]"
+                >
+                    <div class="expand bg-black dark:bg-white h-full" />
+                </div>
+            </div>
+        </transition-group>
+    </div>
+    <div
+        v-else-if="toasts.length > 4"
+        class="toasts_container_horizontal overflow-hidden"
     >
-      <div
-        v-show="showMiniToast && toastExists(showMiniToast)"
-        class="mb-[12px] toast"
-        @mouseleave="showMiniToast = null"
-      >
-        <ToastContent
-          :toast="showMiniToast"
-        />
-      </div>
-    </transition>
-    <transition-group
-      name="toast_horizontal"
-      tag="div"
-      class="overflow-hidden flex items-center gap-[12px] pb-[12px]"
-    >
-      <div
-        v-for="i in toasts"
-        :key="i"
-        class="toast_mini"
-        @mouseover="showMiniToast = i"
-      >
-        <ToastContent
-          :toast="i"
-          :mini="true"
-        />
-      </div>
-    </transition-group>
-  </div>
+        <transition
+            name="mini_toast_expand"
+            tag="div"
+            class="overflow-hidden border"
+        >
+            <div
+                v-show="showMiniToast && toastExists(showMiniToast)"
+                class="mb-[12px] toast"
+                @mouseleave="showMiniToast = null"
+            >
+                <ToastContent
+                    :toast="showMiniToast"
+                />
+            </div>
+        </transition>
+        <transition-group
+            name="toast_horizontal"
+            tag="div"
+            class="overflow-hidden flex items-center gap-[12px] pb-[12px]"
+        >
+            <div
+                v-for="i in toasts"
+                :key="i"
+                class="toast_mini"
+                @mouseover="showMiniToast = i"
+            >
+                <ToastContent
+                    :toast="i"
+                    :mini="true"
+                />
+            </div>
+        </transition-group>
+    </div>
 </template>
 
 <style scoped>

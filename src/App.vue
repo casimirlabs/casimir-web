@@ -37,29 +37,29 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="app_container">
-    <NavBar class="z-[999]" />
-    <div
-      v-if="!loadingSession"
-      class="app_container_inner z-[888]"
-    >
-      <div>
-        <router-view />
-      </div>
-      <Toasts />
+    <div class="app_container">
+        <NavBar class="z-[999]" />
+        <div
+            v-if="!loadingSession"
+            class="app_container_inner z-[888]"
+        >
+            <div>
+                <router-view />
+            </div>
+            <Toasts />
+        </div>
+
+
+        <div
+            v-else
+            class="overflow-hidden opacity-50"
+            style="height: calc(100vh - 300px);"
+        >
+            <Loading :show-text="false" />
+        </div>
+
+        <ConnectWalletModal v-show="openConnectWalletModal" />
     </div>
-
-
-    <div
-      v-else
-      class="overflow-hidden opacity-50"
-      style="height: calc(100vh - 300px);"
-    >
-      <Loading :show-text="false" />
-    </div>
-
-    <ConnectWalletModal v-show="openConnectWalletModal" />
-  </div>
 </template>
 
 <style scoped></style>

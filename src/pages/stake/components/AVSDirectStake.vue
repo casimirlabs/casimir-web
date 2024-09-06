@@ -208,353 +208,353 @@ const handleImageError = (event) => {
 </script>
 
 <template>
-  <div class="card w-full h-full shadow p-[24px] flex flex-col items-start justify-between gap-[24px]">
-    <!-- Title and Subtitle -->
-    <div class="w-full flex items-center gap-[8px] min-w-[210px]">
-      <div>
-        <h1 class="card_title">
-          AVS
-        </h1>
+    <div class="card w-full h-full shadow p-[24px] flex flex-col items-start justify-between gap-[24px]">
+        <!-- Title and Subtitle -->
+        <div class="w-full flex items-center gap-[8px] min-w-[210px]">
+            <div>
+                <h1 class="card_title">
+                    AVS
+                </h1>
 
-        <p class="card_subtitle">
-          Browse and select an AVS to begin restaking
-        </p>
-      </div>
-    </div>
+                <p class="card_subtitle">
+                    Browse and select an AVS to begin restaking
+                </p>
+            </div>
+        </div>
 
-    <!-- Search Bar -->
-    <div class="flex items-center gap-[12px] w-full">
-      <div
-        class="w-full rounded-[6px] flex items-center 
+        <!-- Search Bar -->
+        <div class="flex items-center gap-[12px] w-full">
+            <div
+                class="w-full rounded-[6px] flex items-center 
         justify-between input_container_border gap-[12px] p-0 shadow-md"
-      >
-        <input
-          v-model="searchInputValue"
-          type="text"
-          placeholder="Search"
-          class="flex items-center text-[14.22px] justify-between gap-[8px] w-full h-full outline-none bg-transparent
+            >
+                <input
+                    v-model="searchInputValue"
+                    type="text"
+                    placeholder="Search"
+                    class="flex items-center text-[14.22px] justify-between gap-[8px] w-full h-full outline-none bg-transparent
           text-black dark:text-white px-[6px]"
-        >
-        <button
-          class="rounded-r-[6px] px-[12px] py-[6px] flex items-center justify-center gap-[8px]
+                >
+                <button
+                    class="rounded-r-[6px] px-[12px] py-[6px] flex items-center justify-center gap-[8px]
           bg-gray_4 text-black dark:bg-gray_5 dark:text-white
           hover:bg-gray_4/60 active:bg-gray_4/80 dark:hover:bg-gray_5/60
           dark:active:bg-gray_5/80;
           border-l border-l-lightBorder dark:border-l-darkBorder"
-        >
-          <MagnifyingGlassIcon class="w-[20px] h-[20px]" />
-        </button>
-      </div>
-    </div>
+                >
+                    <MagnifyingGlassIcon class="w-[20px] h-[20px]" />
+                </button>
+            </div>
+        </div>
 
-    <!-- Table -->
-    <div class="w-full h-full">
-      <div class="w-full border border-lightBorder dark:border-darkBorder rounded-[6px] overflow-x-auto overflow-y-scroll">
-        <table class="w-full overflow-x-auto">
-          <thead>
-            <tr class="border-b border-b-lightBorder dark:border-b-darkBorder">
-              <th
-                v-for="item in tableHeaders"
-                v-show="item.show"
-                :key="item.value"
-                class="py-[8px] text-left px-[8px] whitespace-nowrap"
-              >
-                <small class="font-[300]">
-                  {{ item.title }}
-                </small>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="w-full overflow-scroll">
-            <tr
-              v-for="AVS in filteredAVS"
-              :key="AVS"
-              class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
-              @click="openStakeWithAVSModal(), selectAVS(AVS)"
-            >
-              <td
-                v-for="(item, index) in tableHeaders"
-                v-show="item.show"
-                :key="index"
-                class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
-              >
-                <!-- 
+        <!-- Table -->
+        <div class="w-full h-full">
+            <div class="w-full border border-lightBorder dark:border-darkBorder rounded-[6px] overflow-x-auto overflow-y-scroll">
+                <table class="w-full overflow-x-auto">
+                    <thead>
+                        <tr class="border-b border-b-lightBorder dark:border-b-darkBorder">
+                            <th
+                                v-for="item in tableHeaders"
+                                v-show="item.show"
+                                :key="item.value"
+                                class="py-[8px] text-left px-[8px] whitespace-nowrap"
+                            >
+                                <small class="font-[300]">
+                                    {{ item.title }}
+                                </small>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="w-full overflow-scroll">
+                        <tr
+                            v-for="AVS in filteredAVS"
+                            :key="AVS"
+                            class="hover:bg-gray_4 dark:hover:bg-gray_6 cursor-pointer whitespace-nowrap"
+                            @click="openStakeWithAVSModal(), selectAVS(AVS)"
+                        >
+                            <td
+                                v-for="(item, index) in tableHeaders"
+                                v-show="item.show"
+                                :key="index"
+                                class="border-b py-[8px] border-b-lightBorder dark:border-b-darkBorder"
+                            >
+                                <!-- 
     { title: "ETH Restaked", show: ref(true), value: "tvl" },
     { title: "Beacon Ether", show: ref(false), value: "tvlBeaconChain" },
     { title: "LSTs", show: ref(false), value: "tvlRestaking" },
 ] -->
-                <div
-                  v-if="item.value === 'metadataName'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <div class="w-[20px] h-[20px] rounded-[999px]">
-                    <img
-                      :src="AVS.metadataLogo"
-                      :alt="`AVS Logo: ${AVS.metadataLogo}`"
-                      class="w-full h-full"
-                      @error="handleImageError"
-                    >
-                  </div>
-                  <small class="w-[150px] truncate">{{ AVS.metadataName }}</small>
-                </div>
+                                <div
+                                    v-if="item.value === 'metadataName'"
+                                    class="px-[8px] flex items-center gap-[12px]"
+                                >
+                                    <div class="w-[20px] h-[20px] rounded-[999px]">
+                                        <img
+                                            :src="AVS.metadataLogo"
+                                            :alt="`AVS Logo: ${AVS.metadataLogo}`"
+                                            class="w-full h-full"
+                                            @error="handleImageError"
+                                        >
+                                    </div>
+                                    <small class="w-[150px] truncate">{{ AVS.metadataName }}</small>
+                                </div>
 
-                <div
-                  v-else-if="item.value === 'address'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>{{ convertString(AVS.address ) }}</small>
-                </div>
+                                <div
+                                    v-else-if="item.value === 'address'"
+                                    class="px-[8px] flex items-center gap-[12px]"
+                                >
+                                    <small>{{ convertString(AVS.address ) }}</small>
+                                </div>
 
-                <div
-                  v-else-if="item.value === 'metadataLogo'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <div class="w-[20px] h-[20px] rounded-[999px]">
-                    <img
-                      :src="AVS.metadataLogo"
-                      :alt="`AVS Logo: ${AVS.metadataLogo}`"
-                      class="w-full h-full"
-                      @error="handleImageError"
-                    >
-                  </div>
-                </div>
+                                <div
+                                    v-else-if="item.value === 'metadataLogo'"
+                                    class="px-[8px] flex items-center gap-[12px]"
+                                >
+                                    <div class="w-[20px] h-[20px] rounded-[999px]">
+                                        <img
+                                            :src="AVS.metadataLogo"
+                                            :alt="`AVS Logo: ${AVS.metadataLogo}`"
+                                            class="w-full h-full"
+                                            @error="handleImageError"
+                                        >
+                                    </div>
+                                </div>
 
-                <div
-                  v-else-if="item.value === 'metadataWebsite'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>
-                    {{ AVS.metadataWebsite }}
-                  </small>
-                </div>
+                                <div
+                                    v-else-if="item.value === 'metadataWebsite'"
+                                    class="px-[8px] flex items-center gap-[12px]"
+                                >
+                                    <small>
+                                        {{ AVS.metadataWebsite }}
+                                    </small>
+                                </div>
 
-                <div
-                  v-else-if="item.value === 'tvl'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>
-                    {{ AVS.tvl }} ETH
-                  </small>
-                </div>
+                                <div
+                                    v-else-if="item.value === 'tvl'"
+                                    class="px-[8px] flex items-center gap-[12px]"
+                                >
+                                    <small>
+                                        {{ AVS.tvl }} ETH
+                                    </small>
+                                </div>
 
-                <div
-                  v-else-if="item.value === 'tvlBeaconChain'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>
-                    {{ AVS.tvlBeaconChain }} ETH
-                  </small>
-                </div>
+                                <div
+                                    v-else-if="item.value === 'tvlBeaconChain'"
+                                    class="px-[8px] flex items-center gap-[12px]"
+                                >
+                                    <small>
+                                        {{ AVS.tvlBeaconChain }} ETH
+                                    </small>
+                                </div>
 
-                <div
-                  v-else-if="item.value === 'tvlRestaking'"
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>
-                    {{ AVS.tvlRestaking }} ETH
-                  </small>
-                </div>
+                                <div
+                                    v-else-if="item.value === 'tvlRestaking'"
+                                    class="px-[8px] flex items-center gap-[12px]"
+                                >
+                                    <small>
+                                        {{ AVS.tvlRestaking }} ETH
+                                    </small>
+                                </div>
 
-                <div
-                  v-else
-                  class="px-[8px] flex items-center gap-[12px]"
-                >
-                  <small>
-                    {{ AVS[item.value] }}
-                  </small>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+                                <div
+                                    v-else
+                                    class="px-[8px] flex items-center gap-[12px]"
+                                >
+                                    <small>
+                                        {{ AVS[item.value] }}
+                                    </small>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <!-- Pagination Controls -->
-    <div class="flex items-center justify-between gap-[15px] w-full px-[8px]">
-      <div class="text-[#71717a] text-[12px] font-[400]">
-        Page {{ currentPage }} of {{ pagesAvailable }}
-      </div>
-      <div class="flex items-center gap-[5px] text-[#71717a]">
-        <button
-          class="border border-[#e4e4e7] rounded-[6px] p-[4px] 
+        <!-- Pagination Controls -->
+        <div class="flex items-center justify-between gap-[15px] w-full px-[8px]">
+            <div class="text-[#71717a] text-[12px] font-[400]">
+                Page {{ currentPage }} of {{ pagesAvailable }}
+            </div>
+            <div class="flex items-center gap-[5px] text-[#71717a]">
+                <button
+                    class="border border-[#e4e4e7] rounded-[6px] p-[4px] 
             hover:bg-[#F4F4F5] cursor-pointer"
-          @click="goToStartPage()"
-        >
-          <ChevronDoubleLeftIcon class="h-[14px] w-[14px]" />
-        </button>
-        <button
-          class="border border-[#e4e4e7] rounded-[6px] p-[4px] 
+                    @click="goToStartPage()"
+                >
+                    <ChevronDoubleLeftIcon class="h-[14px] w-[14px]" />
+                </button>
+                <button
+                    class="border border-[#e4e4e7] rounded-[6px] p-[4px] 
             hover:bg-[#F4F4F5] cursor-pointer"
-          @click="goToPreviousPage()"
-        >
-          <ChevronLeftIcon class="h-[14px] w-[14px]" />
-        </button>
-        <button
-          class="border border-[#e4e4e7] rounded-[6px] p-[4px] 
+                    @click="goToPreviousPage()"
+                >
+                    <ChevronLeftIcon class="h-[14px] w-[14px]" />
+                </button>
+                <button
+                    class="border border-[#e4e4e7] rounded-[6px] p-[4px] 
             hover:bg-[#F4F4F5] cursor-pointer"
-          @click="goToNextPage()"
-        >
-          <ChevronRightIcon class="h-[14px] w-[14px]" />
-        </button>
-        <button
-          class="border border-[#e4e4e7] rounded-[6px] p-[4px] 
+                    @click="goToNextPage()"
+                >
+                    <ChevronRightIcon class="h-[14px] w-[14px]" />
+                </button>
+                <button
+                    class="border border-[#e4e4e7] rounded-[6px] p-[4px] 
             hover:bg-[#F4F4F5] cursor-pointer"
-          @click="goToLastPage()"
-        >
-          <ChevronDoubleRightIcon class="h-[14px] w-[14px]" />
-        </button>
-      </div>
-    </div>
+                    @click="goToLastPage()"
+                >
+                    <ChevronDoubleRightIcon class="h-[14px] w-[14px]" />
+                </button>
+            </div>
+        </div>
 
 
-    <!-- Table Configurations -->
-    <TransitionRoot
-      appear
-      :show="openColumnsConfigurations"
-      as="template"
-    >
-      <Dialog
-        as="div"
-        class="relative z-10"
-        @close="closeColumnsConfigurationsModal"
-      >
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
+        <!-- Table Configurations -->
+        <TransitionRoot
+            appear
+            :show="openColumnsConfigurations"
+            as="template"
         >
-          <div class="fixed inset-0 bg-black/25" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
+            <Dialog
+                as="div"
+                class="relative z-10"
+                @close="closeColumnsConfigurationsModal"
             >
-              <DialogPanel class="card w-full max-w-[360px] p-[24px]">
-                <div class="text-left pb-[24px] border-b border-b-lightBorder dark:border-b-darkBorder">
-                  <h1 class="card_title">
-                    Configure Columns
-                  </h1>
-                  <p class="card_subtitle">
-                    Change the layout of the transaction list and display only the columns and information that is most
-                    important to you.
-                  </p>
-                </div>
+                <TransitionChild
+                    as="template"
+                    enter="duration-300 ease-out"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="duration-200 ease-in"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0"
+                >
+                    <div class="fixed inset-0 bg-black/25" />
+                </TransitionChild>
 
-                <div class="mt-4">
-                  <div
-                    v-for="(item, index) in columns"
-                    :key="index"
-                    class="w-full flex items-center justify-between mt-[10px] text-[14px] font-[500] tracking-[0.15px] text-[#71717a] text-left"
-                  >
-                    {{ item.title }}
-
-
-                    <div class="flex items-center gap-[12px] text-[12px]">
-                      <div class="flex items-center gap-[6px]">
-                        <button
-                          class="secondary_btn hover:outline outline-[0.5px] outline-lightBorder dark:outline-darkBorder"
-                          style="gap: 0px; box-shadow: none; font-weight: 800; padding: 4px 6px;"
-                          :style="sortedItem === item.value && sortedDirection === 'ascending' ? 'background: black; color: white;' : ''"
-                          @click="sortedItem = item.value, sortedDirection = 'ascending'"
+                <div class="fixed inset-0 overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4 text-center">
+                        <TransitionChild
+                            as="template"
+                            enter="duration-300 ease-out"
+                            enter-from="opacity-0 scale-95"
+                            enter-to="opacity-100 scale-100"
+                            leave="duration-200 ease-in"
+                            leave-from="opacity-100 scale-100"
+                            leave-to="opacity-0 scale-95"
                         >
-                          A
-                          <div class="w-[14px] h-[14px]">
-                            <ArrowLongUpIcon />
-                          </div>
-                        </button>
-                        <button
-                          class="secondary_btn hover:outline outline-[0.5px] outline-lightBorder dark:outline-darkBorder"
-                          style="gap: 0px; box-shadow: none; font-weight: 800; padding: 4px 6px;"
-                          :style="sortedItem === item.value && sortedDirection === 'descending' ? 'background: black; color: white;' : ''"
-                          @click="sortedItem = item.value, sortedDirection = 'descending'"
-                        >
-                          a
-                          <div class="w-[14px] h-[14px]">
-                            <ArrowLongDownIcon />
-                          </div>
-                        </button>
-                      </div>
-                      <Switch
-                        :class="findSwitchHeaderValue(item) ? 'bg-black dark:bg-white' : ' bg-gray_1 dark:bg-gray_6'"
-                        class="switch_container"
-                        @click="toggleColumnShowItem(item)"
-                      >
-                        <span class="sr-only">Use setting</span>
-                        <span
-                          aria-hidden="true"
-                          :class="columns[index].show.value ? 'translate-x-4' : 'translate-x-0'"
-                          class="switch_ball"
-                        />
-                      </Switch>
+                            <DialogPanel class="card w-full max-w-[360px] p-[24px]">
+                                <div class="text-left pb-[24px] border-b border-b-lightBorder dark:border-b-darkBorder">
+                                    <h1 class="card_title">
+                                        Configure Columns
+                                    </h1>
+                                    <p class="card_subtitle">
+                                        Change the layout of the transaction list and display only the columns and information that is most
+                                        important to you.
+                                    </p>
+                                </div>
+
+                                <div class="mt-4">
+                                    <div
+                                        v-for="(item, index) in columns"
+                                        :key="index"
+                                        class="w-full flex items-center justify-between mt-[10px] text-[14px] font-[500] tracking-[0.15px] text-[#71717a] text-left"
+                                    >
+                                        {{ item.title }}
+
+
+                                        <div class="flex items-center gap-[12px] text-[12px]">
+                                            <div class="flex items-center gap-[6px]">
+                                                <button
+                                                    class="secondary_btn hover:outline outline-[0.5px] outline-lightBorder dark:outline-darkBorder"
+                                                    style="gap: 0px; box-shadow: none; font-weight: 800; padding: 4px 6px;"
+                                                    :style="sortedItem === item.value && sortedDirection === 'ascending' ? 'background: black; color: white;' : ''"
+                                                    @click="sortedItem = item.value, sortedDirection = 'ascending'"
+                                                >
+                                                    A
+                                                    <div class="w-[14px] h-[14px]">
+                                                        <ArrowLongUpIcon />
+                                                    </div>
+                                                </button>
+                                                <button
+                                                    class="secondary_btn hover:outline outline-[0.5px] outline-lightBorder dark:outline-darkBorder"
+                                                    style="gap: 0px; box-shadow: none; font-weight: 800; padding: 4px 6px;"
+                                                    :style="sortedItem === item.value && sortedDirection === 'descending' ? 'background: black; color: white;' : ''"
+                                                    @click="sortedItem = item.value, sortedDirection = 'descending'"
+                                                >
+                                                    a
+                                                    <div class="w-[14px] h-[14px]">
+                                                        <ArrowLongDownIcon />
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <Switch
+                                                :class="findSwitchHeaderValue(item) ? 'bg-black dark:bg-white' : ' bg-gray_1 dark:bg-gray_6'"
+                                                class="switch_container"
+                                                @click="toggleColumnShowItem(item)"
+                                            >
+                                                <span class="sr-only">Use setting</span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    :class="columns[index].show.value ? 'translate-x-4' : 'translate-x-0'"
+                                                    class="switch_ball"
+                                                />
+                                            </Switch>
+                                        </div>
+                                    </div>
+                                </div>
+                            </DialogPanel>
+                        </TransitionChild>
                     </div>
-                  </div>
                 </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
+            </Dialog>
+        </TransitionRoot>
 
-    <!-- AVS Card & Staking Modal-->
-    <TransitionRoot
-      appear
-      :show="stakeWithAVSModal && selectedAVS !== null"
-      as="template"
-    >
-      <Dialog
-        as="div"
-        class="relative z-10"
-        @close="closeStakeWithAVSModal"
-      >
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
+        <!-- AVS Card & Staking Modal-->
+        <TransitionRoot
+            appear
+            :show="stakeWithAVSModal && selectedAVS !== null"
+            as="template"
         >
-          <div class="fixed inset-0 bg-black/25" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
+            <Dialog
+                as="div"
+                class="relative z-10"
+                @close="closeStakeWithAVSModal"
             >
-              <DialogPanel
-                v-show="selectedAVS !== null"
-                class="card w-full min-w-[320px] max-w-[450px] p-[24px] mx-auto"
-              >
-                <AVSCard
-                  :close-stake-with-a-v-s-modal="closeStakeWithAVSModal"
-                />
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-  </div>
+                <TransitionChild
+                    as="template"
+                    enter="duration-300 ease-out"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="duration-200 ease-in"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0"
+                >
+                    <div class="fixed inset-0 bg-black/25" />
+                </TransitionChild>
+
+                <div class="fixed inset-0 overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4 text-center">
+                        <TransitionChild
+                            as="template"
+                            enter="duration-300 ease-out"
+                            enter-from="opacity-0 scale-95"
+                            enter-to="opacity-100 scale-100"
+                            leave="duration-200 ease-in"
+                            leave-from="opacity-100 scale-100"
+                            leave-to="opacity-0 scale-95"
+                        >
+                            <DialogPanel
+                                v-show="selectedAVS !== null"
+                                class="card w-full min-w-[320px] max-w-[450px] p-[24px] mx-auto"
+                            >
+                                <AVSCard
+                                    :close-stake-with-a-v-s-modal="closeStakeWithAVSModal"
+                                />
+                            </DialogPanel>
+                        </TransitionChild>
+                    </div>
+                </div>
+            </Dialog>
+        </TransitionRoot>
+    </div>
 </template>

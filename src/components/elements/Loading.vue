@@ -47,25 +47,25 @@ const calculateFontSize = () => {
 </script>
 
 <template>
-  <div
-    id="loading_container"
-    class="relative w-full h-full "
-  >
-    <img
-      :src="isDark? '/loading_light.svg' :'/loading_dark.svg'"
-      alt="Loading Icon"
-      class="w-full h-full arrow_spin_animation"
-    >
-
     <div
-      v-show="props.showText && !wait"
-      class="absolute top-0 left-0 w-full h-full flex items-center 
-      justify-center text-black dark:text-white dynamic_text"
-      :style="{ fontSize: `${calculateFontSize()}vw` }"
+        id="loading_container"
+        class="relative w-full h-full "
     >
-      <h6>{{ loadingText }}{{ dots }}</h6>
+        <img
+            :src="isDark? '/loading_light.svg' :'/loading_dark.svg'"
+            alt="Loading Icon"
+            class="w-full h-full arrow_spin_animation"
+        >
+
+        <div
+            v-show="props.showText && !wait"
+            class="absolute top-0 left-0 w-full h-full flex items-center 
+      justify-center text-black dark:text-white dynamic_text"
+            :style="{ fontSize: `${calculateFontSize()}vw` }"
+        >
+            <h6>{{ loadingText }}{{ dots }}</h6>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

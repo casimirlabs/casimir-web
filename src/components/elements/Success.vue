@@ -20,24 +20,24 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    id="success_container"
-    class="relative w-full h-full min-w-[100px] min-h-[100px] flex items-center
-    justify-center"
-  >
-    <CheckCircleIcon
-      v-if="!wait"
-      class="w-[50%] h-[50%] z-[10] scale_up initial_hidden text-green"
-    />
     <div
-      v-if="!wait"
-      class="absolute w-full h-full top-0 left-0 z-[1] flex items-center justify-center"
+        id="success_container"
+        class="relative w-full h-full min-w-[100px] min-h-[100px] flex items-center
+    justify-center"
     >
-      <div
-        class="w-[75%] h-[75%] bg-green/10 blur-[2px] rounded-[999px] scale_up_normal initial_hidden" 
-      />
+        <CheckCircleIcon
+            v-if="!wait"
+            class="w-[50%] h-[50%] z-[10] scale_up initial_hidden text-green"
+        />
+        <div
+            v-if="!wait"
+            class="absolute w-full h-full top-0 left-0 z-[1] flex items-center justify-center"
+        >
+            <div
+                class="w-[75%] h-[75%] bg-green/10 blur-[2px] rounded-[999px] scale_up_normal initial_hidden" 
+            />
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
