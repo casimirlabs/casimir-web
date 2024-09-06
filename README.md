@@ -1,4 +1,4 @@
-<img width="50px" alt="Casimir logo" src="casimir.png">
+<img width="50px" alt="Casimir logo" src="https://avatars.githubusercontent.com/u/159835967">
 
 # Casimir Web
 
