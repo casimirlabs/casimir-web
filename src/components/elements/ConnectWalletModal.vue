@@ -351,7 +351,7 @@ onUnmounted(() => {
                                         :key="pathIndex"
                                         class="flex items-center gap-[12px]"
                                     >
-                                        <div
+                                        <!-- <div
                                             v-if="checkIfAddressIsUsed(act)"
                                             class="tooltip_container"
                                         >
@@ -359,18 +359,11 @@ onUnmounted(() => {
                                             <div class="tooltip w-[200px]">
                                                 This wallet is currently connect with this account
                                             </div>
-                                        </div>
+                                        </div> -->
                                         <button
                                             class="flex items-center justify-between gap-5 w-full border relative px-[12px] py-[8px] shadow
                         rounded-[6px] bg-lightBg dark:bg-darkBg border-lightBorder dark:border-lightBorder/40
                         hover:bg-hover_white/30 dark:hover:bg-hover_black/30 active:bg-hover_white/60 dark:active:bg-hover_black/60"
-                                            :disabled="checkIfAddressIsUsed(act)"
-                                            :class="checkIfAddressIsUsed(act)? 'opacity-30' : ''"
-                                            @click="
-                                                selectedProvider === 'Ledger' || selectedProvider === 'Trezor' ?
-                                                    selectAddress(trimAndLowercaseAddress(act.address), pathIndex) :
-                                                    selectAddress(trimAndLowercaseAddress(act.address), undefined)
-                                            "
                                         >
                                             <div>
                                                 {{ convertString(act.address) }}
@@ -488,7 +481,6 @@ onUnmounted(() => {
                                     </button>
                                     <button
                                         class="primary_btn w-full flex items-center justify-center text-sm"
-                                        @click="handleConfirmCreateAccountWithExistingSecondary"
                                     >
                                         Create Account
                                     </button>
