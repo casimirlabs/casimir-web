@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onMounted } from "vue"
-import AVSDirectStake from "./components/AVSDirectStake.vue"
-import ActiveStakes from "./components/ActiveStakes.vue"
-import Portfolio from "./components/Portfolio.vue"
+// import AVSDirectStake from "./components/AVSDirectStake.vue"
+// import ActiveStakes from "./components/ActiveStakes.vue"
+// import Portfolio from "./components/Portfolio.vue"
 import {
     TransitionRoot,
     TransitionChild,
@@ -12,17 +12,17 @@ import {
 import { 
     InformationCircleIcon,
 } from "@heroicons/vue/24/outline"
-import TermsOfService from "@/components/elements/TermsOfService.vue"
-import useOperatorStatus from "@/composables/state/operatorStatus"
-import OperatorPrompt from "./components/OperatorPrompt.vue"
-import OperatorView from "./components/OperatorView.vue"
-import AVSStage from "./components/AVSStage.vue"
+// import TermsOfService from "@/components/elements/TermsOfService.vue"
+// import useOperatorStatus from "@/composables/state/operatorStatus"
+// import OperatorPrompt from "./components/OperatorPrompt.vue"
+// import OperatorView from "./components/OperatorView.vue"
+// import AVSStage from "./components/AVSStage.vue"
 
 const openTermsAndConditions = ref(false)
 
-const {
-    showUserIsAnOperator
-} = useOperatorStatus()
+// const {
+//     showUserIsAnOperator
+// } = useOperatorStatus()
 
 const closeTermsAndCondiditons = () => {
     openTermsAndConditions.value = false
@@ -34,24 +34,24 @@ const  openTermsAndCondiditons = () => {
 const showOperatorView = ref(false)
 
 onMounted(() => {
-    if (showUserIsAnOperator.value == "true" || showUserIsAnOperator.value == true) {
-        showOperatorView.value = true
-    } else if (showUserIsAnOperator.value == "false" || showUserIsAnOperator.value == false) {
-        showOperatorView.value = false
-    }
+    // if (showUserIsAnOperator.value == "true" || showUserIsAnOperator.value == true) {
+    //     showOperatorView.value = true
+    // } else if (showUserIsAnOperator.value == "false" || showUserIsAnOperator.value == false) {
+    //     showOperatorView.value = false
+    // }
 })
-watch(showUserIsAnOperator, () => {
-    if (showUserIsAnOperator.value == "true" || showUserIsAnOperator.value == true) {
-        showOperatorView.value = true
-    } else if (showUserIsAnOperator.value == "false" || showUserIsAnOperator.value == false) {
-        showOperatorView.value = false
-    }
-})
+// watch(showUserIsAnOperator, () => {
+//     if (showUserIsAnOperator.value == "true" || showUserIsAnOperator.value == true) {
+//         showOperatorView.value = true
+//     } else if (showUserIsAnOperator.value == "false" || showUserIsAnOperator.value == false) {
+//         showOperatorView.value = false
+//     }
+// })
 </script>
 
 <template>
     <div>
-        <div
+        <!-- <div
             class="w-full overflow-hidden "
             :class="showUserIsAnOperator == undefined? 'h-[120px] pb-[24px]' : 'h-[0px] pb-[0px]' "
             style="transition: all 0.5s ease-in;"
@@ -66,7 +66,7 @@ watch(showUserIsAnOperator, () => {
                     <OperatorPrompt />
                 </div>
             </transition>
-        </div>
+        </div> -->
 
 
         <!-- <div
@@ -153,7 +153,7 @@ watch(showUserIsAnOperator, () => {
                             leave-from="opacity-100 scale-100"
                             leave-to="opacity-0 scale-95"
                         >
-                            <DialogPanel
+                            <!-- <DialogPanel
                                 v-show="selectedStake !== null"
                                 class="card w-full max-w-[360px] px-[24px] pb-[24px] max-h-[500px] overflow-auto relative"
                             >
@@ -168,7 +168,7 @@ watch(showUserIsAnOperator, () => {
                                 </div>
 
                                 <TermsOfService />
-                            </DialogPanel>
+                            </DialogPanel> -->
                         </TransitionChild>
                     </div>
                 </div>

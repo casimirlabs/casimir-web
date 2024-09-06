@@ -28,10 +28,12 @@
   },
   "homepage": "https://github.com/casimirlabs/casimir-web#readme",
   "dependencies": {
-    "@casimirlabs/casimir-contracts": "^0.0.1",
+    "@casimirlabs/casimir-contracts": "^0.0.2",
     "@headlessui/vue": "^1.7.16",
     "@heroicons/vue": "^2.0.18",
+    "@metamask/providers": "^17.1.2",
     "@vueuse/core": "^10.7.0",
+    "@walletconnect/ethereum-provider": "^2.16.0",
     "buffer": "^6.0.3",
     "chart.js": "^4.4.4",
     "viem": "^2.21.2",
