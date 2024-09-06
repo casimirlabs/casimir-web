@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatEther } from "viem"
 import useEthereum from "@/composables/ethereum"
 
 const { strategyById } = useEthereum()
@@ -17,6 +18,7 @@ const { strategyById } = useEthereum()
         AVS Operator: {{ strategy.strategyConfig.delegateAddress }}<br>
         Deposit Fee: {{ strategy.strategyConfig.depositFee }}%<br>
         Reward Fee: {{ strategy.strategyConfig.rewardFee }}%<br>
-        Total Stake: {{ strategy.totalStake }}
+        Total Stake: {{ formatEther(strategy.totalStake) }} ETH<br>
+        User Stake: 
     </div>
 </template>

@@ -1,4 +1,4 @@
-import { createPublicClient, getContract, http, Address, createWalletClient, custom, EIP1193Provider } from "viem"
+import { createPublicClient, getContract, http, Address, createWalletClient, custom, EIP1193Provider, zeroAddress } from "viem"
 import { mainnet, holesky } from "viem/chains"
 import { EthereumProvider } from "@walletconnect/ethereum-provider"
 import mainnetConfig from "@casimirlabs/casimir-contracts/config/mainnet.json"
@@ -26,36 +26,50 @@ const factory = getContract({
     client: readClient
 })
 
-const initialized = ref(false)
+const initialized = ref<boolean>(false)
 
 type StrategyStats = {
     totalStake: bigint
+    userStake: bigint
 }
 type Strategy = Awaited<ReturnType<typeof factory.read.getStrategy>> & StrategyStats
 type StrategyById = Record<number, Strategy>
-let strategyById = reactive<StrategyById>({})
+const strategyById = reactive<StrategyById>({})
+const userAddress = ref<Address>(zeroAddress)
 
 export default function useEthereum() {
     async function initialize() {
         if (!initialized.value) {
-            const strategyIds = await factory.read.getStrategyIds()
-            const strategies = await Promise.all(strategyIds.map(async (id) => {
-                const strategy = await factory.read.getStrategy([id])
-                const manager = getManager(strategy.managerAddress)
-                const totalStake = await manager.read.getTotalStake()
-                return {
-                    id,
-                    ...strategy,
-                    totalStake
+            readClient.watchBlockNumber(
+                { 
+                    emitOnBegin: true, 
+                    onBlockNumber: async () => await fetchData()
                 }
-            }))
-            strategyById = strategies.reduce((acc, strategy) => {
-                const { id, ...rest } = strategy
-                acc[id] = rest
-                return acc
-            }, {} as StrategyById)
+            )
 
             initialized.value = true
+        }
+    }
+
+    async function fetchData() {
+        const strategyIds = await factory.read.getStrategyIds()
+        const strategies = await Promise.all(strategyIds.map(async (id) => {
+            const strategy = await factory.read.getStrategy([id])
+            const manager = getManager(strategy.managerAddress)
+            const [totalStake, userStake] = await Promise.all([
+                await manager.read.getTotalStake(),
+                await manager.read.getUserStake([userAddress.value])
+            ])
+            return {
+                id,
+                ...strategy,
+                totalStake,
+                userStake
+            }
+        }))
+        for (const strategy of strategies) {
+            const { id, ...rest } = strategy
+            strategyById[id] = rest
         }
     }
 
@@ -107,7 +121,9 @@ export default function useEthereum() {
         initialized,
         readClient,
         strategyById,
+        userAddress,
         initialize,
+        fetchData,
         getWalletConnectProvider,
         getManager,
         getRegistry
