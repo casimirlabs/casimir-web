@@ -6,7 +6,7 @@ import holeskyConfig from "@casimirlabs/casimir-contracts/config/holesky.json"
 import { ICasimirFactoryAbi } from "@casimirlabs/casimir-contracts/abi/ICasimirFactoryAbi"
 import { ICasimirManagerAbi } from "@casimirlabs/casimir-contracts/abi/ICasimirManagerAbi"
 import { ICasimirRegistryAbi } from "@casimirlabs/casimir-contracts/abi/ICasimirRegistryAbi"
-import { reactive, ref } from "vue"
+import { onMounted, reactive, ref } from "vue"
 
 const network: "mainnet" | "holesky" = import.meta.env.PUBIC_NETWORK || "holesky"
 const ethereumRpcUrl = import.meta.env.PUBLIC_ETHEREUM_RPC_URL || "http://127.0.0.1:8545"
@@ -26,7 +26,7 @@ const factory = getContract({
     client: readClient
 })
 
-const initialized = ref<boolean>(false)
+let initialized =false
 
 type StrategyStats = {
     totalStake: bigint
@@ -38,18 +38,17 @@ const strategyById = reactive<StrategyById>({})
 const userAddress = ref<Address>(zeroAddress)
 
 export default function useEthereum() {
-    async function initialize() {
-        if (!initialized.value) {
+    onMounted(async () => {
+        if (!initialized) {
             readClient.watchBlockNumber(
                 { 
                     emitOnBegin: true, 
                     onBlockNumber: async () => await fetchData()
                 }
             )
-
-            initialized.value = true
+            initialized = true
         }
-    }
+    })
 
     async function fetchData() {
         const strategyIds = await factory.read.getStrategyIds()
@@ -118,11 +117,10 @@ export default function useEthereum() {
     }
 
     return {
-        initialized,
+        network,
         readClient,
         strategyById,
         userAddress,
-        initialize,
         fetchData,
         getWalletConnectProvider,
         getManager,
