@@ -1,3 +1,8 @@
+<script setup lang="ts">
+import NavBar from "@/components/NavBar.vue"
+// import Toasts from "@/components/Toasts.vue"
+</script>
+
 <template>
     <div class="app_container">
         <NavBar class="z-[999]" />
@@ -7,7 +12,7 @@
             <div>
                 <router-view />
             </div>
-            <Toasts />
+            <!-- <Toasts /> -->
         </div>
     </div>
 </template>

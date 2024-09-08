@@ -1,6 +1,5 @@
 import { createWebHistory, createRouter } from "vue-router"
-
-import Stake from "@/pages/stake/Stake.vue"
+import Dashboard from "@/pages/dashboard/Dashboard.vue"
 import PageNotFound from "@/pages/404/PageNotFound.vue"
 import Test from "@/pages/test/Test.vue"
 
@@ -8,7 +7,7 @@ const routes = [
     { 
         path: "/",
         name: "stake",
-        component: Stake
+        component: Dashboard
     },
     {
         path: "/test",

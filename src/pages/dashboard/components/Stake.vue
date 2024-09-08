@@ -2,7 +2,7 @@
 import { ref, watch, onMounted } from "vue"
 // import AVSDirectStake from "./components/AVSDirectStake.vue"
 // import ActiveStakes from "./components/ActiveStakes.vue"
-// import Portfolio from "./components/Portfolio.vue"
+import Portfolio from "@/"
 import {
     TransitionRoot,
     TransitionChild,
