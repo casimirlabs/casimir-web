@@ -1,6 +1,6 @@
-import useEthereum from "@/composables/ethereum"
+import { reactive, ref, watch } from "vue"
 import { Address } from "viem"
-import { reactive, watch } from "vue"
+import useEthereum from "@/composables/ethereum"
 
 type AVS = {
     metadataName: string,
@@ -16,7 +16,13 @@ type AVS = {
     totalStakers: number
 }
 
+export interface AVSWithAllocation extends AVS {
+    allocatedPercentage: number;
+    isLocked: boolean;
+}
+
 const avsByAddress = reactive<Record<Address, AVS>>({})
+const selectedAVS = ref<AVS>()
 
 export default function useAVS() {
     const { network, strategyById } = useEthereum()
@@ -36,7 +42,13 @@ export default function useAVS() {
         return await response.json()
     }
 
+    function selectAVS(avs: AVS) {
+        selectedAVS.value = avs
+    }
+
     return {
-        avsByAddress
+        avsByAddress,
+        selectedAVS,
+        selectAVS
     }
 }
