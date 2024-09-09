@@ -1,12 +1,12 @@
 <script setup>
-import { SunIcon, MoonIcon, PlusCircleIcon, ArrowRightOnRectangleIcon, Square2StackIcon, } from "@heroicons/vue/24/outline"
-import {  useDark, useToggle } from "@vueuse/core"
-import {  Menu,  MenuButton,  MenuItems } from "@headlessui/vue"
-// import useConnectWalletModal from "@/composables/connectWalletModal"
+import { SunIcon, MoonIcon } from "@heroicons/vue/24/outline"
+import { useDark, useToggle } from "@vueuse/core"
+import useWallet from "@/composables/wallet"
 import useFormat from "@/composables/format"
+import { formatEther } from "viem"
 
-const { copyTextToClipboard, convertString } = useFormat()
-// const { toggleConnectWalletModal } = useConnectWalletModal()
+const { wallet, toggleWalletModal } = useWallet()
+const { formatAddress } = useFormat()
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
@@ -56,150 +56,44 @@ const toggleDark = useToggle(isDark)
                     />
                 </button>
 
+                <!-- Connect Wallet Button -->
                 <div class="w-[200px]">
-                    <Menu
-                        as="div"
-                        class="relative inline-block text-left w-full"
-                    >
-                        <!-- Connect Wallet Button -->
-                        <MenuButton
+                    <div class="relative inline-block text-left w-full">
+                        <button
                             class="connect_wallet_menu_btn"
-                            @click="userMenu = true"
+                            @click="toggleWalletModal()"
                         >
                             <div
-                                v-if="user"
+                                v-if="wallet.client && wallet.address"
                                 class="flex items-center align-middle justify-between w-full"
                             >
-                                <div class="flex items-center gap-[8px]">
+                                <div class="flex items-center gap-[8px] w-full">
                                     <div class="w-[20px] h-[20px]">
                                         <img
-                                            :src="`/${user.walletProvider.toLowerCase()}.svg`"
-                                            :alt="`/${user.walletProvider.toLowerCase()}.svg`"
-                                            class="block w-full h-full max-w-full"
+                                            :src="`/${wallet?.provider?.toLowerCase()}.svg`"
+                                            :alt="`/${wallet?.provider?.toLowerCase()}.svg`"
+                                            class="block w-full h-full max-w-full rounded-full"
                                         >
                                     </div>
 
                                     <div class="card_title font-[400] mb-0">
-                                        {{ convertString(user.address) }}
+                                        {{ formatAddress(wallet.address) }}
                                     </div>
-                                </div>
-
-                                <div>
-                                    <img
-                                        :src="isDark? '/expand_icon_light.svg':'/expand_icon_dark.svg'"
-                                        alt="Expand Icon"
-                                        class="w-[6.25px] h-[10.13px]"
-                                    >
+                                    
+                                    <div class="card_title font-[400] mb-0">
+                                        {{ formatEther(wallet.balance) }} ETH
+                                    </div>
                                 </div>
                             </div>
+
                             <div
-                                v-show="!user"
+                                v-else
                                 class="flex items-center justify-between w-full"
                             >
-                                <div class="flex items-center w-full">
-                                    <small class="mt-[2px] w-full">Connect Wallet</small>
-                                </div>
+                                <small class="my-[2px] w-full">Connect Wallet</small>
                             </div> 
-                        </MenuButton>
-                        
-                        <transition
-                            enter-active-class="transition duration-100 ease-out"
-                            enter-from-class="transform scale-95 opacity-0"
-                            enter-to-class="transform scale-100 opacity-100"
-                            leave-active-class="transition duration-75 ease-in"
-                            leave-from-class="transform scale-100 opacity-100"
-                            leave-to-class="transform scale-95 opacity-0"
-                        >
-                            <MenuItems
-                                v-show="userMenu"
-                                class="absolute right-0 mt-2 origin-top-right shadow-lg dark:shadow-sm dark:shadow-white/30
-                ring-1 ring-black/5 focus:outline-none w-full card"
-                            >
-                                <button
-                                    v-if="!user"
-                                    class="h-[40px] px-[8px] flex items-center gap-[8px] w-full
-                   text-gray_6 dark:text-gray_4 hover:bg-light  
-                   hover:bg-gray_4/60 dark:hover:bg-gray_5/60"
-                                    @click="toggleConnectWalletModal(true), userMenu = false"
-                                >
-                                    <PlusCircleIcon class="w-[20px] h-[20px]" />
-                                    <small>Connect Wallet</small>
-                                </button>
-
-                                <div v-else>
-                                    <button
-                                        class="h-[40px] px-[8px] flex items-center gap-[8px] w-full
-                   text-gray_6 dark:text-gray_4 hover:bg-light 
-                  hover:bg-gray_4/60 dark:hover:bg-gray_5/60 border-b 
-                  border-b-lightBorder dark:border-b-lightBorder/60"
-                                        @click="toggleConnectWalletModal(true), userMenu = false"
-                                    >
-                                        <PlusCircleIcon class="w-[20px] h-[20px]" />
-                                        <small>Add Wallet</small>
-                                    </button>
-                                    <div class="p-[8px] ">
-                                        <caption class="text-gray_1 whitespace-nowrap font-[600]">
-                                            Primary Wallet
-                                        </caption>
-
-                                        <button
-                                            class="w-full mt-[8px] rounded-[3px] flex items-center
-                      justify-between px-[8px] py-[6px] hover:bg-gray_4 dark:hover:bg-gray_5"
-                                            @click="copyTextToClipboard(user.address)"
-                                            @mouseover="showCopyForPrimary = true"
-                                            @mouseleave="showCopyForPrimary = false"
-                                        >
-                                            <div class="flex items-center gap-[8px]">
-                                                <div class="w-[20px] h-[20px]">
-                                                    <img
-                                                        :src="`/${user.walletProvider.toLowerCase()}.svg`"
-                                                        :alt="`/${user.walletProvider.toLowerCase()}.svg`"
-                                                        class="block w-full h-full max-w-full"
-                                                    >
-                                                </div>
-
-                                                <div class="card_title font-[400] mb-0 text-gray_5">
-                                                    {{ convertString(user.address) }}
-                                                </div>
-                                            </div>
-
-                                            <div 
-                                                v-if="showCopyForPrimary && copySuccessful === ''"
-                                            >
-                                                <Square2StackIcon
-                                                    class="w-[18px] h-[18px] text-gray_3"
-                                                />
-                                            </div>
-
-                                            <div
-                                                v-else-if="showCopyForPrimary && copySuccessful === 'copied'"
-                                                class="flex items-center text-[10px] text-green font-[600]"
-                                            >
-                                                Copied
-                                            </div>
-
-                                            <div
-                                                v-else-if="showCopyForPrimary && copySuccessful === 'failed'"
-                                                class="flex items-center text-[10px] text-red"
-                                            >
-                                                Failed
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <button
-                                        class="h-[40px] px-[8px] flex items-center gap-[8px] w-full
-                                            text-red dark:text-red hover:bg-light  
-                                            hover:bg-gray_4/60 dark:hover:bg-gray_5/60  border-t 
-                                            border-t-lightBorder dark:border-t-lightBorder/60"
-                                        @click="disconnectWallet()"
-                                    >
-                                        <ArrowRightOnRectangleIcon class="w-[20px] h-[20px]" />
-                                        <small>Disconnect Account</small>
-                                    </button>
-                                </div>
-                            </MenuItems>
-                        </transition>
-                    </Menu>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

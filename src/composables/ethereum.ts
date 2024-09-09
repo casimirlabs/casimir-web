@@ -1,6 +1,5 @@
 import { createPublicClient, getContract, http, Address, createWalletClient, custom, EIP1193Provider, zeroAddress } from "viem"
 import { mainnet, holesky } from "viem/chains"
-import { EthereumProvider } from "@walletconnect/ethereum-provider"
 import mainnetConfig from "@casimirlabs/casimir-contracts/config/mainnet.json"
 import holeskyConfig from "@casimirlabs/casimir-contracts/config/holesky.json"
 import { ICasimirFactoryAbi } from "@casimirlabs/casimir-contracts/abi/ICasimirFactoryAbi"
@@ -10,7 +9,6 @@ import { onMounted, reactive, ref } from "vue"
 
 const network: "mainnet" | "holesky" = import.meta.env.PUBIC_NETWORK || "holesky"
 const ethereumRpcUrl = import.meta.env.PUBLIC_ETHEREUM_RPC_URL || "http://127.0.0.1:8545"
-const walletConnectProjectId = import.meta.env.PUBLIC_WALLET_CONNECT_PROJECT_ID || ""
 
 const config = { mainnet: mainnetConfig, holesky: holeskyConfig }[network]
 const chain = { mainnet: mainnet, holesky: holesky }[network]
@@ -72,14 +70,6 @@ export default function useEthereum() {
         }
     }
 
-    async function getWalletConnectProvider() {
-        return await EthereumProvider.init({
-            projectId: walletConnectProjectId,
-            showQrModal: true,
-            chains: [chain.id]
-        })
-    }
-
     function getManager(address: Address, provider?: EIP1193Provider) {
         let writeClient: ReturnType<typeof createWalletClient> | undefined
         if (provider) {
@@ -117,12 +107,12 @@ export default function useEthereum() {
     }
 
     return {
+        chain,
         network,
         readClient,
         strategyById,
         userAddress,
         fetchData,
-        getWalletConnectProvider,
         getManager,
         getRegistry
     }

@@ -12,7 +12,7 @@ export default function useFormat() {
                             id: "copy_address_" + text,
                             type: "success",
                             title: "Address Copied",
-                            subtitle: "Copied Address " + convertString(text),
+                            subtitle: "Copied Address " + formatAddress(text),
                             timed: true,
                             loading: false,
                             iconUrl: ""
@@ -37,13 +37,13 @@ export default function useFormat() {
             })
     }
 
-    function convertString(inputString: string) {
-        if (inputString.length && inputString.length <= 3) {
+    function formatAddress(inputString: string) {
+        if (inputString.length && inputString.length <= 4) {
             return inputString
         }
       
-        const start = inputString.substring(0, 3)
-        const end = inputString.substring(inputString.length - 3)
+        const start = inputString.substring(0, 5)
+        const end = inputString.substring(inputString.length - 4)
         const middle = ".".repeat(3)
       
         return start + middle + end
@@ -55,7 +55,7 @@ export default function useFormat() {
 
     return {
         copyTextToClipboard,
-        convertString, 
+        formatAddress, 
         trimAndLowercaseAddress,
     }
 }
