@@ -1,5 +1,5 @@
-import { onMounted, readonly, ref } from "vue"
-import { useStorage } from "@vueuse/core"
+import { readonly, ref } from "vue"
+// import { useStorage } from "@vueuse/core"
 
 interface Toast {
   id: string; // random for removing purposes
@@ -11,7 +11,7 @@ interface Toast {
   loading: boolean;
 }
 
-const initializeComposable = ref(false)
+// const initializeComposable = ref(false)
 
 const toasts = ref([] as Toast[])
 

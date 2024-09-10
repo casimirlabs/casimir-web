@@ -48,12 +48,12 @@ const props = defineProps({
                         class="w-full h-full"
                     />
                 </div>
-                <div 
+                <!-- <div 
                     v-else-if="props.toast.type === 'loading'"
                     class="w-full h-full"
                 >
                     <Loading :show-text="false" />
-                </div>
+                </div> -->
             </div>
             <div>
                 <h1 class="card_title">
