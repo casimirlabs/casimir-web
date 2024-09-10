@@ -21,9 +21,8 @@ import AVSCard from "@/pages/dashboard/components/AVSCard.vue"
 import useAVS from "@/composables/avs"
 import useFormat from "@/composables/format"
 
-
 const { avsByAddress, selectedAVS, selectAVS } = useAVS()
-const { formatAddress } = useFormat()
+const { formatAddress, handleImageError } = useFormat()
 const columns = [
     { title: "AVS", show: ref(true), value: "metadataName" },
     // { title: "Address", show: ref(true), value: "address" },
@@ -180,10 +179,6 @@ const AVSData = computed(() => {
         }
     }) || []
 })
-
-const handleImageError = (event) => {
-    event.target.src = "/casimir.svg"
-}
 </script>
 
 <template>

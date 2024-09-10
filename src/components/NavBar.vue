@@ -64,7 +64,7 @@ const toggleDark = useToggle(isDark)
                             @click="toggleWalletModal()"
                         >
                             <div
-                                v-if="wallet.client && wallet.address"
+                                v-if="wallet.client && wallet.address && wallet.balance"
                                 class="flex items-center align-middle justify-between w-full"
                             >
                                 <div class="flex items-center gap-[8px] w-full">

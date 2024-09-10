@@ -20,7 +20,7 @@ export default function useFormat() {
                     )
                 }, 1000)
             })
-            .catch(err => {
+            .catch(() => {
                 setTimeout(() => {
                     addToast(
                         {
@@ -49,6 +49,10 @@ export default function useFormat() {
         return start + middle + end
     }
 
+    function handleImageError(event) {
+        event.target.src = "/casimir.svg"
+    }
+
     function trimAndLowercaseAddress(address: string) {
         return address.trim().toLowerCase()
     }
@@ -56,6 +60,7 @@ export default function useFormat() {
     return {
         copyTextToClipboard,
         formatAddress, 
+        handleImageError,
         trimAndLowercaseAddress,
     }
 }
