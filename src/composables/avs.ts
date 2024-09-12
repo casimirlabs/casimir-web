@@ -2,7 +2,7 @@ import { reactive, ref, watch } from "vue"
 import { Address } from "viem"
 import useEthereum from "@/composables/ethereum"
 
-type AVS = {
+export type AVS = {
     metadataName: string,
     address: string,
     tvl: number,
@@ -14,11 +14,6 @@ type AVS = {
     metadataX: string,
     totalOperators: number,
     totalStakers: number
-}
-
-export interface AVSWithAllocation extends AVS {
-    allocatedPercentage: number;
-    isLocked: boolean;
 }
 
 const avsByAddress = reactive<Record<Address, AVS>>({})

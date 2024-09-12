@@ -1,5 +1,4 @@
 import { readonly, ref } from "vue"
-// import { useStorage } from "@vueuse/core"
 
 interface Toast {
   id: string; // random for removing purposes
@@ -10,8 +9,6 @@ interface Toast {
   timed: boolean;
   loading: boolean;
 }
-
-// const initializeComposable = ref(false)
 
 const toasts = ref([] as Toast[])
 
@@ -27,8 +24,18 @@ export default function useToasts() {
             }, 3100)
         }
     }
+    
     const findToastById = (toastId: string) => {
         return toasts.value.find((toast) => toast.id === toastId)
+    }
+
+    function generateRandomToastId(): string {
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        let result = ""
+        for (let i = 0; i < 16; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length))
+        }
+        return result
     }
 
     const updateToast = (t: Toast) => {
@@ -43,37 +50,10 @@ export default function useToasts() {
         toasts.value = updatedToasts
     }
 
-    // TODO: check if there needs to be an alert that they are test net or main net
-    // onMounted(() => {
-    //     if (!initializeComposable.value) {
-    //         initializeComposable.value = true 
-    //         toasts.value = []
-
-    //         const showCurrentNetwork = ref(false)
-    //         const showCurrentNetworkStorage = useStorage(
-    //             "showCurrentNetwork",
-    //             showCurrentNetwork
-    //         )
-
-    //         setTimeout(() => {
-    //             if (!showCurrentNetworkStorage.value) {
-    //                 addToast({
-    //                     id: "test_net",
-    //                     type: "info",
-    //                     iconUrl: "/goerli.svg",
-    //                     title: "Your are on Goerli Testnet",
-    //                     subtitle: "Estimated time to mainnet is 12 days",
-    //                     timed: true,
-    //                     loading: false
-    //                 })
-    //             }
-    //         }, 800)
-    //     }
-    // })
-
     return {
         toasts: readonly(toasts),
         addToast,
+        generateRandomToastId,
         removeToast,
         updateToast
     }

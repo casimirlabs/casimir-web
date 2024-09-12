@@ -1,12 +1,10 @@
 <script setup>
 import { GlobeAltIcon, DocumentDuplicateIcon } from "@heroicons/vue/24/outline"
-import useAVS from "@/composables/avs"
-import useAvsStage from "@/composables/avsStage"
 import useFormat from "@/composables/format"
+import useStaking from "@/composables/staking"
 
 const { copyTextToClipboard, formatAddress } = useFormat()
-const { addAVSToStage } = useAvsStage()
-const { selectedAVS } = useAVS()
+const { addStakeOptionToStage, selectedStakeOption } = useStaking()
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
@@ -25,28 +23,28 @@ const props = defineProps({
                 <div class="flex items-center gap-[12px]">
                     <div class="w-[50px] h-[50px] bg-transparent rounded-[999px] overflow-hidden">
                         <img
-                            :src="selectedAVS.metadataLogo"
+                            :src="selectedStakeOption.avs.metadataLogo"
                             class="w-full h-full"
                             alt=""
                         > 
                     </div>
                     <div>
                         <h1 class="card_title">
-                            {{ selectedAVS.metadataName }}
+                            {{ selectedStakeOption.avs.metadataName }}
                         </h1>
                     </div>
                 </div>
             </div>
             <div class="flex items-center gap-[12px]">
                 <a
-                    :href="selectedAVS.metadataX"
+                    :href="selectedStakeOption.avs.metadataX"
                     target="_blank"
                     class="outline-none  p-[5px]"
                 >
                     <small class="font-[600] text-[10.22px]">Twitter</small>
                 </a>
                 <a
-                    :href="selectedAVS.metadataWebsite"
+                    :href="selectedStakeOption.avs.metadataWebsite"
                     target="_blank"
                     class="text-blue-500 dark:text-blue-200 outline-none"
                 >
@@ -57,31 +55,31 @@ const props = defineProps({
 
         <!-- AVS Description -->
         <div class="text-[12px] tracking-normal text-left">
-            {{ selectedAVS.metadataDescription }}
+            {{ selectedStakeOption.avs.metadataDescription }}
         </div>
 
         <!-- AVS Details -->
         <div class="w-full">
             <div class="flex items-center w-full justify-between">
                 <small class="font-[500]">Total Operators</small>
-                <small class="font-[500]">{{ selectedAVS.totalOperators }}</small>
+                <small class="font-[500]">{{ selectedStakeOption.avs.totalOperators }}</small>
             </div>
             <div class="flex items-center w-full justify-between mt-[12px]">
                 <small class="font-[500]">Total Stakers</small>
-                <small class="font-[500]">{{ selectedAVS.totalStakers }}</small>
+                <small class="font-[500]">{{ selectedStakeOption.avs.totalStakers }}</small>
             </div>
             <div class="flex items-center w-full justify-between mt-[12px]">
                 <small class="font-[500]">Total ETH Staked</small>
-                <small class="font-[500]">{{ selectedAVS.tvl }} ETH</small>
+                <small class="font-[500]">{{ selectedStakeOption.avs.tvl }} ETH</small>
             </div>
             <div class="flex items-center w-full justify-between mt-[12px]">
                 <small class="font-[500]">Address</small>
                 <div
                     class="tooltip_container flex items-center gap-[6px]"
-                    @click="copyTextToClipboard(selectedAVS.address)"
+                    @click="copyTextToClipboard(selectedStakeOption.avs.address)"
                 >
                     <p class="card_subtitle">
-                        {{ formatAddress(selectedAVS.address) }}
+                        {{ formatAddress(selectedStakeOption.avs.address) }}
                     </p>
                     <div>
                         <DocumentDuplicateIcon class="w-[12px] h-[12px]" />
@@ -98,7 +96,7 @@ const props = defineProps({
         <!-- Add To Stage Button -->
         <button
             class="primary_btn w-full mt-[24px]"
-            @click="addAVSToStage(selectedAVS), props.closeStakeWithAVSModal()"
+            @click="addStakeOptionToStage(selectedStakeOption), props.closeStakeWithAVSModal()"
         >
             <small>Add To Stage</small>
         </button>

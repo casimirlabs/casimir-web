@@ -12,23 +12,15 @@ interface BrowserProvider extends EIP1193Provider {
 type ProviderString = "MetaMask" | "CoinbaseWallet" | "Ledger" | "Trezor" | "TrustWallet" | "WalletConnect"
 
 interface Wallet {
-    client: ReturnType<typeof createWalletClient> | null;
-    provider: string | null;
-    address: Address | null;
-    balance: bigint | null;
+    client: ReturnType<typeof createWalletClient>;
+    provider: string;
+    address: Address;
+    balance: bigint;
     loading: boolean;
 }
 const walletConnectProjectId = import.meta.env.PUBLIC_WALLET_CONNECT_PROJECT_ID || ""
-
+const wallet = reactive<Wallet>({} as Wallet)
 const showConnectWalletModal = ref(false)
-
-const wallet = reactive<Wallet>({
-    client: null,
-    provider: null,
-    address: null,
-    balance: null,
-    loading: false,
-})
 
 export default function useWallet() {
     const { chain, readClient } = useEthereum()

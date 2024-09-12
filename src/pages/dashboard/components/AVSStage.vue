@@ -3,11 +3,18 @@ import { ref } from "vue"
 import { XMarkIcon, DocumentDuplicateIcon, LockOpenIcon, LockClosedIcon } from "@heroicons/vue/24/outline"
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
 // import StakeCard from "@/pages/dashboard/components/StakeCard.vue"
-import useAvsStage from "@/composables/avsStage"
 import useFormat from "@/composables/format"
+import useStaking from "@/composables/staking"
 
 const { copyTextToClipboard, formatAddress, handleImageError } = useFormat()
-const { stage, lockAVSAllocation, onAllocationChange, removeAVSFromStage, unlockAVSAllocation } = useAvsStage()
+const { 
+    stage, 
+    lockStakeOptionAllocation, 
+    onAllocationChange, 
+    stake, 
+    removeStakeOptionFromStage, 
+    unlockStakeOptionAllocation 
+} = useStaking()
 
 const stakeModal = ref(false)
 </script>
@@ -32,7 +39,7 @@ const stakeModal = ref(false)
                 <button
                     class="primary_btn"
                     style="box-shadow: none;"
-                    @click="stakeModal = true"
+                    @click="stake"
                 >
                     <small>Stake</small>
                 </button>
@@ -41,12 +48,12 @@ const stakeModal = ref(false)
 
         <!-- The Stage -->
         <div
-            v-if="stage.length > 0"
+            v-if="stage.length"
             class="w-full flex flex-wrap items-center gap-[24px]"
         >
             <!-- AVS Stage Card -->
             <div
-                v-for="(avs, index) in stage"
+                v-for="(option, index) in stage"
                 :key="index"
                 class="p-[12px] bg-gray_4 dark:bg-gray_6 rounded-[6px] w-full min-w-[300px] max-w-[350px]"
             >
@@ -54,7 +61,7 @@ const stakeModal = ref(false)
                     <div class="flex items-start gap-[12px]">
                         <div class="w-[32px] h-[32px] bg-gray_5 rounded-[999px] overflow-hidden">
                             <img
-                                :src="avs.metadataLogo"
+                                :src="option.avs.metadataLogo"
                                 alt=""
                                 class="w-full h-full mx-auto my-auto"
                                 @error="handleImageError"
@@ -62,14 +69,14 @@ const stakeModal = ref(false)
                         </div>
                         <div>
                             <h1 class="card_title">
-                                {{ avs.metadataName }}
+                                {{ option.avs.metadataName }}
                             </h1>
                             <div
                                 class="tooltip_container flex items-center gap-[6px]"
-                                @click="copyTextToClipboard(avs.address)"
+                                @click="copyTextToClipboard(option.avs.address)"
                             >
                                 <p class="card_subtitle">
-                                    {{ formatAddress(avs.address) }}
+                                    {{ formatAddress(option.avs.address) }}
                                 </p>
                                 <div>
                                     <DocumentDuplicateIcon class="w-[12px] h-[12px]" />
@@ -80,26 +87,26 @@ const stakeModal = ref(false)
                             </div>
                         </div>
                     </div>
-                    <button @click="removeAVSFromStage(avs)">
+                    <button @click="removeStakeOptionFromStage(option)">
                         <XMarkIcon class="w-[16px] h-[16px]" />
                     </button>
                 </div>
                 <div class="text-[12px] tracking-normal mb-[12px] truncate">
-                    {{ avs.metadataDescription }}
+                    {{ option.avs.metadataDescription }}
                 </div>
 
                 <div class="w-full">
                     <div class="flex items-center w-full justify-between">
                         <small class="font-[500]">Total Operators</small>
-                        <small class="font-[500] opacity-50">{{ avs.totalOperators }}</small>
+                        <small class="font-[500] opacity-50">{{ option.avs.totalOperators }}</small>
                     </div>
                     <div class="flex items-center w-full justify-between mt-[12px]">
                         <small class="font-[500]">Total Stakers</small>
-                        <small class="font-[500] opacity-50">{{ avs.totalStakers }}</small>
+                        <small class="font-[500] opacity-50">{{ option.avs.totalStakers }}</small>
                     </div>
                     <div class="flex items-center w-full justify-between mt-[12px]">
                         <small class="font-[500]">Total ETH Staked</small>
-                        <small class="font-[500] opacity-50">{{ avs.tvl }} ETH</small>
+                        <small class="font-[500] opacity-50">{{ option.avs.tvl }} ETH</small>
                     </div>
                 </div>
 
@@ -109,11 +116,11 @@ const stakeModal = ref(false)
                 <div class="mb-[12px] flex items-center gap-[12px] w-full">
                     <div class="flex items-center gap-[3px]">
                         <input
-                            v-model="avs.allocatedPercentage"
+                            v-model="option.allocatedPercentage"
                             type="text"
-                            :placeholder="avs.allocatedPercentage"
+                            :placeholder="option.allocatedPercentage"
                             class="w-[50px] text-left outline-none bg-transparent"
-                            :disabled="avs.isLocked"
+                            :disabled="option.isLocked"
                             @input="onAllocationChange(index, $event.target.value)"
                         >
                         <span class="text-[10.22px]">%</span>
@@ -121,29 +128,29 @@ const stakeModal = ref(false)
                     <div class="w-full">
                         <input
                             id="myRange"
-                            v-model="avs.allocatedPercentage"
+                            v-model="option.allocatedPercentage"
                             type="range"
                             min="0"
                             max="100"
                             step="1"
                             class="slider"
-                            :disabled="avs.isLocked"
-                            @input="onAllocationChange(index, avs.allocatedPercentage)"
+                            :disabled="option.isLocked"
+                            @input="onAllocationChange(index, option.allocatedPercentage)"
                         >
                     </div>
                     <!-- Lock/Unlock -->
                     <div class="flex items-center justify-between">
                         <button
-                            v-if="!avs.isLocked"
+                            v-if="!option.isLocked"
                             class="flex items-center gap-[6px]"
-                            @click="lockAVSAllocation(avs)"
+                            @click="lockStakeOptionAllocation(option)"
                         >
                             <LockOpenIcon class="w-[16px] h-[16px]" />
                         </button>
                         <button
                             v-else
                             class="flex items-center gap-[6px]"
-                            @click="unlockAVSAllocation(avs)"
+                            @click="unlockStakeOptionAllocation(option)"
                         >
                             <LockClosedIcon class="w-[16px] h-[16px]" />
                         </button>
