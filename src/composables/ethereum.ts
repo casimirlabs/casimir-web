@@ -1,4 +1,4 @@
-import { createPublicClient, getContract, http, Address, createWalletClient, custom, EIP1193Provider, zeroAddress } from "viem"
+import { createPublicClient, getContract, http, Address, zeroAddress } from "viem"
 import { mainnet, holesky } from "viem/chains"
 import mainnetConfig from "@casimirlabs/casimir-contracts/config/mainnet.json"
 import holeskyConfig from "@casimirlabs/casimir-contracts/config/holesky.json"
