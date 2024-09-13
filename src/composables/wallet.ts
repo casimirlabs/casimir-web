@@ -1,7 +1,8 @@
-import { reactive, readonly, ref } from "vue"
+import { onMounted, reactive, readonly, ref } from "vue"
 import { Address, createWalletClient, custom, EIP1193Provider } from "viem"
 import { EthereumProvider } from "@walletconnect/ethereum-provider"
 import useEthereum from "@/composables/ethereum"
+import { useLocalStorage } from "@vueuse/core"
 
 interface BrowserProvider extends EIP1193Provider {
     isMetaMask?: boolean
@@ -21,9 +22,20 @@ interface Wallet {
 const walletConnectProjectId = import.meta.env.PUBLIC_WALLET_CONNECT_PROJECT_ID || ""
 const wallet = reactive<Wallet>({} as Wallet)
 const showConnectWalletModal = ref(false)
+const walletInitialized = ref(false)
 
 export default function useWallet() {
     const { chain, readClient } = useEthereum()
+
+    onMounted(async () => {
+        wallet.provider = localStorage.getItem("walletProvider") || ""
+        wallet.address = localStorage.getItem("walletAddress") as Address
+        wallet.balance = BigInt(localStorage.getItem("walletBalance") || "0")
+        if (wallet.provider && wallet.address) {
+            connectWallet(wallet.provider as ProviderString)
+        }
+        walletInitialized.value = true
+    })
 
     async function connectWallet(providerString: ProviderString) {
         wallet.loading = true
@@ -58,9 +70,14 @@ export default function useWallet() {
             chain
         })
 
-        const accounts = await wallet.client.request({ method: "eth_requestAccounts" })
+        // First check if the provider is already connected
+        const accounts = await wallet.client.request({ method: "eth_accounts" })
         if (accounts && accounts.length > 0) {
             wallet.address = accounts[0]
+        } else {
+            // If not, then connect the provider
+            await wallet.client.request({ method: "eth_requestAccounts" })
+            wallet.address = await wallet.client.request({ method: "eth_accounts" })
         }
 
         if (wallet.address) {
@@ -68,6 +85,10 @@ export default function useWallet() {
             wallet.balance = await readClient.getBalance({ address: formattedAddress as `0x${string}` })
         }
         
+        localStorage.setItem("walletProvider", wallet.provider)
+        localStorage.setItem("walletAddress", wallet.address)
+        localStorage.setItem("walletBalance", wallet.balance.toString())
+
         wallet.loading = false
     }
 
@@ -77,6 +98,10 @@ export default function useWallet() {
         wallet.balance = null
         wallet.client = null
         wallet.loading = false
+        localStorage.removeItem("walletProvider")
+        localStorage.removeItem("walletAddress")
+        localStorage.removeItem("walletBalance")
+        
     }
 
     async function getWalletConnectProvider() {

@@ -3,6 +3,7 @@ import { ref } from "vue"
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
 import useWallet from "@/composables/wallet"
 import useFormat from "@/composables/format"
+import { computed } from "vue"
 
 const { 
     wallet, 
@@ -17,7 +18,11 @@ type ProviderString = "MetaMask" | "CoinbaseWallet" | "WalletConnect" | "Trezor"
 
 type UserAuthFlowState = "loading" | "select_provider"| "success" | "connection_failed"
 
-const flowState = ref<UserAuthFlowState>("select_provider")
+const flowState = computed<UserAuthFlowState>(() => {
+    if (wallet.client) return "success"
+    if (wallet.loading) return "loading"
+    return "select_provider"
+})
 const errorMessage = ref(false)
 const errorMessageText = ref("Something went wrong, please try again later.")
 
@@ -33,18 +38,15 @@ const supportedWalletProviders: Array<ProviderString> = [
 async function handleSelectProvider(provider: ProviderString) {
     try {
         await connectWallet(provider)
-        flowState.value = "success"
         toggleWalletModal()
     } catch (err) {
         console.error(err)
-        flowState.value = "connection_failed"
         errorMessage.value = true
     }
 }
 
 async function handleDisconnectWallet() {
     await disconnectWallet()
-    flowState.value = "select_provider"
 } 
 </script>
 
@@ -240,7 +242,7 @@ async function handleDisconnectWallet() {
   
                             <!-- SECTION: CONNECTION FAILED -->
                             <section
-                                v-else-if="flowState === 'connection_failed'"
+                                v-else-if="errorMessage"
                                 class="w-full h-full"
                             >
                                 <div class="flex flex-col items-center justify-center h-full w-full gap-5">
