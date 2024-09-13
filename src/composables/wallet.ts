@@ -2,7 +2,6 @@ import { onMounted, reactive, readonly, ref } from "vue"
 import { Address, createWalletClient, custom, EIP1193Provider } from "viem"
 import { EthereumProvider } from "@walletconnect/ethereum-provider"
 import useEthereum from "@/composables/ethereum"
-import { useLocalStorage } from "@vueuse/core"
 
 interface BrowserProvider extends EIP1193Provider {
     isMetaMask?: boolean
@@ -13,14 +12,21 @@ interface BrowserProvider extends EIP1193Provider {
 type ProviderString = "MetaMask" | "CoinbaseWallet" | "Ledger" | "Trezor" | "TrustWallet" | "WalletConnect"
 
 interface Wallet {
-    client: ReturnType<typeof createWalletClient>;
+    client?: ReturnType<typeof createWalletClient>;
     provider: string;
     address: Address;
     balance: bigint;
     loading: boolean;
 }
+const defaultWallet = {
+    provider: "",
+    address: "0x0000000000000000000000000000000000000000" as Address,
+    balance: BigInt(0),
+    loading: false,
+    client: undefined
+}
 const walletConnectProjectId = import.meta.env.PUBLIC_WALLET_CONNECT_PROJECT_ID || ""
-const wallet = reactive<Wallet>({} as Wallet)
+const wallet = reactive<Wallet>({ ...defaultWallet })
 const showConnectWalletModal = ref(false)
 const walletInitialized = ref(false)
 
@@ -93,15 +99,10 @@ export default function useWallet() {
     }
 
     async function disconnectWallet() {
-        wallet.provider = null
-        wallet.address = null
-        wallet.balance = null
-        wallet.client = null
-        wallet.loading = false
+        Object.assign(wallet, defaultWallet) // Resets the wallet state to default values
         localStorage.removeItem("walletProvider")
         localStorage.removeItem("walletAddress")
         localStorage.removeItem("walletBalance")
-        
     }
 
     async function getWalletConnectProvider() {
