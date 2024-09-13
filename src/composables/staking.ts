@@ -1,5 +1,5 @@
 import { computed, readonly, ref } from "vue"
-import { getContract, Address } from "viem"
+import { getContract, Address, parseUnits } from "viem"
 import useAVS, { AVS } from "@/composables/avs"
 import useEthereum, { Strategy } from "@/composables/ethereum"
 import useToasts from "@/composables/toasts"
@@ -17,7 +17,7 @@ interface StakeOptionWithAllocation extends StakeOption {
 }
 
 const stage = ref([] as StakeOptionWithAllocation[])
-const amountToStake = ref(0)
+const amountToStake = ref(5)
 const acceptedTerms = ref(false)
 const selectedStakeOption = ref<StakeOption>()
 
@@ -129,6 +129,18 @@ export default function useStaking() {
 
     async function stake() {
         if (!wallet.client) throw new Error("Wallet not connected")
+        if (stage.value.length === 0) {
+            addToast({
+                id: generateRandomToastId(),
+                type: "failed",
+                iconUrl: "",
+                title: "No Stake Options",
+                subtitle: "Please add at least one stake option to the stage before submitting",
+                timed: true,
+                loading: false,
+            })
+            return
+        }
 
         const toastContent = {
             id: generateRandomToastId(),
@@ -142,29 +154,25 @@ export default function useStaking() {
         addToast(toastContent)
 
         try {
-            // TODO: Implement this function in the next commit
-            console.log("Staking function not implemented yet")
-            // const manager = getContract({
-            //     abi: abi.manager,
-            //     address: selectedStakeOption.value?.strategy.managerAddress as Address,
-            //     client: {
-            //         account: wallet.address,
-            //         public: readClient,
-            //         wallet: wallet.client
-            //     }
-            // })
+            const manager = getContract({
+                abi: abi.manager,
+                address: selectedStakeOption.value?.strategy.managerAddress as Address,
+                client: {
+                    account: wallet.address,
+                    public: readClient,
+                    wallet: wallet.client
+                }
+            })
 
-            // const txHash = await manager.write.depositStake({ value: 10000000000n, account: wallet.address })
-            // console.log("txHash: ", txHash)
-
-            // toastContent.loading = false
-            // toastContent.title = "Stake Successful"
-            // toastContent.subtitle = `Transaction hash: ${txHash}`
-            // addToast(toastContent)
-
+            const amountToStakeInWei = parseUnits(amountToStake.value.toString(), 18)
+            const txHash = await manager.write.depositStake({ value: amountToStakeInWei, account: wallet.address })
+            toastContent.loading = false
+            toastContent.title = "Stake Successful"
+            toastContent.subtitle = `Transaction hash: ${txHash}`
+            stage.value = []
+            addToast(toastContent)
         } catch (error) {
             console.error("Staking error:", error)
-
             toastContent.loading = false
             toastContent.type = "error"
             toastContent.title = "Stake Failed"
