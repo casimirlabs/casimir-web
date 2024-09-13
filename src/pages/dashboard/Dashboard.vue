@@ -2,7 +2,7 @@
 import Portfolio from "@/pages/dashboard/components/Portfolio.vue"
 import AVSTable from "@/pages/dashboard/components/AVSTable.vue"
 import AVSStage from "@/pages/dashboard/components/AVSStage.vue"
-// import ActivelyStaked from "./components/ActivelyStaked.vue"
+import ActivelyStaked from "./components/ActivelyStaked.vue"
 </script>
 
 <template>
@@ -18,8 +18,8 @@ import AVSStage from "@/pages/dashboard/components/AVSStage.vue"
         <div class="w-full mt-[24px]">
             <AVSStage />
         </div>
-        <!-- <div class="w-full mt-[24px] h-[540px]">
+        <div class="w-full mt-[24px] h-[540px]">
             <ActivelyStaked />
-        </div> -->
+        </div>
     </div>
 </template>

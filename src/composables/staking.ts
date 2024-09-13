@@ -1,5 +1,5 @@
-import { computed, readonly, ref } from "vue"
-import { getContract, Address, parseUnits } from "viem"
+import { computed, onMounted, readonly, ref } from "vue"
+import { Address, decodeEventLog, parseEther, formatEther, getContract, parseUnits } from "viem"
 import useAVS, { AVS } from "@/composables/avs"
 import useEthereum, { Strategy } from "@/composables/ethereum"
 import useToasts from "@/composables/toasts"
@@ -16,16 +16,45 @@ interface StakeOptionWithAllocation extends StakeOption {
     isLocked: boolean;
 }
 
+type StakeDetails = {
+    operatorType: "default" | "eigen"
+    address: string
+    amountStaked: number
+    availableToWithdraw: number
+    rewards?: number
+    WithdrawalInitiated?: number
+    WithdrawalRequested?: number
+    WithdrawalFulfilled?: number
+}
+
+type TotalsForRewardsCalculation = {
+    StakeDeposited: number,
+    StakeRebalanced: number,
+    WithdrawalInitiated: number,
+    WithdrawalRequested: number,
+    WithdrawalFulfilled: number
+}
+
+const isInitialized = ref(false)
 const stage = ref([] as StakeOptionWithAllocation[])
 const amountToStake = ref(5)
 const acceptedTerms = ref(false)
 const selectedStakeOption = ref<StakeOption>()
+const userStakeDetails = ref<Array<StakeDetails>>([])
 
 export default function useStaking() {
     const { abi, readClient, strategyById } = useEthereum()
     const { avsByAddress } = useAVS()
     const { addToast, generateRandomToastId } = useToasts()
     const { wallet } = useWallet()
+
+    onMounted(async () => {
+        if (!isInitialized.value) {
+            isInitialized.value = true
+            await getUserStakeDetails()
+        }
+    })
+
     const stakeOptions = computed(() => {
         return Object.entries(strategyById).map(([id, strategy]) => {
             const avs = avsByAddress[strategy.strategyConfig.serviceAddress]
@@ -127,6 +156,114 @@ export default function useStaking() {
         }
     }
 
+    async function getUserStakeDetails() : Promise<void> {
+        const { address } = wallet
+        if (!address) throw new Error("Wallet not connected")
+    
+        // TODO: Determine if we want to iterate over all strategies and get stake details for each strategy
+        const managerAddress = "0xb3ccE2B6b81A82e3ed6c76908F3d19d508bc3d29"
+        const manager = getContract({
+            abi: abi.manager,
+            address: managerAddress, // hardcoded for now
+            client: {
+                account: wallet.address,
+                public: readClient,
+                wallet: wallet.client
+            }
+        })
+    
+        try {
+            const userStake = await manager.read.getUserStake([address])
+            const userStakeNumber = parseFloat(formatEther(userStake))
+            
+            // const availableToWithdraw = await manager.read.getWithdrawableBalance()
+            // const availableToWithdrawNumber = parseFloat(formatEther(availableToWithdraw))
+    
+            // If the user has a stake
+            if (userStakeNumber > 0) {
+                const amountStaked = userStakeNumber
+                // const withdrawableAmount = availableToWithdrawNumber
+                const userEventTotals = await getContractEventsTotals()
+                // const { WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = userEventTotals
+                const totalsForRewardCalculation = {
+                    StakeDeposited: userEventTotals.StakeDeposited.total,
+                    StakeRebalanced: 0, // userEventTotals.StakeRebalanced.total,
+                    WithdrawalInitiated: 0, // WithdrawalInitiated,
+                    WithdrawalRequested: 0, // WithdrawalRequested,
+                    WithdrawalFulfilled: 0, // WithdrawalFulfilled
+                }
+                const rewards = await calculateRewards(amountStaked, totalsForRewardCalculation)
+    
+                userStakeDetails.value.push({
+                    operatorType: "default",
+                    address,
+                    amountStaked,
+                    availableToWithdraw: 0, // withdrawableAmount,
+                    rewards,
+                    WithdrawalInitiated: 0, // WithdrawalInitiated,
+                    WithdrawalRequested: 0, // WithdrawalRequested
+                    WithdrawalFulfilled: 0, // WithdrawalFulfilled
+                })
+            } 
+        } catch (err) {
+            console.error("Error in getUserStakeDetails:", err)
+        }
+    }
+    
+    async function getContractEventsTotals() {
+        try {
+            // Initialize userEventTotals
+            const userEventTotals: Record<string, { event: string; logs: any[], total: number }> = {}
+            const eventNames = ["StakeDeposited"]
+    
+            // Loop through event names and fetch logs
+            for (const eventName of eventNames) {
+                // Create event filter
+                const filter = await readClient.createContractEventFilter({
+                    abi: abi.manager,
+                    // @ts-ignore
+                    eventName,  // viem will handle topics generation based on ABI
+                    fromBlock: "earliest",
+                    toBlock: "latest"
+                })
+    
+                // Fetch logs for the event
+                const logs = await readClient.getFilterLogs({ filter })
+
+                // Calculate the total amount from the logs
+                let totalAmount = 0n // Use bigint since Ethereum amounts are large numbers
+
+                logs.forEach((log: any) => {
+                // Extract the 'amount' from the log's args
+                    if (log.args && log.args.amount) {
+                        totalAmount += log.args.amount
+                    }
+                })
+
+                // Store logs and the calculated total in userEventTotals
+                userEventTotals[eventName] = { event: eventName, logs, total: Number(totalAmount) }
+            }
+            return userEventTotals
+        } catch (error) {
+            console.error("Error fetching contract events totals by address:", error)
+            throw error
+        }
+    }
+    
+
+    // TODO: Double check logic here
+    async function calculateRewards(currentStaked: number, totalsForRewardCalculation: TotalsForRewardsCalculation): Promise<number> {
+        try {
+            const { StakeDeposited, StakeRebalanced, WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = totalsForRewardCalculation
+            const currentStakedInWei = parseEther(currentStaked.toString())
+            return 0
+            // return currentStakedInWei - StakeDeposited + (WithdrawalInitiated + WithdrawalRequested + WithdrawalFulfilled)
+        } catch (err) {
+            console.error(`There was an error in calculateRewards: ${err}`)
+            return 0
+        }
+    }
+    
     async function stake() {
         if (!wallet.client) throw new Error("Wallet not connected")
         if (stage.value.length === 0) {
@@ -165,6 +302,7 @@ export default function useStaking() {
             })
 
             const amountToStakeInWei = parseUnits(amountToStake.value.toString(), 18)
+            // @ts-ignore
             const txHash = await manager.write.depositStake({ value: amountToStakeInWei, account: wallet.address })
             toastContent.loading = false
             toastContent.title = "Stake Successful"
@@ -200,6 +338,7 @@ export default function useStaking() {
         stakeOptions: readonly(stakeOptions),
         selectedStakeOption,
         stage,
+        userStakeDetails: readonly(userStakeDetails),
         addStakeOptionToStage,
         removeStakeOptionFromStage,
         onAllocationChange,

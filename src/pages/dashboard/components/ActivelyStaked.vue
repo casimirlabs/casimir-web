@@ -1,31 +1,18 @@
 <script setup>
-import { 
-    InformationCircleIcon,
-    AdjustmentsVerticalIcon,
-    ChevronDoubleLeftIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    ChevronDoubleRightIcon
-} from "@heroicons/vue/24/outline"
 import { ref, computed } from "vue"
-import {
-    TransitionRoot,
-    TransitionChild,
-    Dialog,
-    DialogPanel,
-    Switch
-} from "@headlessui/vue"
-import useFormat from "@/composables/services/format"
-import useUser from "@/composables/services/user"
-import { useStorage } from "@vueuse/core"
-import useStakingState from "@/composables/state/staking"
+import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
+import { 
+    ChevronDoubleLeftIcon, 
+    ChevronDoubleRightIcon,
+    ChevronLeftIcon, 
+    ChevronRightIcon, 
+    InformationCircleIcon, 
+} from "@heroicons/vue/24/outline"
+import useFormat from "@/composables/format"
+import useStaking from "@/composables/staking"
 
-// TODO: Refactor to use userStakeDetails instead of sampleUserStakeDetails
-const { setWithdrawAmount, handleWithdraw, userStakeDetails, sampleUserStakeDetails } = useStakingState()
-
-
-const { user } = useUser()
-const { convertString, formatEthersCasimir, formatDecimalString } = useFormat()
+const { handleWithdraw, setWithdrawAmount, userStakeDetails } = useStaking()
+const { formatAddress } = useFormat()
 const columns = [
     { title: "Address", show: ref(true), value: "address" }, 
     { title: "Total Staked", show: ref(true), value: "amountStaked" }, 
@@ -35,49 +22,21 @@ const columns = [
     { title: "Withdrawals Initiated", show: ref(true), value: "WithdrawalInitiated" }, 
     { title: "Withdrawals Requested", show: ref(true), value: "WithdrawalRequested" }, 
     { title: "Withdrawals Fulfilled", show: ref(true), value: "WithdrawalFulfilled" }, 
-    // Removed for now
-    // { title: "Timestamp", show: ref(true), value: "timestamp" }, 
-    // { title: "Age", show: ref(false), value: "age" }, 
-    // { title: "Status", show: ref(true), value: "status" }, 
 ]
 
 const tableHeaders = ref(columns)
-useStorage("chosenActiveStakeTableHeaders", tableHeaders.value)
-
-const toggleColumnShowItem = (item) =>{
-    const index = columns.findIndex((col) => col === item)
-
-    if (index > -1) {
-        columns[index].show = ref(!item.show.value)
-        tableHeaders.value = columns
-    } else return
-    
-    tableHeaders.value = columns.map((col) => ({
-        title: col.title,
-        show: ref(col.show.value),
-        value: col.value
-    }))  
-}
-
-const openColumnsConfigurations = ref(false)
-const closeColumnsConfigurationsModal = () => {
-    openColumnsConfigurations.value = false
-}
-const  openColumnsConfigurationsModal = () => {
-    openColumnsConfigurations.value = true
-}
 const openActiveStakeOptions = ref(false)
 const closeOpenActiveStakeOptions = () => {
     openActiveStakeOptions.value = false
 }
-const  openOpenActiveStakeOptions = () => {
+const openOpenActiveStakeOptions = () => {
     openActiveStakeOptions.value = true
 }
 
 const currentPage = ref(1)
 const itemsPerPage = ref(9)
 const pagesAvailable = computed(() => {
-    const pages = Math.ceil(sampleUserStakeDetails?.value?.length / itemsPerPage.value)
+    const pages = Math.ceil(userStakeDetails?.value?.length / itemsPerPage.value)
     return pages > 0 ? pages : 1
 })
 
@@ -97,15 +56,6 @@ const goToNextPage = () => {
 const goToLastPage = () => {
     currentPage.value = pagesAvailable.value
 }
-
-const getWalletProviderByAddress = (address) => {
-    const index = user?.value?.accounts?.findIndex(item => item.address == address)
-    if (index > -1) {
-        return "/"+user.value.accounts[index].walletProvider.toLowerCase() + ".svg"
-    }
-    return false
-}
-
 const formatedAmountToWithdraw = ref(null)
 const selectedStake = ref(null)
 
@@ -136,10 +86,10 @@ const clearErrorMessage = () => {
 }
 
 const filteredStakeDetail = computed(() => {
-    if (sampleUserStakeDetails.value?.length > itemsPerPage.value) {
-        return sampleUserStakeDetails.value?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
+    if (userStakeDetails.value?.length > itemsPerPage.value) {
+        return userStakeDetails.value?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
     } else {
-        return sampleUserStakeDetails.value
+        return userStakeDetails.value
     }
 })
 
@@ -154,11 +104,6 @@ const handleWithdrawAction = () => {
     handleWithdraw(selectedStake.value)
     closeOpenActiveStakeOptions()
 
-}
-
-const findSwitchHeaderValue = (switchItem) => {
-    const index = tableHeaders.value.findIndex(item => item.title == switchItem.title)
-    return tableHeaders.value[index].show
 }
 </script>
 
@@ -177,12 +122,6 @@ const findSwitchHeaderValue = (switchItem) => {
                     </div>
                 </div>
             </div>
-            <button
-                class="secondary_btn shadow-none"
-                @click="openColumnsConfigurationsModal()"
-            >
-                <AdjustmentsVerticalIcon class="w-[20px] h-[20px]" />
-            </button>
         </div>
 
         <!-- Table -->
@@ -223,22 +162,8 @@ const findSwitchHeaderValue = (switchItem) => {
                                     v-if="item.value === 'address'"
                                     class="px-[8px] flex items-center gap-[12px]"
                                 >
-                                    <div
-                                        v-if="!getWalletProviderByAddress(stake[item.value])"
-                                        class="placeholder_avatar"
-                                    />
-                                    <div 
-                                        v-else
-                                        class="w-[20px] h-[20px]"
-                                    >
-                                        <img
-                                            :src="getWalletProviderByAddress(stake[item.value])"
-                                            alt=""
-                                            class="w-[20px] h-[20px]"
-                                        >
-                                    </div>
                                     <small>
-                                        {{ convertString(stake[item.value] ) }}
+                                        {{ formatAddress(stake[item.value] ) }}
                                     </small>
                                 </div>
   
@@ -256,7 +181,7 @@ const findSwitchHeaderValue = (switchItem) => {
                                     <div class="tooltip_container_left">
                                         <small>
                                             {{ 
-                                                formatEthersCasimir(formatDecimalString(stake[item.value]))
+                                                stake[item.value]
                                             }} ETH
                                         </small>
                                         <div class="tooltip_left whitespace-nowrap">
@@ -320,85 +245,7 @@ const findSwitchHeaderValue = (switchItem) => {
                 </button>
             </div>
         </div>
-
-        <!-- Table Configurations -->
-        <TransitionRoot
-            appear
-            :show="openColumnsConfigurations"
-            as="template"
-        >
-            <Dialog
-                as="div"
-                class="relative z-10"
-                @close="closeColumnsConfigurationsModal"
-            >
-                <TransitionChild
-                    as="template"
-                    enter="duration-300 ease-out"
-                    enter-from="opacity-0"
-                    enter-to="opacity-100"
-                    leave="duration-200 ease-in"
-                    leave-from="opacity-100"
-                    leave-to="opacity-0"
-                >
-                    <div class="fixed inset-0 bg-black/25" />
-                </TransitionChild>
-
-                <div class="fixed inset-0 overflow-y-auto">
-                    <div
-                        class="flex min-h-full items-center justify-center p-4 text-center"
-                    >
-                        <TransitionChild
-                            as="template"
-                            enter="duration-300 ease-out"
-                            enter-from="opacity-0 scale-95"
-                            enter-to="opacity-100 scale-100"
-                            leave="duration-200 ease-in"
-                            leave-from="opacity-100 scale-100"
-                            leave-to="opacity-0 scale-95"
-                        >
-                            <DialogPanel
-                                class="card w-full max-w-[360px] p-[24px]"
-                            >
-                                <div class="text-left pb-[24px] border-b border-b-lightBorder dark:border-b-darkBorder">
-                                    <h1 class="card_title">
-                                        Configure Columns
-                                    </h1>
-                                    <p class="card_subtitle">
-                                        Change the layout of the transaction list and display only the columns and information that is most important to you.
-                                    </p>
-                                </div>
-
-                                <div class="mt-4">
-                                    <div
-                                        v-for="(item, index) in columns"
-                                        :key="index"
-                                        class="w-full flex items-center justify-between mt-[10px] text-[14px] font-[500] tracking-[0.15px] text-[#71717a]"
-                                    >
-                                        {{ item.title }}
-                                        <div class="flex items-center gap-[12px] text-[12px]">
-                                            <Switch
-                                                :class="findSwitchHeaderValue(item)? 'bg-black dark:bg-white' : ' bg-gray_1 dark:bg-gray_6'"
-                                                class="switch_container"
-                                                @click="toggleColumnShowItem(item)"
-                                            >
-                                                <span class="sr-only">Use setting</span>
-                                                <span
-                                                    aria-hidden="true"
-                                                    :class="columns[index].show.value ? 'translate-x-4' : 'translate-x-0'"
-                                                    class="switch_ball"
-                                                />
-                                            </Switch>
-                                        </div>
-                                    </div>
-                                </div>
-                            </DialogPanel>
-                        </TransitionChild>
-                    </div>
-                </div>
-            </Dialog>
-        </TransitionRoot>
-
+        
         <!-- Active Stake Options -->
         <TransitionRoot
             appear
