@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/casimirlabs/casimir-web#readme",
   "dependencies": {
-    "@casimirlabs/casimir-contracts": "^0.0.3",
+    "@casimirlabs/casimir-contracts": "^0.0.4",
     "@headlessui/vue": "^1.7.16",
     "@heroicons/vue": "^2.0.18",
     "@metamask/providers": "^17.1.2",

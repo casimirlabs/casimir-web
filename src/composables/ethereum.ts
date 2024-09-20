@@ -2,9 +2,9 @@ import { createPublicClient, getContract, http, Address, zeroAddress } from "vie
 import { mainnet, holesky } from "viem/chains"
 import mainnetConfig from "@casimirlabs/casimir-contracts/config/mainnet.json"
 import holeskyConfig from "@casimirlabs/casimir-contracts/config/holesky.json"
-import { CasimirFactoryAbi } from "@casimirlabs/casimir-contracts/abi/CasimirFactoryAbi"
-import { CasimirManagerAbi } from "@casimirlabs/casimir-contracts/abi/CasimirManagerAbi"
-import { CasimirRegistryAbi } from "@casimirlabs/casimir-contracts/abi/CasimirRegistryAbi"
+import { ICasimirFactoryAbi } from "@casimirlabs/casimir-contracts/abi/ICasimirFactoryAbi"
+import { ICasimirManagerAbi } from "@casimirlabs/casimir-contracts/abi/ICasimirManagerAbi"
+import { ICasimirRegistryAbi } from "@casimirlabs/casimir-contracts/abi/ICasimirRegistryAbi"
 import { onMounted, reactive, ref } from "vue"
 
 export type Strategy = Awaited<ReturnType<typeof factory.read.getStrategy>> & StrategyStats
@@ -15,9 +15,9 @@ type StrategyStats = {
 }
 
 const abi = {
-    factory: CasimirFactoryAbi,
-    manager: CasimirManagerAbi,
-    registry: CasimirRegistryAbi
+    factory: ICasimirFactoryAbi,
+    manager: ICasimirManagerAbi,
+    registry: ICasimirRegistryAbi
 }
 
 const network: "mainnet" | "holesky" = import.meta.env.PUBIC_NETWORK || "holesky"
