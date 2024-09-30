@@ -5,6 +5,7 @@ import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessu
 // import StakeCard from "@/pages/dashboard/components/StakeCard.vue"
 import useFormat from "@/composables/format"
 import useStaking from "@/composables/staking"
+import useToasts from "@/composables/toasts"
 
 const { copyTextToClipboard, formatAddress, handleImageError } = useFormat()
 const { 
@@ -15,8 +16,27 @@ const {
     removeStakeOptionFromStage, 
     unlockStakeOptionAllocation 
 } = useStaking()
+const { addToast, generateRandomToastId } = useToasts()
 
 const stakeModal = ref(false)
+
+async function handleStakeClick() {
+    if (!stage.length) {
+    // Trigger toast if stage is empty
+        addToast({
+            id: generateRandomToastId(),
+            type: "failed",
+            iconUrl: "", // You can use an appropriate icon for your toast
+            title: "No AVS Selected",
+            subtitle: "Please select at least one AVS before staking.",
+            timed: true,
+            loading: false,
+        })
+    } else {
+    // Proceed with the staking logic if stage is not empty
+        await stake()
+    }
+}
 </script>
 
 <template>
@@ -38,8 +58,8 @@ const stakeModal = ref(false)
             <div class="flex items-center gap-[12px]">
                 <button
                     class="primary_btn"
-                    style="box-shadow: none;"
-                    @click="stake"
+                    :class="{ 'disabled-btn': !stage.length }"
+                    @click="handleStakeClick"
                 >
                     <small>Stake</small>
                 </button>

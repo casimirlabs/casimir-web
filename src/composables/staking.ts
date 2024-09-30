@@ -51,7 +51,9 @@ export default function useStaking() {
     onMounted(async () => {
         if (!isInitialized.value) {
             isInitialized.value = true
-            await getUserStakeDetails()
+            if (wallet.provider) {
+                await getUserStakeDetails()
+            }
         }
     })
 

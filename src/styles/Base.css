@@ -1,4 +1,4 @@
-/* This file is ment to be for base component styling  */
+/* This file is meant to be for base component styling  */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -22,6 +22,16 @@
     @apply rounded-[6px] px-[12px] py-[6px] flex items-center gap-[8px]
     text-white dark:text-white bg-red hover:bg-red/80
     active:bg-red/75  
+}
+
+.primary_btn.disabled-btn {
+  background-color: grey;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.primary_btn.disabled-btn:hover {
+  background-color: grey;
 }
 
 .tooltip_container {
