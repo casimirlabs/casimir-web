@@ -21,8 +21,7 @@ const { addToast, generateRandomToastId } = useToasts()
 const stakeModal = ref(false)
 
 async function handleStakeClick() {
-    if (!stage.length) {
-    // Trigger toast if stage is empty
+    if (!stage.value.length) {
         addToast({
             id: generateRandomToastId(),
             type: "failed",
@@ -33,7 +32,6 @@ async function handleStakeClick() {
             loading: false,
         })
     } else {
-    // Proceed with the staking logic if stage is not empty
         await stake()
     }
 }
