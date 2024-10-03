@@ -4,6 +4,7 @@ import useAVS, { AVS } from "@/composables/avs"
 import useEthereum, { Strategy } from "@/composables/ethereum"
 import useToasts from "@/composables/toasts"
 import useWallet from "@/composables/wallet"
+import { parse } from "path"
 
 type StakeOption = {
     id: number,
@@ -37,7 +38,7 @@ type TotalsForRewardsCalculation = {
 
 const isInitialized = ref(false)
 const stage = ref([] as StakeOptionWithAllocation[])
-const amountToStake = ref(5)
+const amountToStake = ref(0)
 const acceptedTerms = ref(false)
 const selectedStakeOption = ref<StakeOption>()
 const userStakeDetails = ref<Array<StakeDetails>>([])
@@ -326,8 +327,8 @@ export default function useStaking() {
         if (!selectedStakeOption.value) throw new Error("Invalid stake option")
     }
 
-    function setAmountToStake(amount: number) {
-        amountToStake.value = amount
+    function setAmountToStake(amount: string) {
+        amountToStake.value = parseFloat(amount) || 0
     }
 
     function toggleAcceptedTerms() {
@@ -336,7 +337,7 @@ export default function useStaking() {
 
     return {
         acceptedTerms: readonly(acceptedTerms),
-        amountToStake: readonly(amountToStake),
+        amountToStake: amountToStake,
         stakeOptions: readonly(stakeOptions),
         selectedStakeOption,
         stage,

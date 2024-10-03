@@ -1,26 +1,29 @@
 <script setup>
 import { ref } from "vue"
-import { XMarkIcon, DocumentDuplicateIcon, LockOpenIcon, LockClosedIcon } from "@heroicons/vue/24/outline"
-import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
-// import StakeCard from "@/pages/dashboard/components/StakeCard.vue"
+import { CheckIcon, XMarkIcon, DocumentDuplicateIcon, LockOpenIcon, LockClosedIcon } from "@heroicons/vue/24/outline"
 import useFormat from "@/composables/format"
 import useStaking from "@/composables/staking"
 import useToasts from "@/composables/toasts"
+import useWallet from "@/composables/wallet"
+import { formatEther } from "viem"
 
 const { copyTextToClipboard, formatAddress, handleImageError } = useFormat()
-const { 
-    stage, 
+const {
+    acceptedTerms,
+    amountToStake,
+    stage,
     lockStakeOptionAllocation, 
-    onAllocationChange, 
-    stake, 
-    removeStakeOptionFromStage, 
+    onAllocationChange,
+    removeStakeOptionFromStage,
+    setAmountToStake,
+    stake,
+    toggleAcceptedTerms,
     unlockStakeOptionAllocation 
 } = useStaking()
 const { addToast, generateRandomToastId } = useToasts()
+const { wallet } = useWallet()
 
-const stakeModal = ref(false)
-
-async function handleStakeClick() {
+async function handleStake() {
     if (!stage.value.length) {
         addToast({
             id: generateRandomToastId(),
@@ -33,6 +36,16 @@ async function handleStakeClick() {
         })
     } else {
         await stake()
+    }
+}
+function onAmountChange(event) {
+    const value = parseFloat(event.target.value)
+    // Ensure the value is a valid number and less than or equal to wallet balance
+    if (!isNaN(value) && value <= parseFloat(formatEther(wallet.balance))) {
+        setAmountToStake(value)
+    } else {
+        // If invalid, default to max balance (convert from wei to eth)
+        setAmountToStake(parseFloat(formatEther(wallet.balance)))
     }
 }
 </script>
@@ -57,7 +70,7 @@ async function handleStakeClick() {
                 <button
                     class="primary_btn"
                     :class="{ 'disabled-btn': !stage.length }"
-                    @click="handleStakeClick"
+                    @click="handleStake"
                 >
                     <small>Stake</small>
                 </button>
@@ -69,6 +82,39 @@ async function handleStakeClick() {
             v-if="stage.length"
             class="w-full flex flex-wrap items-center gap-[24px]"
         >
+            <!-- Amount to stake input -->
+            <div class="p-[12px] min-h-[260px] min-w-[300px] bg-gray_4 dark:bg-gray_6 rounded-[6px] shadow-lg">
+                <div class="mb-6">
+                    <label
+                        class="block text-white text-sm font-medium mb-3"
+                        for="stake-amount"
+                    >
+                        Amount to Stake
+                    </label>
+                    <div class="relative">
+                        <input
+                            id="stake-amount"
+                            v-model="amountToStake"
+                            type="number"
+                            class="input_container"
+                            :max="wallet?.balance"
+                            min="0"
+                            placeholder="0"
+                            @input="onAmountChange"
+                        >
+                        <button
+                            class="secondary_btn absolute inset-y-0 right-0 flex items-center px-4 text-sm rounded-r-l"
+                            @click="setAmountToStake(parseFloat(formatEther(wallet?.balance)))"
+                        >
+                            Max
+                        </button>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-2">
+                        Available Balance: <span class="font-semibold">{{ wallet.provider ? formatEther(wallet?.balance) : '' }} ETH</span>
+                    </p>
+                </div>
+            </div>
+
             <!-- AVS Stage Card -->
             <div
                 v-for="(option, index) in stage"
@@ -129,7 +175,7 @@ async function handleStakeClick() {
                 </div>
 
                 <div class="mt-[24px] mb-[6px]">
-                    <small>Allocated Stake Percentage</small>
+                    <small>Allocated Percentage</small>
                 </div>
                 <div class="mb-[12px] flex items-center gap-[12px] w-full">
                     <div class="flex items-center gap-[3px]">
@@ -173,55 +219,24 @@ async function handleStakeClick() {
                             <LockClosedIcon class="w-[16px] h-[16px]" />
                         </button>
                     </div>
+                    <!-- Calculated value of how much ETH -->
+                    <small class="flex justify-end font-[500] min-w-[80px]">
+                        {{ amountToStake * option.allocatedPercentage ? amountToStake * option.allocatedPercentage / 100 : '0.00' }} ETH
+                    </small>
                 </div>
             </div>
-
-            <!-- Stake Modal -->
-            <TransitionRoot
-                appear
-                :show="stakeModal"
-                as="template"
+        </div>
+        <div class="flex items-center gap-[12px] mt-6">
+            <button
+                class="checkbox_button bg-transparent h-[10px] w-[10px]"
+                @click="toggleAcceptedTerms"
             >
-                <Dialog
-                    as="div"
-                    class="relative z-10"
-                    @close="stakeModal = false"
-                >
-                    <TransitionChild
-                        as="template"
-                        enter="duration-300 ease-out"
-                        enter-from="opacity-0"
-                        enter-to="opacity-100"
-                        leave="duration-200 ease-in"
-                        leave-from="opacity-100"
-                        leave-to="opacity-0"
-                    >
-                        <div class="fixed inset-0 bg-black/25" />
-                    </TransitionChild>
-
-                    <div class="fixed inset-0 overflow-y-auto">
-                        <div
-                            class="flex min-h-full items-center justify-center p-4 text-center"
-                        >
-                            <TransitionChild
-                                as="template"
-                                enter="duration-300 ease-out"
-                                enter-from="opacity-0 scale-95"
-                                enter-to="opacity-100 scale-100"
-                                leave="duration-200 ease-in"
-                                leave-from="opacity-100 scale-100"
-                                leave-to="opacity-0 scale-95"
-                            >
-                                <DialogPanel
-                                    class="card w-full max-w-[360px] p-[24px] max-h-[500px] overflow-auto relative"
-                                >
-                                    <!-- <StakeCard /> -->
-                                </DialogPanel>
-                            </TransitionChild>
-                        </div>
-                    </div>
-                </Dialog>
-            </TransitionRoot>
+                <CheckIcon
+                    v-show="acceptedTerms"
+                    class="h-[12px] w-[12px]"
+                />
+            </button>
+            <small class="card_subtitle">Accept terms and conditions</small>
         </div>
     </div>
 </template>
