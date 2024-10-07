@@ -216,7 +216,7 @@ body caption{
   font-weight: 500;
   line-height: normal;
 }
-.shawdow{
+.shadow{
   box-shadow: 1px 2px 3px 0px rgba(0, 0, 0, 0.17);
 }
 .card_subtitle{
@@ -317,7 +317,7 @@ body caption{
   @apply text-black dark:text-white;
 }
 
-.slidecontainer {
+.slide_container {
   width: 100%;
 }
 

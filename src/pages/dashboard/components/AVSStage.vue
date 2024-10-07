@@ -1,60 +1,21 @@
 <script setup>
-import { ref } from "vue"
-import { CheckIcon, XMarkIcon, DocumentDuplicateIcon, LockOpenIcon, LockClosedIcon } from "@heroicons/vue/24/outline"
+import { XMarkIcon, DocumentDuplicateIcon, LockOpenIcon, LockClosedIcon } from "@heroicons/vue/24/outline"
 import useFormat from "@/composables/format"
 import useStaking from "@/composables/staking"
-import useToasts from "@/composables/toasts"
-import useWallet from "@/composables/wallet"
-import { formatEther } from "viem"
 
 const { copyTextToClipboard, formatAddress, handleImageError } = useFormat()
 const {
-    acceptedTerms,
     amountToStake,
     stage,
     lockStakeOptionAllocation, 
     onAllocationChange,
     removeStakeOptionFromStage,
-    setAmountToStake,
-    stake,
-    toggleAcceptedTerms,
     unlockStakeOptionAllocation 
 } = useStaking()
-const { addToast, generateRandomToastId } = useToasts()
-const { wallet } = useWallet()
-
-async function handleStake() {
-    if (!stage.value.length) {
-        addToast({
-            id: generateRandomToastId(),
-            type: "failed",
-            iconUrl: "", // You can use an appropriate icon for your toast
-            title: "No AVS Selected",
-            subtitle: "Please select at least one AVS before staking.",
-            timed: true,
-            loading: false,
-        })
-    } else {
-        await stake()
-    }
-}
-function onAmountChange(event) {
-    const value = parseFloat(event.target.value)
-    // Ensure the value is a valid number and less than or equal to wallet balance
-    if (!isNaN(value) && value <= parseFloat(formatEther(wallet.balance))) {
-        setAmountToStake(value)
-    } else {
-        // If invalid, default to max balance (convert from wei to eth)
-        setAmountToStake(parseFloat(formatEther(wallet.balance)))
-    }
-}
 </script>
 
 <template>
-    <div
-        class="card w-full shadow p-[24px]"
-        style="transition: all ease 0.3s; overflow: visible"
-    >
+    <div class="card w-full shadow p-[24px]">
         <!-- Header, Title/Subtitle, Stake Button -->
         <div class="flex items-start justify-between gap-[12px]">
             <div class="text-left pb-[24px]">
@@ -65,16 +26,6 @@ function onAmountChange(event) {
                     Add one or more AVSs to the stage and allocate a staking percentage to each
                 </p>
             </div>
-
-            <div class="flex items-center gap-[12px]">
-                <button
-                    class="primary_btn"
-                    :class="{ 'disabled-btn': !stage.length }"
-                    @click="handleStake"
-                >
-                    <small>Stake</small>
-                </button>
-            </div>
         </div>
 
         <!-- The Stage -->
@@ -82,39 +33,6 @@ function onAmountChange(event) {
             v-if="stage.length"
             class="w-full flex flex-wrap items-center gap-[24px]"
         >
-            <!-- Amount to stake input -->
-            <div class="p-[12px] min-h-[260px] min-w-[300px] bg-gray_4 dark:bg-gray_6 rounded-[6px] shadow-lg">
-                <div class="mb-6">
-                    <label
-                        class="block text-white text-sm font-medium mb-3"
-                        for="stake-amount"
-                    >
-                        Amount to Stake
-                    </label>
-                    <div class="relative">
-                        <input
-                            id="stake-amount"
-                            v-model="amountToStake"
-                            type="number"
-                            class="input_container"
-                            :max="wallet?.balance"
-                            min="0"
-                            placeholder="0"
-                            @input="onAmountChange"
-                        >
-                        <button
-                            class="secondary_btn absolute inset-y-0 right-0 flex items-center px-4 text-sm rounded-r-l"
-                            @click="setAmountToStake(parseFloat(formatEther(wallet?.balance)))"
-                        >
-                            Max
-                        </button>
-                    </div>
-                    <p class="text-gray-400 text-sm mt-2">
-                        Available Balance: <span class="font-semibold">{{ wallet.provider ? formatEther(wallet?.balance) : '' }} ETH</span>
-                    </p>
-                </div>
-            </div>
-
             <!-- AVS Stage Card -->
             <div
                 v-for="(option, index) in stage"
@@ -225,18 +143,6 @@ function onAmountChange(event) {
                     </small>
                 </div>
             </div>
-        </div>
-        <div class="flex items-center gap-[12px] mt-6">
-            <button
-                class="checkbox_button bg-transparent h-[10px] w-[10px]"
-                @click="toggleAcceptedTerms"
-            >
-                <CheckIcon
-                    v-show="acceptedTerms"
-                    class="h-[12px] w-[12px]"
-                />
-            </button>
-            <small class="card_subtitle">Accept terms and conditions</small>
         </div>
     </div>
 </template>

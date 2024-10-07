@@ -3,6 +3,7 @@ import Portfolio from "@/pages/dashboard/components/Portfolio.vue"
 import AVSTable from "@/pages/dashboard/components/AVSTable.vue"
 import AVSStage from "@/pages/dashboard/components/AVSStage.vue"
 import ActivelyStaked from "./components/ActivelyStaked.vue"
+import StakeWidget from "./components/StakeWidget.vue"
 </script>
 
 <template>
@@ -15,8 +16,13 @@ import ActivelyStaked from "./components/ActivelyStaked.vue"
                 <AVSTable />
             </div>
         </div>
-        <div class="w-full mt-[24px]">
-            <AVSStage />
+        <div class="flex items-stretch gap-[24px] mt-[24px] w-full h-full">
+            <div class="flex flex-grow w-9/12">
+                <AVSStage />
+            </div>
+            <div class="flex flex-grow w-3/12">
+                <StakeWidget />
+            </div>
         </div>
         <div class="w-full mt-[24px] h-[540px]">
             <ActivelyStaked />
