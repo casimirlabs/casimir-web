@@ -74,6 +74,12 @@
     @apply outline-none w-full;
   }
 
+  .input_container.disabled {
+    background-color: grey;
+    cursor: not-allowed;
+    opacity: 0.75;
+  }
+
   .input_selector{
     @apply absolute top-[120%] left-0 bg-[#FFF] dark:bg-black 
     border border-lightBorder dark:border-lightBorder/40

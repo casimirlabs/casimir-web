@@ -10,14 +10,22 @@ const { acceptedTerms, amountToStake, setAmountToStake, stage, stake, toggleAcce
 const { addToast, generateRandomToastId } = useToasts()
 const { wallet } = useWallet()
 
-const formattedWalletBalance = computed(() => wallet.provider ? formatEther(wallet.balance) : "0")
+const formattedWalletBalance = computed(() => wallet.provider ? formatEther(wallet.balance) : 0)
 
 function onAmountChange(event: Event) {
     const input = event.target as HTMLInputElement
-    const value = parseFloat(input.value)
-    if (!isNaN(value) && value <= parseFloat(formatEther(wallet?.balance))) {
+    const value = input.value === "" ? NaN : parseFloat(input.value)
+
+    // If the input is empty, set the stake amount to "0"
+    if (isNaN(value)) {
+        setAmountToStake("0")
+    } 
+    // Ensure the value is a valid number and less than or equal to wallet balance
+    else if (value <= parseFloat(formatEther(wallet?.balance))) {
         setAmountToStake(value.toString())
-    } else {
+    } 
+    // If invalid, default to max balance (convert from wei to eth)
+    else {
         setAmountToStake(formatEther(wallet.balance))
     }
 }
@@ -37,6 +45,7 @@ async function handleStake() {
         await stake()
     }
 }
+
 </script>
 
 <template>
@@ -55,18 +64,23 @@ async function handleStake() {
                     v-model.number="amountToStake"
                     type="number"
                     class="input_container"
-                    :max="formattedWalletBalance || '0'"
+                    :class="{ 'disabled': !stage.length }"
+                    :max="formattedWalletBalance"
                     min="0"
                     placeholder="0"
+                    :disabled="!stage.length"
                     @input="onAmountChange"
                 >
                 <button
                     class="secondary_btn absolute inset-y-0 right-0 flex items-center px-4 text-sm rounded-r-l"
-                    @click="setAmountToStake(formattedWalletBalance)"
+                    :class="{ 'disabled': !stage.length }"
+                    :disabled="!stage.length"
+                    @click="setAmountToStake(formattedWalletBalance.toString())"
                 >
                     Max
                 </button>
             </div>
+
             <p class="text-gray-400 text-sm mt-2">
                 Available Balance: <span class="font-semibold">{{ wallet.provider ? formatEther(wallet?.balance) : '' }} ETH</span>
             </p>
