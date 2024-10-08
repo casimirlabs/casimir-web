@@ -293,32 +293,33 @@ export default function useStaking() {
         }
         addToast(toastContent)
 
-        try {
-            const manager = getContract({
-                abi: abi.manager,
-                address: selectedStakeOption.value?.strategy.managerAddress as Address,
-                client: {
-                    account: wallet.address,
-                    public: readClient,
-                    wallet: wallet.client
-                }
-            })
-
-            const amountToStakeInWei = parseUnits(amountToStake.value.toString(), 18)
-            // @ts-ignore
-            const txHash = await manager.write.depositStake({ value: amountToStakeInWei, account: wallet.address })
-            toastContent.loading = false
-            toastContent.title = "Stake Successful"
-            toastContent.subtitle = `Transaction hash: ${txHash}`
-            stage.value = []
-            addToast(toastContent)
-        } catch (error) {
-            console.error("Staking error:", error)
-            toastContent.loading = false
-            toastContent.type = "error"
-            toastContent.title = "Stake Failed"
-            toastContent.subtitle = (error as Error).message || "Unknown error occurred"
-            addToast(toastContent)
+        for (const stakeOption of stage.value) {
+            try {
+                const manager = getContract({
+                    abi: abi.manager,
+                    address: stakeOption.strategy.managerAddress as Address,
+                    client: {
+                        account: wallet.address,
+                        public: readClient,
+                        wallet: wallet.client
+                    }
+                })
+                const amountToStakeInWei = parseEther((amountToStake.value * (stakeOption.allocatedPercentage / 100)).toString())
+                // @ts-ignore
+                const txHash = await manager.write.depositStake({ value: amountToStakeInWei, account: wallet.address })
+                toastContent.loading = false
+                toastContent.title = "Stake Successful"
+                toastContent.subtitle = `Transaction hash: ${txHash}`
+                stage.value = []
+                addToast(toastContent)
+            } catch (error) {
+                console.error("Staking error:", error)
+                toastContent.loading = false
+                toastContent.type = "error"
+                toastContent.title = "Stake Failed"
+                toastContent.subtitle = (error as Error).message || "Unknown error occurred"
+                addToast(toastContent)
+            }
         }
     }
 

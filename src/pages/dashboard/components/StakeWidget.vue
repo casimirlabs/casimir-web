@@ -105,7 +105,7 @@ async function handleStake() {
             <div>
                 <button
                     class="primary_btn w-full"
-                    :class="{ 'disabled-btn': !stage.length }"
+                    :class="{ 'disabled-btn': !stage.length || !amountToStake || !acceptedTerms }"
                     @click="handleStake"
                 >
                     <small>Stake</small>
