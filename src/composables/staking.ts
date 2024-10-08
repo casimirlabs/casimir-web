@@ -57,6 +57,13 @@ export default function useStaking() {
         }
     },{ immediate: true, deep: true })
 
+    watch(wallet, () => {
+        if (!wallet.provider) {
+            userStakeDetails.value = []
+            isLoadingStakeDetails.value = false
+        }
+    })
+
     const stakeOptions = computed(() => {
         return Object.entries(strategyById).map(([id, strategy]) => {
             const avs = avsByAddress[strategy.strategyConfig.serviceAddress]
@@ -215,7 +222,6 @@ export default function useStaking() {
             isLoadingStakeDetails.value = false
         }
     }
-    
     
     async function getContractEventsTotals() {
         try {

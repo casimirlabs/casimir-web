@@ -45,8 +45,9 @@ async function handleSelectProvider(provider: ProviderString) {
     }
 }
 
-async function handleDisconnectWallet() {
-    await disconnectWallet()
+function handleDisconnectWallet() {
+    disconnectWallet()
+    toggleWalletModal()
 } 
 </script>
 

@@ -98,7 +98,7 @@ export default function useWallet() {
         wallet.loading = false
     }
 
-    async function disconnectWallet() {
+    function disconnectWallet() {
         Object.assign(wallet, defaultWallet) // Resets the wallet state to default values
         localStorage.removeItem("walletProvider")
         localStorage.removeItem("walletAddress")
