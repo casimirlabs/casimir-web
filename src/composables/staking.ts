@@ -162,9 +162,9 @@ export default function useStaking() {
         isLoadingStakeDetails.value = true
         const { address } = wallet
         if (!address) throw new Error("Wallet not connected")
-      
-        // Get all strategy manager addresses
         const strategyAddresses = Object.values(strategyById).map(strategy => strategy.managerAddress)
+        const updatedStakeDetails = []
+    
         try {
             for (const managerAddress of strategyAddresses) {
                 const manager = getContract({
@@ -176,47 +176,46 @@ export default function useStaking() {
                         wallet: wallet.client
                     }
                 })
-      
+    
                 const userStake = await manager.read.getUserStake([address])
                 const userStakeNumber = parseFloat(formatEther(userStake))
-      
-                // const availableToWithdraw = await manager.read.getWithdrawableBalance()
-                // const availableToWithdrawNumber = parseFloat(formatEther(availableToWithdraw))
-      
+    
                 // If the user has a stake in the current strategy
                 if (userStakeNumber > 0) {
                     const amountStaked = userStakeNumber
-                    // const withdrawableAmount = availableToWithdrawNumber
                     const userEventTotals = await getContractEventsTotals()
-                    // const { WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = userEventTotals
                     const totalsForRewardCalculation = {
                         StakeDeposited: userEventTotals.StakeDeposited.total,
-                        StakeRebalanced: 0, // userEventTotals.StakeRebalanced.total,
-                        WithdrawalInitiated: 0, // WithdrawalInitiated,
-                        WithdrawalRequested: 0, // WithdrawalRequested,
-                        WithdrawalFulfilled: 0 // WithdrawalFulfilled
+                        StakeRebalanced: 0, 
+                        WithdrawalInitiated: 0, 
+                        WithdrawalRequested: 0, 
+                        WithdrawalFulfilled: 0
                     }
-      
+    
                     const rewards = await calculateRewards(amountStaked, totalsForRewardCalculation)
-      
-                    userStakeDetails.value.push({
-                        operatorType: "default",
+    
+                    // TODO: Determine operator type
+                    updatedStakeDetails.push({
+                        operatorType: "default" as const,
                         address,
                         amountStaked,
-                        availableToWithdraw: 0, // withdrawableAmount,
+                        availableToWithdraw: 0, 
                         rewards,
-                        WithdrawalInitiated: 0, // WithdrawalInitiated,
-                        WithdrawalRequested: 0, // WithdrawalRequested
-                        WithdrawalFulfilled: 0 // WithdrawalFulfilled
+                        WithdrawalInitiated: 0, 
+                        WithdrawalRequested: 0, 
+                        WithdrawalFulfilled: 0
                     })
                 }
             }
+    
+            userStakeDetails.value = updatedStakeDetails
         } catch (err) {
             console.error("Error in getUserStakeDetails:", err)
         } finally {
             isLoadingStakeDetails.value = false
         }
     }
+    
     
     async function getContractEventsTotals() {
         try {
@@ -323,6 +322,8 @@ export default function useStaking() {
                 toastContent.title = "Stake Failed"
                 toastContent.subtitle = (error as Error).message || "Unknown error occurred"
                 addToast(toastContent)
+            } finally {
+                await getUserStakeDetails()
             }
         }
     }
