@@ -1,10 +1,9 @@
-import { computed, onMounted, readonly, ref } from "vue"
-import { Address, decodeEventLog, parseEther, formatEther, getContract, parseUnits } from "viem"
+import { computed, readonly, ref, watch } from "vue"
+import { Address, parseEther, formatEther, getContract } from "viem"
 import useAVS, { AVS } from "@/composables/avs"
 import useEthereum, { Strategy } from "@/composables/ethereum"
 import useToasts from "@/composables/toasts"
 import useWallet from "@/composables/wallet"
-import { parse } from "path"
 
 type StakeOption = {
     id: number,
@@ -36,12 +35,13 @@ type TotalsForRewardsCalculation = {
     WithdrawalFulfilled: number
 }
 
-const isInitialized = ref(false)
 const stage = ref([] as StakeOptionWithAllocation[])
 const amountToStake = ref(0)
 const acceptedTerms = ref(false)
 const selectedStakeOption = ref<StakeOption>()
 const userStakeDetails = ref<Array<StakeDetails>>([])
+const isLoadingStakeDetails = ref(false)
+const isStrategiesLoaded = ref(false)
 
 export default function useStaking() {
     const { abi, readClient, strategyById } = useEthereum()
@@ -49,14 +49,13 @@ export default function useStaking() {
     const { addToast, generateRandomToastId } = useToasts()
     const { wallet } = useWallet()
 
-    onMounted(async () => {
-        if (!isInitialized.value) {
-            isInitialized.value = true
-            if (wallet.provider) {
-                await getUserStakeDetails()
-            }
+    watch(strategyById, async (newValue) => {
+        if (isStrategiesLoaded.value) return
+        if (Object.keys(newValue).length > 0 && wallet.provider) {
+            isStrategiesLoaded.value = true
+            await getUserStakeDetails()
         }
-    })
+    },{ immediate: true, deep: true })
 
     const stakeOptions = computed(() => {
         return Object.entries(strategyById).map(([id, strategy]) => {
@@ -159,57 +158,63 @@ export default function useStaking() {
         }
     }
 
-    async function getUserStakeDetails() : Promise<void> {
+    async function getUserStakeDetails(): Promise<void> {
+        isLoadingStakeDetails.value = true
         const { address } = wallet
         if (!address) throw new Error("Wallet not connected")
-    
-        // TODO: Determine if we want to iterate over all strategies and get stake details for each strategy
-        const managerAddress = "0xb3ccE2B6b81A82e3ed6c76908F3d19d508bc3d29"
-        const manager = getContract({
-            abi: abi.manager,
-            address: managerAddress, // hardcoded for now
-            client: {
-                account: wallet.address,
-                public: readClient,
-                wallet: wallet.client
-            }
-        })
-    
+      
+        // Get all strategy manager addresses
+        const strategyAddresses = Object.values(strategyById).map(strategy => strategy.managerAddress)
         try {
-            const userStake = await manager.read.getUserStake([address])
-            const userStakeNumber = parseFloat(formatEther(userStake))
-            
-            // const availableToWithdraw = await manager.read.getWithdrawableBalance()
-            // const availableToWithdrawNumber = parseFloat(formatEther(availableToWithdraw))
-    
-            // If the user has a stake
-            if (userStakeNumber > 0) {
-                const amountStaked = userStakeNumber
-                // const withdrawableAmount = availableToWithdrawNumber
-                const userEventTotals = await getContractEventsTotals()
-                // const { WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = userEventTotals
-                const totalsForRewardCalculation = {
-                    StakeDeposited: userEventTotals.StakeDeposited.total,
-                    StakeRebalanced: 0, // userEventTotals.StakeRebalanced.total,
-                    WithdrawalInitiated: 0, // WithdrawalInitiated,
-                    WithdrawalRequested: 0, // WithdrawalRequested,
-                    WithdrawalFulfilled: 0, // WithdrawalFulfilled
-                }
-                const rewards = await calculateRewards(amountStaked, totalsForRewardCalculation)
-    
-                userStakeDetails.value.push({
-                    operatorType: "default",
-                    address,
-                    amountStaked,
-                    availableToWithdraw: 0, // withdrawableAmount,
-                    rewards,
-                    WithdrawalInitiated: 0, // WithdrawalInitiated,
-                    WithdrawalRequested: 0, // WithdrawalRequested
-                    WithdrawalFulfilled: 0, // WithdrawalFulfilled
+            for (const managerAddress of strategyAddresses) {
+                const manager = getContract({
+                    abi: abi.manager,
+                    address: managerAddress as Address,
+                    client: {
+                        account: wallet.address,
+                        public: readClient,
+                        wallet: wallet.client
+                    }
                 })
-            } 
+      
+                const userStake = await manager.read.getUserStake([address])
+                const userStakeNumber = parseFloat(formatEther(userStake))
+      
+                // const availableToWithdraw = await manager.read.getWithdrawableBalance()
+                // const availableToWithdrawNumber = parseFloat(formatEther(availableToWithdraw))
+      
+                // If the user has a stake in the current strategy
+                if (userStakeNumber > 0) {
+                    const amountStaked = userStakeNumber
+                    // const withdrawableAmount = availableToWithdrawNumber
+                    const userEventTotals = await getContractEventsTotals()
+                    // const { WithdrawalInitiated, WithdrawalRequested, WithdrawalFulfilled } = userEventTotals
+                    const totalsForRewardCalculation = {
+                        StakeDeposited: userEventTotals.StakeDeposited.total,
+                        StakeRebalanced: 0, // userEventTotals.StakeRebalanced.total,
+                        WithdrawalInitiated: 0, // WithdrawalInitiated,
+                        WithdrawalRequested: 0, // WithdrawalRequested,
+                        WithdrawalFulfilled: 0 // WithdrawalFulfilled
+                    }
+      
+                    const rewards = await calculateRewards(amountStaked, totalsForRewardCalculation)
+      
+                    userStakeDetails.value.push({
+                        operatorType: "default",
+                        address,
+                        amountStaked,
+                        availableToWithdraw: 0, // withdrawableAmount,
+                        rewards,
+                        WithdrawalInitiated: 0, // WithdrawalInitiated,
+                        WithdrawalRequested: 0, // WithdrawalRequested
+                        WithdrawalFulfilled: 0 // WithdrawalFulfilled
+                    })
+                }
+            }
         } catch (err) {
             console.error("Error in getUserStakeDetails:", err)
+        } finally {
+            isLoadingStakeDetails.value = false
         }
     }
     
@@ -253,7 +258,6 @@ export default function useStaking() {
         }
     }
     
-
     // TODO: Double check logic here
     async function calculateRewards(currentStaked: number, totalsForRewardCalculation: TotalsForRewardsCalculation): Promise<number> {
         try {
@@ -339,6 +343,7 @@ export default function useStaking() {
     return {
         acceptedTerms: readonly(acceptedTerms),
         amountToStake: amountToStake,
+        isLoadingStakeDetails: readonly(isLoadingStakeDetails),
         stakeOptions: readonly(stakeOptions),
         selectedStakeOption,
         stage,

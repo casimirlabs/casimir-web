@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue"
+import { computed, ref, watchEffect } from "vue"
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
 import { 
     ChevronDoubleLeftIcon, 
@@ -85,11 +85,13 @@ const clearErrorMessage = () => {
     }, 3500)
 }
 
-const filteredStakeDetail = computed(() => {
+const filteredStakeDetail = ref([])
+
+watchEffect(() => {
     if (userStakeDetails.value?.length > itemsPerPage.value) {
-        return userStakeDetails.value?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
+        filteredStakeDetail.value = userStakeDetails.value?.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
     } else {
-        return userStakeDetails.value
+        filteredStakeDetail.value = userStakeDetails.value
     }
 })
 
