@@ -17,7 +17,7 @@
 
   --max-app-width: 1275px; 
   --min-app-width: 360px;
-  --navbar-height: 56px;
+  --navbar-height: 76px;
   --x-padding: 14px;
   --y-padding: 4px;
   --page-padding: 24px;
@@ -86,7 +86,7 @@ body caption{
 }
 
 .app_container_inner {
-  @apply w-full mx-auto py-[24px] 1300s:px-[24px];
+  @apply w-full mx-auto pb-[24px] 1300s:px-[24px];
   min-height: calc(100% - var(--navbar-height));
   max-width: var(--max-app-width);
   min-width: var(--min-app-width);
@@ -185,7 +185,7 @@ body caption{
 }
 
 .connect_wallet_menu_btn{
-  @apply w-full rounded-[6px] px-[16px] py-[6px] border
+  @apply w-full rounded-[6px] px-[16px] py-[12px] border
   border-lightBorder dark:border-lightBorder/40 flex items-center
   justify-between;
 }

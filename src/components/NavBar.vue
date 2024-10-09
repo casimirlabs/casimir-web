@@ -51,7 +51,7 @@ const toggleDark = useToggle(isDark)
                 </button>
 
                 <!-- Connect Wallet Button -->
-                <div class="w-[200px]">
+                <div class="w-[240px]">
                     <div class="relative inline-block text-left w-full">
                         <button
                             class="connect_wallet_menu_btn"
