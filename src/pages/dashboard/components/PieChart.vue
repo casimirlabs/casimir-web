@@ -10,30 +10,44 @@ import {
     CategoryScale,
     LinearScale,
 } from "chart.js"
-import { defineProps } from "vue"
+import useStaking from "@/composables/staking"
+import useWallet from "@/composables/wallet"
+import { computed } from "vue"
+import { formatUnits } from "viem"
 
-type AvsAllocation = {
-  [key: string]: number;
-};
+const { userStakeDetails } = useStaking()
+const { wallet } = useWallet()
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale)
 
-const props = defineProps({
-    avsAllocation: {
-        type: Object as () => AvsAllocation,
-        required: true,
-    },
+const labels = computed(() => {
+    if (!userStakeDetails.value || Object.keys(userStakeDetails.value).length === 0) {
+        return []
+    }
+    
+    return [
+        ...Object.keys(userStakeDetails.value).map(id => `AVS-${id}`),
+        "Non-Staked ETH"
+    ]
 })
 
-const labels = Object.keys(props.avsAllocation)
-const data = Object.values(props.avsAllocation)
+const data = computed(() => {
+    if (!userStakeDetails.value || Object.keys(userStakeDetails.value).length === 0) {
+        return []
+    }
 
-const chartData = {
-    labels: labels,
+    return [
+        ...Object.keys(userStakeDetails.value).map((id: string, idx: number) => Number(userStakeDetails.value[idx].amountStaked)),
+        (parseFloat(formatUnits(wallet.balance, 18)))
+    ]
+})
+
+const chartData = computed(() => ({
+    labels: labels.value,
     datasets: [
         {
             label: "AVS Allocation",
-            data: data,
+            data: data.value,
             backgroundColor: [
                 "rgba(255, 99, 132, 0.5)",
                 "rgba(54, 162, 235, 0.5)",
@@ -43,7 +57,7 @@ const chartData = {
             hoverOffset: 4,
         },
     ],
-}
+}))
 
 const chartOptions: ChartOptions<"pie"> = {
     responsive: true,
@@ -64,12 +78,15 @@ const chartOptions: ChartOptions<"pie"> = {
         },
     },
 }
-
 </script>
 
 <template>
     <Pie
+        v-if="chartData.datasets[0].data.length > 0"
         :data="chartData"
         :options="chartOptions"
     />
+    <div v-else>
+        Loading chart data...
+    </div>
 </template>

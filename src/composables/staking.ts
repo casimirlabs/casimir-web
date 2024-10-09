@@ -49,6 +49,13 @@ export default function useStaking() {
     const { addToast, generateRandomToastId } = useToasts()
     const { wallet } = useWallet()
 
+    // TODO: Remove placeholder user
+    const placeholderUser = {
+        totalRewardsEarned: 5.25,
+        availableToWithdrawNow: 2,
+        lockedAndNotAvailable: 98,
+    }
+
     watch(strategyById, async (newValue) => {
         if (isStrategiesLoaded.value) return
         if (Object.keys(newValue).length > 0 && wallet.provider) {
@@ -354,6 +361,7 @@ export default function useStaking() {
         stakeOptions: readonly(stakeOptions),
         selectedStakeOption,
         stage,
+        placeholderUser,
         userStakeDetails: readonly(userStakeDetails),
         addStakeOptionToStage,
         removeStakeOptionFromStage,

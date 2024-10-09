@@ -1,20 +1,22 @@
 <script setup>
 import PieChart from "./PieChart.vue"
+import { computed } from "vue"
+import { formatEther } from "viem"
+import useStaking from "@/composables/staking"
+import useWallet from "@/composables/wallet"
 
-const user = {
-    walletETH: 100,
-    currentlyRestakedETH: 100,
-    totalRewardsEarned: 5.25,
-    availableToWithdrawNow: 2,
-    lockedAndNotAvailable: 98,
-}
+const { placeholderUser, userStakeDetails } = useStaking()
+const { wallet } = useWallet()
 
-const avsAllocation = {
-    avs1: 25,
-    avs2: 40,
-    avs3: 35,
-    avs4: 10
-}
+const currentlyRestaked = computed(() => {
+    if (!userStakeDetails.value || Object.keys(userStakeDetails.value).length === 0) {
+        return 0
+    }
+
+    return Object.keys(userStakeDetails.value).reduce((acc, id) => {
+        return acc + Number(userStakeDetails.value[id].amountStaked)
+    }, 0)
+})
 </script>
 
 <template>
@@ -33,7 +35,7 @@ const avsAllocation = {
         <div class="w-full h-[400px] flex">
             <!-- Left: Pie Chart -->
             <div class="w-1/2 flex items-center justify-center">
-                <PieChart :avs-allocation="avsAllocation" />
+                <PieChart />
             </div>
 
             <!-- Right: Metrics -->
@@ -43,7 +45,7 @@ const avsAllocation = {
                         Non-Staked ETH
                     </h2>
                     <p class="card_title">
-                        {{ user.walletETH }} ETH
+                        {{ formatEther(wallet.balance) }} ETH
                     </p>
                 </div>
                 <div class="p-[12px]">
@@ -51,7 +53,7 @@ const avsAllocation = {
                         Currently Restaked ETH
                     </h2>
                     <p class="card_title">
-                        {{ user.currentlyRestakedETH }} ETH
+                        {{ currentlyRestaked }} ETH
                     </p>
                 </div>
 
@@ -60,7 +62,8 @@ const avsAllocation = {
                         Total Rewards Earned
                     </h2>
                     <p class="card_title">
-                        {{ user.totalRewardsEarned }} ETH
+                        <!-- TODO: Replace placeholderUser and make dynamic -->
+                        {{ placeholderUser.totalRewardsEarned }} ETH
                     </p>
                 </div>
 
@@ -69,7 +72,8 @@ const avsAllocation = {
                         Available to Withdraw Now
                     </h2>
                     <p class="card_title">
-                        {{ user.availableToWithdrawNow }} ETH
+                        <!-- TODO: Replace placeholderUser and make dynamic -->
+                        {{ placeholderUser.availableToWithdrawNow }} ETH
                     </p>
                 </div>
 
@@ -78,7 +82,8 @@ const avsAllocation = {
                         Locked and Not Available
                     </h2>
                     <p class="card_title">
-                        {{ user.lockedAndNotAvailable }} ETH
+                        <!-- TODO: Replace placeholderUser and make dynamic -->
+                        {{ placeholderUser.lockedAndNotAvailable }} ETH
                     </p>
                 </div>
             </div>
