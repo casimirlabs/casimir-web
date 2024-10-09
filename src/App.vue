@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import NavBar from "@/components/NavBar.vue"
-import Toasts from "@/components/Toasts.vue"
 import ConnectWalletModal from "@/components/ConnectWalletModal.vue"
+import Toasts from "@/components/Toasts.vue"
 import useWallet from "@/composables/wallet"
 
 const { showConnectWalletModal } = useWallet()
-
 </script>
 
 <template>
@@ -22,5 +21,3 @@ const { showConnectWalletModal } = useWallet()
         </div>
     </div>
 </template>
-
-<style scoped></style>

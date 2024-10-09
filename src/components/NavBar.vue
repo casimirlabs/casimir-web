@@ -3,18 +3,12 @@ import { SunIcon, MoonIcon } from "@heroicons/vue/24/outline"
 import { useDark, useToggle } from "@vueuse/core"
 import useWallet from "@/composables/wallet"
 import useFormat from "@/composables/format"
-import { formatEther } from "viem"
 
 const { wallet, toggleWalletModal } = useWallet()
-const { formatAddress } = useFormat()
+const { formatAddress, formatEthBalance } = useFormat()
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
-
-// const showCopyForPrimary = ref(false)
-// const copySuccessful = ref("")
-
-// TODO: Implement disconnect wallet
 </script>
 
 <template>
@@ -81,7 +75,7 @@ const toggleDark = useToggle(isDark)
                                     </div>
                                     
                                     <div class="card_title font-[400] mb-0">
-                                        {{ formatEther(wallet.balance) }} ETH
+                                        {{ formatEthBalance(wallet.balance) }} ETH
                                     </div>
                                 </div>
                             </div>

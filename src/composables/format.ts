@@ -1,4 +1,5 @@
 import useToasts from "@/composables/toasts"
+import { formatUnits } from "viem"
 
 const { addToast } = useToasts()
 
@@ -49,8 +50,29 @@ export default function useFormat() {
         return start + middle + end
     }
 
-    function handleImageError(event) {
-        event.target.src = "/casimir.svg"
+    function formatEthBalance(balanceInWei: bigint) {
+        const balanceInEth = parseFloat(formatUnits(balanceInWei, 18))
+    
+        const trimDecimals = (value: number, decimals: number) => {
+            const factor = Math.pow(10, decimals)
+            return Math.floor(value * factor) / factor
+        }
+    
+        if (balanceInEth < 0.001) {
+            return trimDecimals(balanceInEth, 6).toFixed(6)
+        } else if (balanceInEth < 1) {
+            return trimDecimals(balanceInEth, 4).toFixed(4)
+        } else if (balanceInEth < 1000) {
+            return trimDecimals(balanceInEth, 3).toFixed(3)
+        } else {
+            return trimDecimals(balanceInEth, 2).toFixed(2)
+        }
+    }    
+
+    function handleImageError(event: Event) {
+        if (event.target) {
+            (event.target as HTMLImageElement).src = "/casimir.svg"
+        }
     }
 
     function trimAndLowercaseAddress(address: string) {
@@ -59,7 +81,8 @@ export default function useFormat() {
 
     return {
         copyTextToClipboard,
-        formatAddress, 
+        formatAddress,
+        formatEthBalance,
         handleImageError,
         trimAndLowercaseAddress,
     }

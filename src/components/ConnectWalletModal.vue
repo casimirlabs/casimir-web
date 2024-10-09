@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
-import useWallet from "@/composables/wallet"
 import useFormat from "@/composables/format"
-import { computed } from "vue"
+import useWallet from "@/composables/wallet"
 
 const { 
     wallet, 
