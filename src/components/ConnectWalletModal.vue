@@ -2,6 +2,7 @@
 import { computed, ref } from "vue"
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from "@headlessui/vue"
 import useFormat from "@/composables/format"
+import useStaking from "@/composables/staking"
 import useWallet from "@/composables/wallet"
 
 const { 
@@ -12,6 +13,7 @@ const {
     toggleWalletModal 
 } = useWallet()
 const { copyTextToClipboard, formatAddress } = useFormat()
+const { clearUserStakeDetails, getUserStakeDetails } = useStaking()
 
 type ProviderString = "MetaMask" | "CoinbaseWallet" | "WalletConnect" | "Trezor" | "Ledger" | "TrustWallet"
 
@@ -38,6 +40,8 @@ async function handleSelectProvider(provider: ProviderString) {
     try {
         await connectWallet(provider)
         toggleWalletModal()
+        // TODO: Refactor getUserStakeDetails to a more elegant approach on connect/disconnect?
+        await getUserStakeDetails()
     } catch (err) {
         console.error(err)
         errorMessage.value = true
@@ -47,6 +51,7 @@ async function handleSelectProvider(provider: ProviderString) {
 function handleDisconnectWallet() {
     disconnectWallet()
     toggleWalletModal()
+    clearUserStakeDetails()
 } 
 </script>
 

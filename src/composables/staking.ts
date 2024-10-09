@@ -56,20 +56,14 @@ export default function useStaking() {
         lockedAndNotAvailable: 98,
     }
 
+    // TODO: Refactor getUserStakeDetails to a more elegant approach on connect/disconnect
     watch(strategyById, async (newValue) => {
         if (isStrategiesLoaded.value) return
-        if (Object.keys(newValue).length > 0 && wallet.provider) {
+        if (Object.keys(newValue).length > 0 && wallet.provider && !isStrategiesLoaded.value) {
             isStrategiesLoaded.value = true
             await getUserStakeDetails()
         }
     },{ immediate: true, deep: true })
-
-    watch(wallet, () => {
-        if (!wallet.provider) {
-            userStakeDetails.value = []
-            isLoadingStakeDetails.value = false
-        }
-    })
 
     const stakeOptions = computed(() => {
         return Object.entries(strategyById).map(([id, strategy]) => {
@@ -98,6 +92,10 @@ export default function useStaking() {
                 loading: false,
             })
         }
+    }
+
+    function clearUserStakeDetails() {
+        userStakeDetails.value = []
     }
     
     function removeStakeOptionFromStage(stakeOption: StakeOptionWithAllocation) {
@@ -177,6 +175,7 @@ export default function useStaking() {
         const { address } = wallet
         if (!address) throw new Error("Wallet not connected")
         const strategyAddresses = Object.values(strategyById).map(strategy => strategy.managerAddress)
+        if (strategyAddresses.length) isStrategiesLoaded.value = true
         const updatedStakeDetails = []
     
         try {
@@ -364,6 +363,8 @@ export default function useStaking() {
         placeholderUser,
         userStakeDetails: readonly(userStakeDetails),
         addStakeOptionToStage,
+        clearUserStakeDetails,
+        getUserStakeDetails,
         removeStakeOptionFromStage,
         onAllocationChange,
         lockStakeOptionAllocation,

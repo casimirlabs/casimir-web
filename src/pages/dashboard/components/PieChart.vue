@@ -21,7 +21,7 @@ const { wallet } = useWallet()
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale)
 
 const labels = computed(() => {
-    if (!userStakeDetails.value || Object.keys(userStakeDetails.value).length === 0) {
+    if (!userStakeDetails.value.length || Object.keys(userStakeDetails.value).length === 0) {
         return []
     }
     
@@ -32,7 +32,7 @@ const labels = computed(() => {
 })
 
 const data = computed(() => {
-    if (!userStakeDetails.value || Object.keys(userStakeDetails.value).length === 0) {
+    if (!userStakeDetails.value.length || Object.keys(userStakeDetails.value).length === 0) {
         return []
     }
 
@@ -86,6 +86,9 @@ const chartOptions: ChartOptions<"pie"> = {
         :data="chartData"
         :options="chartOptions"
     />
+    <div v-else-if="!wallet.client || !wallet.address || !wallet.balance">
+        Connect your wallet to view your portfolio.
+    </div>
     <div v-else>
         Loading chart data...
     </div>
