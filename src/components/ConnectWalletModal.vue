@@ -93,10 +93,7 @@ function handleDisconnectWallet() {
                         leave-from="opacity-100 scale-100"
                         leave-to="opacity-0 scale-95"
                     >
-                        <DialogPanel
-                            id="connect_wallet_modal"
-                            class="connect_wallet_card transition-all"
-                        >
+                        <DialogPanel class="connect_wallet_card transition-all">
                             <!-- SECTION: SELECT PROVIDER -->
                             <section v-if="flowState === 'select_provider'">
                                 <div>
@@ -108,13 +105,14 @@ function handleDisconnectWallet() {
                                     </p>
                                 </div>
   
+                                <!-- TODO: @Chris need a way to find out if the extension is not downloaded -->
                                 <div class="mt-[20px] flex flex-col gap-[12px]">
                                     <div
                                         v-for="walletProvider in supportedWalletProviders"
                                         :key="walletProvider"
                                     >
                                         <button
-                                            class="flex items-center justify-between gap-5 w-full border relative px-[12px] py-[8px] shadow
+                                            class="flex items-center w-full border relative px-[12px] py-[8px] shadow
                                                    rounded-[6px] bg-lightBg dark:bg-darkBg border-lightBorder dark:border-lightBorder/40
                                                  hover:bg-hover_white/30 dark:hover:bg-hover_black/30 active:bg-hover_white/60 dark:active:bg-hover_black/60"
                                             :disabled="wallet.loading"
@@ -129,15 +127,6 @@ function handleDisconnectWallet() {
                                                 {{ walletProvider }}
                                             </small>
                                         </button>
-                                        <!-- TODO: @Chris need a way to find out if the extenstion is not downloaded -->
-                                        <!-- <div
-                                              class="tooltip_container text-white"
-                                          >
-                                              <div class="tooltip w-[260px]">
-                                              You currently do not have the extension for this wallet provider connected, click the button
-                                              to take you to the wallet provider extension page.
-                                              </div>
-                                          </div> -->
                                     </div>
                                 </div>
                                 <div class="h-15 w-full text-[11px] flex items-center font-[500] mb-5 text-red">
@@ -172,24 +161,23 @@ function handleDisconnectWallet() {
                                 v-else-if="flowState === 'success'"
                                 class="w-full h-full p-5 bg-lightBg dark:bg-darkBg rounded-lg"
                             >
-                                <div class="flex flex-col items-center justify-center h-full w-full gap-5">
-                                    <!-- Wallet Connection Information -->
-                                    <div class="w-full bg-lightBg dark:bg-darkBg rounded-lg p-4 shadow">
-                                        <!-- Header: Connected with MetaMask and Disconnect Button -->
-                                        <div class="flex justify-between items-center mb-4">
-                                            <div class="text-sm">
-                                                <span class="text-gray-500">Connected with {{ wallet.provider }}</span>
-                                            </div>
-                                            <button
-                                                class="text-sm text-blue-600 border border-blue-600 rounded px-3 py-1 hover:bg-blue-100"
-                                                @click="handleDisconnectWallet"
-                                            >
-                                                Disconnect
-                                            </button>
+                                <!-- Disconnect Button -->
+                                <div class="w-full flex items-end justify-end">
+                                    <button
+                                        class="text-sm text-blue-600 border border-blue-600 rounded px-3 py-1 hover:bg-blue-100"
+                                        @click="handleDisconnectWallet"
+                                    >
+                                        Disconnect
+                                    </button>
+                                </div>
+
+                                <div class="flex flex-col h-full w-full justify-around">
+                                    <!-- Wallet Info -->
+                                    <div class="flex flex-col items-center gap-6">
+                                        <div class="text-sm text-gray-500">
+                                            Connected with {{ wallet.provider }}
                                         </div>
-      
-                                        <!-- Wallet Address -->
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-3">
                                             <img
                                                 :src="`/${wallet?.provider?.toLowerCase()}.svg`"
                                                 :alt="`/${wallet?.provider?.toLowerCase()}.svg`"
@@ -199,47 +187,47 @@ function handleDisconnectWallet() {
                                                 {{ wallet.address ? formatAddress(wallet.address) : '' }}
                                             </span>
                                         </div>
-      
-                                        <!-- Action Links -->
-                                        <div class="flex justify-between mt-4">
-                                            <!-- Copy Address Button -->
-                                            <button
-                                                class="text-sm text-blue-600 flex items-center gap-1"
-                                                @click="wallet.address && copyTextToClipboard(wallet.address)"
+                                    </div>
+    
+                                    <!-- Action Links -->
+                                    <div class="flex flex-col justify-between gap-4">
+                                        <!-- Copy Address Button -->
+                                        <button
+                                            class="text-sm text-blue-600 flex items-center gap-1"
+                                            @click="wallet.address && copyTextToClipboard(wallet.address)"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-5 w-5"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
                                             >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-5 w-5"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path d="M9 2a1 1 0 011 1v1h4a1 1 0 011 1v2a1 1 0 110 2H7a1 1 0 01-1-1V5a1 1 0 011-1h1V3a1 1 0 011-1zM7 7V5h6v2H7z" />
-                                                    <path d="M3 8a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-1h4a1 1 0 001-1v-3a1 1 0 10-2 0v2H7a1 1 0 00-1 1v2H4v-8H3z" />
-                                                </svg>
-                                                Copy address
-                                            </button>
+                                                <path d="M9 2a1 1 0 011 1v1h4a1 1 0 011 1v2a1 1 0 110 2H7a1 1 0 01-1-1V5a1 1 0 011-1h1V3a1 1 0 011-1zM7 7V5h6v2H7z" />
+                                                <path d="M3 8a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-1h4a1 1 0 001-1v-3a1 1 0 10-2 0v2H7a1 1 0 00-1 1v2H4v-8H3z" />
+                                            </svg>
+                                            Copy address
+                                        </button>
 
-                                            <!-- View on Etherscan Button -->
-                                            <a
-                                                :href="`https://etherscan.io/address/${wallet.address}`" 
-                                                target="_blank"
-                                                class="text-sm text-blue-600 flex items-center gap-1"
+                                        <!-- View on Etherscan Button -->
+                                        <a
+                                            :href="`https://etherscan.io/address/${wallet.address}`" 
+                                            target="_blank"
+                                            class="text-sm text-blue-600 flex items-center gap-1"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-5 w-5"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
                                             >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-5 w-5"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M12.293 7.293a1 1 0 011.414 1.414l-7 7a1 1 0 01-1.414-1.414l7-7zm1.707-3.586A1 1 0 0115 4v8a1 1 0 11-2 0V6.414L5.707 13.707a1 1 0 11-1.414-1.414L11.586 4H7a1 1 0 110-2h8a1 1 0 011 1z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                                View on Etherscan
-                                            </a>
-                                        </div>
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M12.293 7.293a1 1 0 011.414 1.414l-7 7a1 1 0 01-1.414-1.414l7-7zm1.707-3.586A1 1 0 0115 4v8a1 1 0 11-2 0V6.414L5.707 13.707a1 1 0 11-1.414-1.414L11.586 4H7a1 1 0 110-2h8a1 1 0 011 1z"
+                                                    clip-rule="evenodd"
+                                                />
+                                            </svg>
+                                            View on Etherscan
+                                        </a>
                                     </div>
                                 </div>
                             </section>
