@@ -31,7 +31,7 @@ const showConnectWalletModal = ref(false)
 const walletInitialized = ref(false)
 
 export default function useWallet() {
-    const { chain, readClient } = useEthereum()
+    const { chain, readClient, setOnBalanceUpdate } = useEthereum()
 
     onMounted(async () => {
         wallet.provider = localStorage.getItem("walletProvider") || ""
@@ -41,6 +41,12 @@ export default function useWallet() {
             connectWallet(wallet.provider as ProviderString)
         }
         walletInitialized.value = true
+
+        // Set up the callback to update wallet balance when blockchain changes
+        setOnBalanceUpdate(async () => {
+            localStorage.setItem("walletBalance", wallet.balance.toString())
+            wallet.balance = await readClient.getBalance({ address: wallet.address as `0x${string}` })
+        })
     })
 
     async function connectWallet(providerString: ProviderString) {

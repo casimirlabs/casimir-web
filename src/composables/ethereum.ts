@@ -46,12 +46,21 @@ const strategyById = reactive<StrategyById>({})
 const userAddress = ref<Address>(zeroAddress)
 
 export default function useEthereum() {
+    let onBalanceUpdate: (() => void) | null = null
+
+    // Allow wallet composable to pass an update handler
+    function setOnBalanceUpdate(callback: () => void) {
+        onBalanceUpdate = callback
+    }
+    
     onMounted(async () => {
         if (!initialized) {
             readClient.watchBlockNumber(
                 { 
                     emitOnBegin: true, 
-                    onBlockNumber: async () => await fetchData()
+                    onBlockNumber: async () => {
+                        await fetchData()
+                    }
                 }
             )
             initialized = true
@@ -84,6 +93,11 @@ export default function useEthereum() {
             const { id, ...rest } = strategy
             strategyById[id] = rest
         }
+
+        // Fetch and update balance if the callback exists
+        if (onBalanceUpdate) {
+            onBalanceUpdate()
+        }
     }
 
     return {
@@ -94,6 +108,7 @@ export default function useEthereum() {
         readClient,
         strategyById,
         userAddress,
-        fetchData
+        fetchData,
+        setOnBalanceUpdate
     }
 }
