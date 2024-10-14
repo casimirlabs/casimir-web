@@ -39,14 +39,14 @@ export default function useWallet() {
         wallet.balance = BigInt(localStorage.getItem("walletBalance") || "0")
         if (wallet.provider && wallet.address) {
             connectWallet(wallet.provider as ProviderString)
+            // Set up the callback to update wallet balance when blockchain changes
+            setOnBalanceUpdate(async () => {
+                localStorage.setItem("walletBalance", wallet.balance.toString())
+                wallet.balance = await readClient.getBalance({ address: wallet.address as `0x${string}` })
+            })
         }
         walletInitialized.value = true
 
-        // Set up the callback to update wallet balance when blockchain changes
-        setOnBalanceUpdate(async () => {
-            localStorage.setItem("walletBalance", wallet.balance.toString())
-            wallet.balance = await readClient.getBalance({ address: wallet.address as `0x${string}` })
-        })
     })
 
     async function connectWallet(providerString: ProviderString) {
