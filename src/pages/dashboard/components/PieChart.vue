@@ -21,6 +21,10 @@ const { wallet } = useWallet()
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale)
 
 const labels = computed(() => {
+    if (wallet.balance && !userStakeDetails.value.length) {
+        return ["Non-Staked ETH"]
+    }
+    
     if (!userStakeDetails.value.length || Object.keys(userStakeDetails.value).length === 0) {
         return []
     }
@@ -32,6 +36,10 @@ const labels = computed(() => {
 })
 
 const data = computed(() => {
+    if (wallet.balance && !userStakeDetails.value.length) {
+        return [parseFloat(formatUnits(wallet.balance, 18))]
+    }
+
     if (!userStakeDetails.value.length || Object.keys(userStakeDetails.value).length === 0) {
         return []
     }
