@@ -34,6 +34,7 @@ export default function useWallet() {
     const { chain, readClient, setOnBalanceUpdate } = useEthereum()
 
     onMounted(async () => {
+        if (walletInitialized.value) return
         wallet.provider = localStorage.getItem("walletProvider") || ""
         wallet.address = localStorage.getItem("walletAddress") as Address
         wallet.balance = BigInt(localStorage.getItem("walletBalance") || "0")
@@ -89,7 +90,8 @@ export default function useWallet() {
         } else {
             // If not, then connect the provider
             await wallet.client.request({ method: "eth_requestAccounts" })
-            wallet.address = await wallet.client.request({ method: "eth_accounts" })
+            const ethAccounts = wallet.address = await wallet.client.request({ method: "eth_accounts" })
+            wallet.address = ethAccounts[0] as `0x${string}`
         }
 
         if (wallet.address) {
